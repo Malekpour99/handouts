@@ -32,14 +32,14 @@ vim ~/.config/nvim/init.vim
   - ```esc esc``` for returning to normal mode from visual mode
 - **INSERT mode**: Where you can type and edit text
   - ```i``` for inserting before the cursor
-  - ```(Shift + i) or I``` for inserting at the beginning of the current line
+  - ```(Shift + i)``` or ```I``` for inserting at the beginning of the current line
   - ```a``` for inserting after the cursor
-  - ```(Shift + a) or A``` for inserting at the end of the current line
+  - ```(Shift + a)``` or ```A``` for inserting at the end of the current line
   - ```o``` for inserting in a new line below the current line
-  - ```(Shift + o) or O``` for inserting in a new line above the current line
+  - ```(Shift + o)``` or ```O``` for inserting in a new line above the current line
 - **VISUAL mode**: Allows you to select and manipulate text visually
   - ```v``` for activating visual mode
-  - ```(Shift + v) or V``` for activating visual line mode which allows to select lines(rows) by navigating
+  - ```(Shift + v)``` or ```V``` for activating visual line mode which allows to select lines(rows) by navigating
   - ```ctrl + v``` for activating visual block mode which allows you to select columns by navigating
 
 
@@ -58,7 +58,7 @@ vim ~/.config/nvim/init.vim
 - ```w```: Moves forward by a word
 - ```b```: Moves backward by a word
 - ```e```: Jumps to the end of a word
-- ```(Shift + e) or E```: Jumps to the end of a word (ignores any ```-``` in the words when jumping to the end of the word)
+- ```(Shift + e)``` or ```E```: Jumps to the end of a word (ignores any ```-``` in the words when jumping to the end of the word)
 - ```0```: Jumps to the beginning of the current line
 - ```^```: Jumps to first (non-blank) character at the beginning of the current line
 - ```$```: Jumps to the end of the current line
