@@ -7,9 +7,22 @@ To install VIM on linux:
 ```
 sudo apt install vim
 ```
+modifying and customizing vim's configuration file
+```
+vim ~/.vimrc
+```
+by modifying vim's configuration file, you can make your customized changes and configuration persist; and you can also temporarily apply and use them directly from the vim's normal mode!
+
+---
+
+It's recommended to use neo vim instead of vim since it's better and supports using multiple plugins which provides numerous features and functionality alongside vim
 To install Neo VIM on linux:
 ```
 sudo apt install neovim
+```
+modifying and customizing neo-vim's configuration file
+```
+vim ~/.config/nvim/init.vim
 ```
 
 ## Vim Modes
@@ -27,3 +40,5 @@ sudo apt install neovim
   - ```v``` for activating visual mode
   - ```(Shift + v) or V``` for activating visual line mode which allows to select lines(rows) by navigating
   - ```ctrl + v``` for activating visual block mode which allows you to select columns by navigating
+
+## Navigation
