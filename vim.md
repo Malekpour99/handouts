@@ -51,4 +51,15 @@ vim ~/.config/nvim/init.vim
 - To exit without saving changes: ```:q!```
   - note that by exiting without saving your changes, any changes made will be discarded!
 
-## Navigation
+## Movements & Navigation
+- Use ```h```, ```j```, ```k```, ```l``` for left, down, up, and right movements respectively; you can also navigate your movements by using arrow keys, but using the first method is much faster!!
+  - you can combine navigation keys with numbers which enables you to multiply navigation direction by that number, e.g. ```20j``` will move the cursor down by 20 lines from its current position.
+- ```w```: Moves forward by a word
+- ```b```: Moves backward by a word
+- ```e```: Jumps to the end of a word
+- ```(Shift + e) or E```: Jumps to the end of a word (ignores any ```-``` in the words when jumping to the end of the word)
+- ```0```: Jumps to the beginning of the current line
+- ```^```: Jumps to first (non-blank) character at the beginning of the current line
+- ```$```: Jumps to the end of the current line
+- ```gg```: Jumps to the beginning of the file
+- ```G```: Jumps to the end of the file
