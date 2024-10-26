@@ -28,7 +28,8 @@ vim ~/.config/nvim/init.vim
 ## Vim Modes
 - **NORMAL mode**: Default mode for navigation and executing commands
   - VIM opens files in the normal mode
-  - ```esc``` for returning to normal mode from any other mode
+  - ```esc``` for returning to normal mode from insert mode
+  - ```esc esc``` for returning to normal mode from visual mode
 - **INSERT mode**: Where you can type and edit text
   - ```i``` for inserting before the cursor
   - ```(Shift + i) or I``` for inserting at the beginning of the current line
