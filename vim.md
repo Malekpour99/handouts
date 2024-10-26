@@ -63,4 +63,51 @@ vim ~/.config/nvim/init.vim
 - ```^```: Jumps to first (non-blank) character at the beginning of the current line
 - ```$```: Jumps to the end of the current line
 - ```gg```: Jumps to the beginning of the file
-- ```G```: Jumps to the end of the file
+- ```(Shift + g)``` or ```G```: Jumps to the end of the file
+
+## Editing
+any action in the editing section **can be combined with numbers** which multiplies the number of execution times for that action!!
+
+### Deleting & Cutting
+- ```x```: Deletes the character under the cursor
+- ```d```: Deletes selection in **visual** mode
+- ```dw```: Deletes from the cursor until the start of the next word
+- ```d2w or 2dw```: Deletes 2 words from the current cursor position
+- ```diw```: Deletes the word under the cursor (inner word)
+- ```di)``` or ```di(```: Deletes everything inside the parenthesis ()
+- ```di"```: Deletes everything inside the quotation mark ""
+- ```de```: Deletes to the end of the word
+- ```dd```: Deletes the current line
+- ```d0```: Deletes from the cursor to the beginning of the current line
+- ```(Shift + d)``` or ```d$```: Deletes from the cursor to the end of the current line
+- note that **deleting is the same as cutting** and you can paste any deleted text where you want it!
+
+### Copying (Yanking)
+- ```y```: Yanks selection in the **visual** mode
+- ```yy```: Yanks () the current line
+- ```5yy```: Yanks 5 lines from the current position of the cursor
+- ```yiw```: Yanks the current word under the cursor (inner word)
+- ```ye```: Yanks to the end of the word
+- ```yi(``` or ```yi)```: Yanks inside the parentheses ()
+- ```y0```: Yanks from the cursor to the beginning of the line
+- ```y$```: Yanks from the cursor to the end of the line
+
+### Pasting
+- ```p```: Pastes below the cursor
+- ```P```: Pastes above the cursor
+
+### Changing
+- ```c```: Changes selection in the **visual** mode
+- ```cc```: Changes the current line
+- ```cw```: Changes the current word
+- ```ci(``` or ```ci)```: Changes inside the parentheses ()
+- ```cw```: Changes the current word
+- ```c0```: Changes from the cursor to the beginning of the line
+- ```c$```: Changes from the cursor to the end of the line
+- ```cb```: Changes to the beginning of the previous word
+- Note that when you want change something its position and dedicated space is preserved and only the contents are removed whereas when you want to delete something everything relevant to the context is removed!
+
+### Undo and Redo
+- ```u```: Undo changes individually (step by step)
+- ```Shift + u``` or ```U```: Undo changes made to the current line (resets the current line to its original state)
+- ```ctrl + r```: Redo changes
