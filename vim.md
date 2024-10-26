@@ -41,4 +41,14 @@ vim ~/.config/nvim/init.vim
   - ```(Shift + v) or V``` for activating visual line mode which allows to select lines(rows) by navigating
   - ```ctrl + v``` for activating visual block mode which allows you to select columns by navigating
 
+
+## Basic Operations
+- Open a file: ```vim <file_name>```
+  - note that if the file does not exist, vim creates it if you save your changes when exiting the vim editor!
+- To save (write) changes: ```:w```
+- To exit (quit): ```q```
+- To save and exit: ```:wq```
+- To exit without saving changes: ```:q!```
+  - note that by exiting without saving your changes, any changes made will be discarded!
+
 ## Navigation
