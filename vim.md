@@ -146,3 +146,9 @@ any action in the editing section **can be combined with numbers** which multipl
   >> After selecting your token in this mode:
 - ```*```: Jumps to the next occurrence of the selected token
 - ```#```: Jumps to the previous occurrence of the selected token
+
+## Indentation
+- ```>>```: Indents the current line (or selected lines)
+- ```<<```: Dedents the current line (or selected lines)
+- ```==```: Auto-indents the current line (or selected lines)
+- ```gg=G```: Auto-indents the entire file
