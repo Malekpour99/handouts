@@ -53,6 +53,7 @@ vim ~/.config/nvim/init.vim
 - To exit without saving changes: ```:q!```
   - note that by exiting without saving your changes, any changes made will be discarded!
 
+
 ## Configurations
 - ```:! <command>```: Runs your command in the terminal without closing the vim editor
 - ```:set number```: Shows line numbers
@@ -76,6 +77,7 @@ vim ~/.config/nvim/init.vim
 - ```$```: Jumps to the end of the current line
 - ```gg```: Jumps to the beginning of the file
 - ```(Shift + g)``` or ```G```: Jumps to the end of the file
+
 
 ## Editing
 any action in the editing section **can be combined with numbers** which multiplies the number of execution times for that action!!
@@ -121,5 +123,26 @@ any action in the editing section **can be combined with numbers** which multipl
 
 ### Undo and Redo
 - ```u```: Undo changes individually (step by step)
-- ```Shift + u``` or ```U```: Undo changes made to the current line (resets the current line to its original state)
+- ```(Shift + u)``` or ```U```: Undo changes made to the current line (resets the current line to its original state)
 - ```ctrl + r```: Redo changes
+
+## Seaching & Navigation
+> All of this search and navigations can be combined with yank, change or delete actions!
+- ```%```: Jumps between matching parentheses or brackets 
+- ```t<character>```: Searches for the character's next occurrence on the current line and jumps <u>right before</u> that character
+- ```(shift + t)<character>```: Searches for the character's previous occurrence on the current line and jumps <u>right after</u> that character
+- ```f<character>```: Searches for the character's next occurrence on the current line and jumps <u>right on that</u> character
+- ```(shift + f)<character>```: Searches for the character's previous occurrence on the current line and jumps <u>right on that</u> character
+- ```nG``` or ```:n```: Jumps to the n-th line of the current file
+
+---
+> Searching in the Normal mode
+- ```/<characters> + Enter```: Searches for the next occurrence of the characters
+- ```?<characters> + Enter```: Searches for the previous occurrence of the characters
+- ```n```: Jumps to the next search result
+- ```(Shift + n)``` or ```N```: Jumps to the previous search result
+---
+> Searching in the Visual mode
+  >> After selecting your token in this mode:
+- ```*```: Jumps to the next occurrence of the selected token
+- ```#```: Jumps to the previous occurrence of the selected token
