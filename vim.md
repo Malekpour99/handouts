@@ -53,6 +53,17 @@ vim ~/.config/nvim/init.vim
 - To exit without saving changes: ```:q!```
   - note that by exiting without saving your changes, any changes made will be discarded!
 
+## Configurations
+- ```:! <command>```: Runs your command in the terminal without closing the vim editor
+- ```:set number```: Shows line numbers
+- ```:set relativenumber```: Shows relative line numbers based on the current selected line (numbers change by moving through lines)
+- ```:set mouse=a```: Activates the mouse cursor for selection and scrolling through lines
+- ```:set tabstop=4```: Sets tab stop indentation to 4 spaces
+- ```:set shiftwidth=4```: Sets shift width to 4 spaces (this option works with ```>>``` and ```<<``` for indenting and dedenting lines)
+- ```:set autoindent```: Activates automatic indentation when pressing enter to enter next lines
+- ```:colorscheme <color>```: Changes vim theme colors
+
+
 ## Movements & Navigation
 - Use ```h```, ```j```, ```k```, ```l``` for left, down, up, and right movements respectively; you can also navigate your movements by using arrow keys, but using the first method is much faster!!
   - you can combine navigation keys with numbers which enables you to multiply navigation direction by that number, e.g. ```20j``` will move the cursor down by 20 lines from its current position.
