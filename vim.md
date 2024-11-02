@@ -41,6 +41,7 @@ vim ~/.config/nvim/init.vim
   - ```v``` for activating visual mode
   - ```(Shift + v)``` or ```V``` for activating visual line mode which allows to select lines(rows) by navigating
   - ```ctrl + v``` for activating visual block mode which allows you to select columns by navigating
+- **Replace mode**: Gets activate by pressing ```r``` and allows you to replace only one character then returns to normal mode after replacement
 
 
 ## Basic Operations
@@ -94,7 +95,7 @@ any action in the editing section **can be combined with numbers** which multipl
 
 ### Pasting
 - ```p```: Pastes below the cursor
-- ```P```: Pastes above the cursor
+- ```(Shift + p)``` or ```P```: Pastes above the cursor
 
 ### Changing
 - ```c```: Changes selection in the **visual** mode
