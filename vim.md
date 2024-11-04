@@ -162,3 +162,11 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```'<letter>```: Jumps to the mark position, set with the specified letter
 > You can use letters like a, b, c, etc. to set a mark!
 
+## Registers
+- ```:reg```: Lists all registers and their contents
+- ```"0p```: Pastes the contents of the unnamed register (last registered content)
+- ```"7p```: Pastes the contents of register 7
+- ```"7yy```: Yanks the current line into register 7
+- ```"+```: Uses the system clipboard
+- ```"+yy```: Copies the current line to the system clipboard
+
