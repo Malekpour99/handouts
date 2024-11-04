@@ -157,3 +157,8 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```:%s/<search term>/<replacement term>/g```: Substitute all occurrences of the search term with the replacement term in the entire file
 - ```:s/<search term>/<replacement term>/g```: Substitute all occurrences of the search term with the replacement term in the current line or selected lines
 
+## Marking & Jumping
+- ```m<letter>```: Sets a mark at the current position
+- ```'<letter>```: Jumps to the mark position, set with the specified letter
+> You can use letters like a, b, c, etc. to set a mark!
+
