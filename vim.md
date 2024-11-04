@@ -152,3 +152,8 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```<<```: Dedents the current line (or selected lines)
 - ```==```: Auto-indents the current line (or selected lines)
 - ```gg=G```: Auto-indents the entire file
+
+## Substitution
+- ```:%s/<search term>/<replacement term>/g```: Substitute all occurrences of the search term with the replacement term in the entire file
+- ```:s/<search term>/<replacement term>/g```: Substitute all occurrences of the search term with the replacement term in the current line or selected lines
+
