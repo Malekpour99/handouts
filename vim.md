@@ -15,15 +15,30 @@ by modifying vim's configuration file, you can make your customized changes and 
 
 ---
 
-It's recommended to use neo vim instead of vim since it's better and supports using multiple plugins which provides numerous features and functionality alongside vim
+It's recommended to use **neo vim** instead of vim since it's better and supports using multiple plugins which provides numerous features and functionality alongside vim
 To install Neo VIM on linux:
 ```
 sudo apt install neovim
 ```
 modifying and customizing neo-vim's configuration file
 ```
-vim ~/.config/nvim/init.vim
+nvim ~/.config/nvim/init.vim
 ```
+> A Sample for Neo-Vim configuration file: [NeuralNine / config-files](https://github.com/NeuralNine/config-files/blob/master/init.vim)
+
+### Plugin configuration
+> [junegunn / vim-plug](https://github.com/junegunn/vim-plug) for managing and installing plugins:
+```
+call plug#begin()
+Plug '<link-to-plugin-Github-repository>'
+call plug#end()
+```
+After listing your required plugins in the neo-vim's configuration file, then open it with ```nvim``` like above, and:
+- ```:PlugInstall``` Installs plugins from plug-links list
+- ```:PlugUpdate```: Installs or updates the plugins
+- ```:PlugDiff```: Reviews the changes from the last update
+- ```:PlugClean```: Removes plugins no longer in the list
+
 
 ## Vim Modes
 - **NORMAL mode**: Default mode for navigation and executing commands
