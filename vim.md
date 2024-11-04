@@ -170,3 +170,8 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```"+```: Uses the system clipboard
 - ```"+yy```: Copies the current line to the system clipboard
 
+## Macros
+- ```q<letter>```: Starts recording a macro into the specified register letter
+- ```q```: Stops recording the macro
+- ```@<letter>```: Executes the macro stored in the specified register letter
+> You can also combine macro actions in another macro!
