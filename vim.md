@@ -125,6 +125,7 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```u```: Undo changes individually (step by step)
 - ```(Shift + u)``` or ```U```: Undo changes made to the current line (resets the current line to its original state)
 - ```ctrl + r```: Redo changes
+- ```.```: Repeat the last command
 
 ## Seaching & Navigation
 > All of this search and navigations can be combined with yank, change or delete actions!
@@ -134,6 +135,7 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```f<character>```: Searches for the character's next occurrence on the current line and jumps <u>right on that</u> character
 - ```(shift + f)<character>```: Searches for the character's previous occurrence on the current line and jumps <u>right on that</u> character
 - ```nG``` or ```:n```: Jumps to the n-th line of the current file
+- ```zz```: Centers the current line in the screen (for better content view)
 
 ---
 > Searching in the Normal mode
