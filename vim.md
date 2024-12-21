@@ -24,7 +24,7 @@ modifying and customizing neo-vim's configuration file
 ```
 nvim ~/.config/nvim/init.vim
 ```
-> A Sample for Neo-Vim configuration file: [NeuralNine / config-files](https://github.com/NeuralNine/config-files/blob/master/init.vim)
+> A Sample for Neo-Vim configuration file: [NeuralNine / config-files](https://github.com/NeuralNine/config-files/blob/master/.config/nvim/init.vim)
 
 ### Plugin configuration
 > [junegunn / vim-plug](https://github.com/junegunn/vim-plug) for managing and installing plugins:
