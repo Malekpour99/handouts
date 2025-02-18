@@ -47,15 +47,15 @@ After listing your required plugins in the neo-vim's configuration file, then op
   - ```esc esc``` for returning to normal mode from visual mode
 - **INSERT mode**: Where you can type and edit text
   - ```i``` for inserting before the cursor
-  - ```(Shift + i)``` or ```I``` for inserting at the beginning of the current line
+  - ```<S-i>``` or ```I``` for inserting at the beginning of the current line
   - ```a``` for inserting after the cursor
-  - ```(Shift + a)``` or ```A``` for inserting at the end of the current line
+  - ```<S-a>``` or ```A``` for inserting at the end of the current line
   - ```o``` for inserting in a new line below the current line
-  - ```(Shift + o)``` or ```O``` for inserting in a new line above the current line
+  - ```<S-o>``` or ```O``` for inserting in a new line above the current line
 - **VISUAL mode**: Allows you to select and manipulate text visually
   - ```v``` for activating visual mode
-  - ```(Shift + v)``` or ```V``` for activating visual line mode which allows to select lines(rows) by navigating
-  - ```ctrl + v``` for activating visual block mode which allows you to select columns by navigating
+  - ```<S-v>``` or ```V``` for activating visual line mode which allows to select lines(rows) by navigating
+  - ```<C-v>``` for activating visual block mode which allows you to select columns by navigating
 - **Replace mode**: Gets activate by pressing ```r``` and allows you to replace only one character then returns to normal mode after replacement
 
 
@@ -86,12 +86,12 @@ After listing your required plugins in the neo-vim's configuration file, then op
 - ```w```: Moves forward by a word
 - ```b```: Moves backward by a word
 - ```e```: Jumps to the end of a word
-- ```(Shift + e)``` or ```E```: Jumps to the end of a word (ignores any ```-``` in the words when jumping to the end of the word)
+- ```<S-e>``` or ```E```: Jumps to the end of a word (ignores any ```-``` in the words when jumping to the end of the word)
 - ```0```: Jumps to the beginning of the current line
 - ```^```: Jumps to first (non-blank) character at the beginning of the current line
 - ```$```: Jumps to the end of the current line
 - ```gg```: Jumps to the beginning of the file
-- ```(Shift + g)``` or ```G```: Jumps to the end of the file
+- ```<S-g>``` or ```G```: Jumps to the end of the file
 
 
 ## Editing
@@ -108,7 +108,7 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```de```: Deletes to the end of the word
 - ```dd```: Deletes the current line
 - ```d0```: Deletes from the cursor to the beginning of the current line
-- ```(Shift + d)``` or ```d$```: Deletes from the cursor to the end of the current line
+- ```<S-d>``` or ```d$```: Deletes from the cursor to the end of the current line
 - note that **deleting is the same as cutting** and you can paste any deleted text where you want it!
 
 ### Copying (Yanking)
@@ -123,7 +123,7 @@ any action in the editing section **can be combined with numbers** which multipl
 
 ### Pasting
 - ```p```: Pastes below the cursor
-- ```(Shift + p)``` or ```P```: Pastes above the cursor
+- ```<S-p>``` or ```P```: Pastes above the cursor
 
 ### Changing
 - ```c```: Changes selection in the **visual** mode
@@ -138,7 +138,7 @@ any action in the editing section **can be combined with numbers** which multipl
 
 ### Undo and Redo
 - ```u```: Undo changes individually (step by step)
-- ```(Shift + u)``` or ```U```: Undo changes made to the current line (resets the current line to its original state)
+- ```<S-u>``` or ```U```: Undo changes made to the current line (resets the current line to its original state)
 - ```ctrl + r```: Redo changes
 - ```.```: Repeat the last command
 
@@ -146,9 +146,9 @@ any action in the editing section **can be combined with numbers** which multipl
 > All of this search and navigations can be combined with yank, change or delete actions!
 - ```%```: Jumps between matching parentheses or brackets 
 - ```t<character>```: Searches for the character's next occurrence on the current line and jumps <u>right before</u> that character
-- ```(shift + t)<character>```: Searches for the character's previous occurrence on the current line and jumps <u>right after</u> that character
+- ```<S-t><character>```: Searches for the character's previous occurrence on the current line and jumps <u>right after</u> that character
 - ```f<character>```: Searches for the character's next occurrence on the current line and jumps <u>right on that</u> character
-- ```(shift + f)<character>```: Searches for the character's previous occurrence on the current line and jumps <u>right on that</u> character
+- ```<S-f><character>```: Searches for the character's previous occurrence on the current line and jumps <u>right on that</u> character
 - ```nG``` or ```:n```: Jumps to the n-th line of the current file
 - ```zz```: Centers the current line in the screen (for better content view)
 
@@ -157,7 +157,7 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```/<characters> + Enter```: Searches for the next occurrence of the characters
 - ```?<characters> + Enter```: Searches for the previous occurrence of the characters
 - ```n```: Jumps to the next search result
-- ```(Shift + n)``` or ```N```: Jumps to the previous search result
+- ```<S-n>``` or ```N```: Jumps to the previous search result
 ---
 > Searching in the Visual mode
   >> After selecting your token in this mode:
