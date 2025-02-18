@@ -192,3 +192,21 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```q```: Stops recording the macro
 - ```@<letter>```: Executes the macro stored in the specified register letter
 > You can also combine macro actions in another macro!
+
+## Plugins
+
+### Surround - [vim-surround](https://github.com/tpope/vim-surround)
+- ```ysiw)```: Surrounds inner-word with parenthesis()
+- ```cs("```: Changes surrounding parenthesis with double-quotations
+- ```ds"```: Removes surrounding double-quotations
+
+### Comment - [vim-commentary](https://github.com/tpope/vim-commentary)
+- ```gcc```: Comments/Uncomments a line
+- ```gc```: Comments/Uncomments selection in visual mode
+- ```:7,10Commentary```: Comments/Uncomments lines from '7' to '10'
+
+### NERD Tree - [nerdtree](https://github.com/preservim/nerdtree)
+- ```:NERDTreeToggle```: Toggles NERD tree
+- ```<C-w>w```: Cycle between open windows (NERDTree and main editor).
+- ```<C-w>h```: Move focus to the window on the left (usually NERDTree)
+- ```<C-w>l```: Move focus to the window on the right (usually the main editor)
