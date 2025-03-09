@@ -195,6 +195,12 @@ any action in the editing section **can be combined with numbers** which multipl
 
 ## Plugins
 
+### Vim Move - [vim-move](https://github.com/matze/vim-move)
+- ```<A-k>```: Move current line/selection up
+- ```<A-j>```: Move current line/selection down
+- ```<A-h>```: Move current character/selection left
+- ```<A-l>```: Move current character/selection right
+
 ### Surround - [vim-surround](https://github.com/tpope/vim-surround)
 - ```ysiw)```: Surrounds inner-word with parenthesis()
 - ```cs("```: Changes surrounding parenthesis with double-quotations
