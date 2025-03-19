@@ -70,6 +70,12 @@ git checkout <branch_name>
 
 # Create and switch to a new branch
 git checkout -b <branch_name>
+
+# Delete a branch locally
+git branch -d <branch_name>
+
+# Delete a branch remotely
+git push origin --delete <branch_name>
 ```
 
 ## Merging and Rebasing
@@ -217,12 +223,6 @@ git push --delete origin <tag_name>
 ```bash
 # Remove a file from local working directory and git history
 git rm <file>
-
-# Delete a branch locally
-git branch -d <branch_name>
-
-# Delete a branch remotely
-git push origin --delete <branch_name>
 
 # Remove untracked files
 git clean -f
