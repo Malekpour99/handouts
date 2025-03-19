@@ -1,5 +1,28 @@
 # Git
 
+## Table of Contents
+- [Git](#git)
+  - [Table of Contents](#table-of-contents)
+  - [Configuration](#configuration)
+  - [Initializing and Cloning](#initializing-and-cloning)
+  - [Staging and Committing](#staging-and-committing)
+  - [Branching](#branching)
+  - [Merging](#merging)
+  - [Rebasing](#rebasing)
+  - [Cherry-picking](#cherry-picking)
+  - [Pushing and Pulling](#pushing-and-pulling)
+  - [Undoing Changes](#undoing-changes)
+  - [Stashing Changes](#stashing-changes)
+  - [Working with Remotes](#working-with-remotes)
+  - [Viewing History](#viewing-history)
+  - [Tagging](#tagging)
+  - [Deleting and Cleaning](#deleting-and-cleaning)
+  - [Signing Commits and Tags](#signing-commits-and-tags)
+  - [Blaming](#blaming)
+  - [Bisect](#bisect)
+  - [Help](#help)
+  - [Others](#others)
+
 ## Configuration
 ```bash
 # Set global username
@@ -94,7 +117,7 @@ git branch -d <branch_name>
 git push origin --delete <branch_name>
 ```
 
-## Merging and Rebasing
+## Merging
 ```bash
 # Merge 'branch_name' branch into the current branch (fast-forward)
 git merge <branch_name>
@@ -130,7 +153,10 @@ git merge -X ours feature-branch
 
 # Merge but prefer the incoming changes (theirs strategy for conflicts)
 git merge -X theirs feature-branch
+```
 
+## Rebasing
+```bash
 # Rebase the current branch onto the 'branch_name' branch
 git rebase <branch_name>
 
@@ -161,6 +187,30 @@ git rebase --continue
   - ***Squash*** multiple commits into one: merge commits.
   - ***Drop*** a commit: removes a commit.
   - *Reorder* commits: Simply move commit lines up/down in the rebase editor.
+
+## Cherry-picking
+```bash
+# Copies a commit from another branch to the current branch
+git cherry-pick <commit-hash>
+
+# Picks and copies multiple commits.
+git cherry-pick <commit-hash1> <commit-hash2>
+
+# Copies all commits from <commit-hash1> (exclusive) to <commit-hash2> (inclusive).
+git cherry-pick <commit-hash1>^..<commit-hash2>
+
+# Copies changes and takes them to staging but doesn’t create a commit (lets you edit before committing)
+git cherry-pick -n <commit-hash>
+
+# Opens the commit message editor so you can modify the commit message.
+git cherry-pick -e <commit-hash>
+
+# Stops the cherry-pick and restores the previous state
+git cherry-pick --abort
+
+# Continue cherry-pick after resolving conflicts
+git cherry-pick --continue
+```
 
 ## Pushing and Pulling
 ```bash
@@ -406,21 +456,6 @@ git tag -s <tag_name> -m "Signed tag message"
 git tag -v <tag_name>
 ```
 
-## Helping
-```bash
-# Show help for a specific command
-git help <command>
-
-# Show the manual page for a command
-git <command> --help
-
-# Show all available Git commands
-git help -a
-
-# Show guides and tutorials
-git help -g
-```
-
 ## Blaming
 ```bash
 # Shows who last modified each line in a file
@@ -474,3 +509,23 @@ git bisect reset
 # Run a script to automate bisecting
 git bisect run <script>
 ```
+
+## Help
+```bash
+# Show help for a specific command
+git help <command>
+
+# Show the manual page for a command
+git <command> --help
+
+# Show all available Git commands
+git help -a
+
+# Show guides and tutorials
+git help -g
+```
+
+## Others
+- ***api.github.com/users/<user_name>*** provides user information in a JSON format
+- Create a Github repository named after your **username** to provide a special representation of your profile in Github!
+- Create a Github repository named **username**.github.io to provide a web-page with this address for showing your resume or any other purpose!
