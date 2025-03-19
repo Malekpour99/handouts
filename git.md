@@ -50,6 +50,10 @@ git commit -m "Commit message"
 git commit
 # Then your default terminal editor opens and you can write your commit title and description
 
+# Edit the latest submitted commit
+git commit --amend
+# To add new changes, stage them before running above code!
+
 # Show details of a specific commit
 git show <commit_hash>
 
@@ -91,7 +95,34 @@ git merge <branch_name>
 
 # Rebase the current branch onto another branch
 git rebase <branch_name>
+
+# Moves the current branch to start from a specific commit
+git rebase <commit-hash>
+
+# Moves feature-branch commits on top of main
+git rebase main feature-branch
+
+# Moves the last 'n' commits onto main, skipping older commits in the current branch
+git rebase --onto main HEAD~n
+
+# Opens an interactive editor to modify the last 'n' commits in the current branch
+git rebase -i HEAD~n
+
+# Stops the rebase and restores the previous state
+git rebase --abort
+
+# Ignores the conflicting commit and continues rebasing.
+git rebase --skip
+
+# Continue rebase after resolving conflicts
+git rebase --continue
 ```
+- During interactive rebase:
+  - ***pick*** a commit: add a commit.
+  - ***Reword*** a commit message: modify a commit message.
+  - ***Squash*** multiple commits into one: merge commits.
+  - ***Drop*** a commit: removes a commit.
+  - *Reorder* commits: Simply move commit lines up/down in the rebase editor.
 
 ## Pushing and Pulling
 ```bash
@@ -209,19 +240,51 @@ git remote rm <remote_name>
 # Show commit history
 git log
 
+# Show commit history including all branches
+git log --all
+
 # Show commit history with one-line summaries
 git log --oneline
 
 # Show commit history with a graph of their branches
 git log --graph
 
+# Shows a history of all movements of HEAD, including commits, resets, checkouts, cherry-picks, and reverts.
+git reflog
+# useful for recovering lost commits
+
 # Show current unstaged changes
 git diff
 git diff HEAD
 git diff -u
 
+# Show only which files changed (without details)
+git diff --name-only
+
+# Shows currents changes in the specified file
+git diff <path/to/file>
+# you can mention your desired file at the each diff command!
+
 # Show changes in staged files
 git diff --staged
+
+# Compares changes to the previous commit before HEAD
+git diff HEAD^
+
+# Compares changes to the 'n'th previous commit before HEAD
+git diff HEAD~n
+
+# Compares two different commits
+git diff <commit_hash_1> <commit_hash_2>
+
+# Shows changes between current branch and 'main'
+git diff main
+
+# Compares two specific branches
+git diff <branch_1> <branch_2>
+
+# Compares local 'main' branch to its remote
+git diff origin/main
 ```
 
 ## Tagging
@@ -263,8 +326,26 @@ git push --delete origin <tag_name>
 # Remove a file from local working directory and git history
 git rm <file>
 
-# Remove untracked files
+# Show what would be deleted (Dry Run)
+git clean -n
+
+# Interactively choose files to delete
+git clean -i
+
+# Remove untracked files (forced)
 git clean -f
+
+# Remove untracked files and directories (forced)
+git clean -fd
+
+# Remove untracked and ignored files (forced)
+git clean -fx
+
+# Removes all untracked files EXCEPT *.log files
+git clean -f -e "*.log"
+
+# Removes only untracked files that MATCH .log
+git clean -f -X "*.log"
 ```
 
 ## Signing Commits and Tags
