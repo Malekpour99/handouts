@@ -1,0 +1,294 @@
+# Git
+
+## Configuration
+```bash
+# Set global username
+git config --global user.name "Your Name"
+
+# Set global email
+git config --global user.email "your.email@example.com"
+
+# Check global configuration
+git config --global --list
+```
+
+## Initializing and Cloning
+```bash
+# Initialize a new Git repository
+git init
+
+# Clone an existing repository
+git clone <repository_url>
+```
+
+## Staging and Committing
+```bash
+# Check the status of the repository
+git status
+
+# Add a file to the staging area
+git add <file>
+
+# Add all files to the staging area
+git add .
+git add *
+git add -A
+
+# Add matching names to the staging area
+git add *.py
+
+# Add specific file to the staging area
+git add <file_name>
+
+# Commit changes with a message
+git commit -m "Commit message"
+
+# Commit changes
+git commit
+# Then your default terminal editor opens and you can write your commit title and description
+
+# Show details of a specific commit
+git show <commit_hash>
+
+# Show details of the latest commit
+git show HEAD
+
+# Show a commit in a specific format
+git show --pretty=short <commit_hash>
+```
+
+## Branching
+```bash
+# List all branches
+git branch
+
+# Create a new branch
+git branch <branch_name>
+
+# Switch to a branch
+git checkout <branch_name>
+
+# Create and switch to a new branch
+git checkout -b <branch_name>
+```
+
+## Merging and Rebasing
+```bash
+# Merge a branch into the current branch
+git merge <branch_name>
+
+# Rebase the current branch onto another branch
+git rebase <branch_name>
+```
+
+## Pushing and Pulling
+```bash
+# Push changes to a remote repository
+git push origin <branch_name>
+
+# Pull latest changes from a remote repository
+git pull origin <branch_name>
+
+# Fetch updates from a remote repository without merging
+git fetch origin
+
+# Set upstream branch for push (git push)
+git push --set-upstream origin <branch_name>
+git push -u origin <branch_name>
+
+# Push changes based on the upstream
+git push
+
+# Set upstream branch for pull (git pull)
+git pull --set-upstream origin <branch_name>
+git pull -u origin <branch_name>
+
+# Pull changes based on the upstream
+git pull
+```
+
+## Undoing Changes
+```bash
+# Discards local changes in a tracked file and restores it to the last committed state
+git checkout -- <file>
+
+# Unstages a file but keeps its changes in the working directory
+git reset <file>
+git reset HEAD <file>
+
+# Reset to a previous commit (soft reset, keeps changes staged)
+git reset --soft <commit_hash>
+
+# Reset to a previous commit (mixed reset, unstages changes but keeps them in the working directory)
+git reset --mixed <commit_hash>
+
+# Reset to a previous commit (hard reset, discards changes)
+git reset --hard <commit_hash>
+
+# Revert a commit
+git revert <commit_hash>
+```
+
+## Stashing Changes
+```bash
+# Stash current changes
+git stash
+
+# Apply the last stashed changes
+git stash pop
+
+# List stashes
+git stash list
+
+# Apply a specific stash
+git stash apply stash@{n}
+```
+
+## Working with Remotes
+```bash
+# Add a remote repository
+git remote add origin <repository_url>
+
+# List remote repositories
+git remote -v
+
+# Change the remote URL
+git remote set-url origin <new_repository_url>
+
+# Remove a remote repository
+git remote rm <remote_name>
+```
+
+## Viewing History
+```bash
+# Show commit history
+git log
+
+# Show commit history with one-line summaries
+git log --oneline
+
+# Show commit history with a graph of their branches
+git log --graph
+
+# Show current unstaged changes
+git diff
+git diff HEAD
+git diff -u
+
+# Show changes in staged files
+git diff --staged
+```
+
+## Tagging
+```bash
+# Create a new tag
+git tag <tag_name>
+
+# List all tags
+git tag
+
+# List all tags starting with "v"
+git tag -l "v*"
+
+# Show details and changes made by an annotated tag
+git show <tag_name>
+
+# Create an annotated tag with a message
+git tag -a <tag_name> -m "Tag message"
+
+# Create a tag for a specific commit
+git tag -a <tag_name> <commit>
+# Then your default terminal editor opens and you can write your tag title and description or message
+
+# Push tags to remote repository
+git push origin --tags
+
+# Push a specific tag to remote
+git push origin <tag_name>
+
+# Delete a local tag
+git tag -d <tag_name>
+
+# Delete a remote tag
+git push --delete origin <tag_name>
+```
+
+## Deleting and Cleaning
+```bash
+# Remove a file from local working directory and git history
+git rm <file>
+
+# Delete a branch locally
+git branch -d <branch_name>
+
+# Delete a branch remotely
+git push origin --delete <branch_name>
+
+# Remove untracked files
+git clean -f
+```
+
+## Signing Commits and Tags
+```bash
+# Configure Git to use GPG for signing
+git config --global user.signingkey <gpg_key_id>
+
+git config --global commit.gpgsign true
+
+# Sign a commit
+git commit -S -m "Signed commit message"
+
+# Verify a signed commit
+git log --show-signature
+
+# Create a signed tag
+git tag -s <tag_name> -m "Signed tag message"
+
+# Verify a signed tag
+git tag -v <tag_name>
+```
+
+## Helping
+```bash
+# Show help for a specific command
+git help <command>
+
+# Show the manual page for a command
+git <command> --help
+
+# Show all available Git commands
+git help -a
+
+# Show guides and tutorials
+git help -g
+```
+
+## Blaming
+```bash
+# Shows who last modified each line in a file
+git blame <file>
+
+# Shows the blame for a specific line in a file
+git blame <file> -L <line-number>
+
+# Shows the blame for a specific range of lines in a file
+git blame <file> -L <start>,<end>
+
+# Provides a more detailed, machine-readable format for the blame information, (useful for scripting or automation)
+git blame --line-porcelain <file>
+
+# Displays the author, timestamp, and the full file path for each line of code
+git blame --show-name <file>
+
+# Blames the lines of a file based on a specific commit hash
+git blame <file> <commit-hash>
+
+# Limits the blame to a specific date range. (use dates like `2025-01-01` or `last week`)
+git blame --since=<date> --until=<date> <file>
+
+# Ignores changes in whitespace when performing the blame. (useful whitespace changes aren’t relevant)
+git blame -w <file>
+
+# Performs blame analysis on a file from a specific branch.
+git blame <branch> <file>
+```
