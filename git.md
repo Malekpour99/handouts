@@ -19,6 +19,9 @@ git init
 
 # Clone an existing repository
 git clone <repository_url>
+
+# Clone desired number (n) of the latest commits from a branch of an existing repository
+git clone --branch=<branch_name> --depth=<n> <repository_url>
 ```
 
 ## Staging and Committing
@@ -61,6 +64,9 @@ git show --pretty=short <commit_hash>
 ```bash
 # List all branches
 git branch
+
+# List all branches and their HEAD commit
+git branch -v
 
 # Create a new branch
 git branch <branch_name>
@@ -140,14 +146,47 @@ git revert <commit_hash>
 # Stash current changes
 git stash
 
-# Apply the last stashed changes
-git stash pop
+# Stash current changes with a message (helps to identify stash)
+git stash push -m "My stash message"
+
+# Stash current changes + untracked files
+git stash -u
+git stash --include-untracked
+
+# Stash everything (even ignored files)
+git stash -a
+git stash --all
 
 # List stashes
 git stash list
 
+# shows file changes in the latest stash
+git stash show
+
+# shows file changes in the latest stash (like a git diff output)
+git stash show -p
+
+# shows the changes in the second-most recent stash
+git stash show stash@{1}
+# 0 is the most recent stash!
+
+# Apply the last stashed changes and deletes it from stash list
+git stash pop
+
+# Apply the last stashed changes without deleting it from stash list
+git stash apply
+
 # Apply a specific stash
 git stash apply stash@{n}
+
+# Removes the last stashed changes from stash list
+git stash drop
+
+# Removes a specific stash from stash list
+git stash drop stash@{n}
+
+# Removes all stashed changes
+git stash clear
 ```
 
 ## Working with Remotes
@@ -291,4 +330,28 @@ git blame -w <file>
 
 # Performs blame analysis on a file from a specific branch.
 git blame <branch> <file>
+```
+
+## Bisect
+```bash
+# Start a binary search to find a faulty commit
+git bisect start
+
+# Mark the current commit as bad
+git bisect bad
+
+# Mark a known bad commit
+git bisect bad <commit_hash>
+
+# Mark a known good commit
+git bisect good <commit_hash>
+
+# Let Git pick the next commit to test
+git bisect next
+
+# Reset bisect state after finishing
+git bisect reset
+
+# Run a script to automate bisecting
+git bisect run <script>
 ```
