@@ -3,3 +3,4 @@ here I will create and update a practical handout for anything I have learned an
 
 ## Available Handouts
 - VIM editor + sample Neo-VIM configuration
+- PostgreSQL
