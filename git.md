@@ -72,6 +72,12 @@ git branch
 # List all branches and their HEAD commit
 git branch -v
 
+# Lists branches that are fully merged into the current branch
+git branch --merged
+
+# Lists branches that still have unmerged commits with the current branch
+git branch --no-merged
+
 # Create a new branch
 git branch <branch_name>
 
@@ -90,10 +96,42 @@ git push origin --delete <branch_name>
 
 ## Merging and Rebasing
 ```bash
-# Merge a branch into the current branch
+# Merge 'branch_name' branch into the current branch (fast-forward)
 git merge <branch_name>
+git merge --ff <branch_name>
 
-# Rebase the current branch onto another branch
+# Merge specified branch into the current branch, also Preserves the history by creating a merge commit (no-fast-forward)
+git merge --no-ff feature-branch
+
+# Merge changes from a specific commit
+git merge <commit-hash>
+
+# Stops the merge and restores the previous state
+git rebase --abort
+
+# Ignores the conflicting commit and continues merging
+git rebase --skip
+
+# Continue merge after resolving conflicts
+git merge --continue
+
+# The recursive strategy for merging branches (default)
+git merge -s recursive feature-branch
+
+# merging more than two branches (octopus strategy for merging multiple branches at once)
+git merge -s octopus feature1 feature2 feature3
+
+# merge two branches and resolves trivial conflicts (resolve strategy for simple merges)
+git merge -s resolve feature-branch
+
+# Merge but prefer the current branch's status and ignores incoming changes (ours strategy for conflicts)
+git merge -s ours feature-branch
+git merge -X ours feature-branch
+
+# Merge but prefer the incoming changes (theirs strategy for conflicts)
+git merge -X theirs feature-branch
+
+# Rebase the current branch onto the 'branch_name' branch
 git rebase <branch_name>
 
 # Moves the current branch to start from a specific commit
@@ -111,7 +149,7 @@ git rebase -i HEAD~n
 # Stops the rebase and restores the previous state
 git rebase --abort
 
-# Ignores the conflicting commit and continues rebasing.
+# Ignores the conflicting commit and continues rebasing
 git rebase --skip
 
 # Continue rebase after resolving conflicts
