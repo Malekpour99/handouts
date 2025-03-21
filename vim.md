@@ -28,6 +28,13 @@ Here I will provide and update a simple handout for VIM editor key bindings and 
     - [Surround - vim-surround](#surround---vim-surround)
     - [Comment - vim-commentary](#comment---vim-commentary)
     - [NERD Tree - nerdtree](#nerd-tree---nerdtree)
+      - [Basic Navigation](#basic-navigation)
+      - [Managing Tabs](#managing-tabs)
+      - [File \& Directory Management](#file--directory-management)
+      - [Bookmarking](#bookmarking)
+      - [Miscellaneous](#miscellaneous)
+
+
 ## Installation & configuration
 To install VIM on linux:
 ```
@@ -238,7 +245,48 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```:7,10Commentary```: Comments/Uncomments lines from '7' to '10'
 
 ### NERD Tree - [nerdtree](https://github.com/preservim/nerdtree)
+
+#### Basic Navigation
 - ```:NERDTreeToggle```: Toggles NERD tree
+- ```:NERDTreeFind```: Open NERDTree and locate the current file
 - ```<C-w>w```: Cycle between open windows (NERDTree and main editor).
 - ```<C-w>h```: Move focus to the window on the left (usually NERDTree)
 - ```<C-w>l```: Move focus to the window on the right (usually the main editor)
+- ```o```: Open file/directory (expand/collapse)
+- ```i```: Open file in a split window (horizontally)
+- ```s```: Open file in a split window (vertically)
+- ```go```: Open file but keep focus in NERDTree
+- ```p```: Jump to parent directory
+- ```P```: Jump to root directory
+- ```K```: Go to the first child node
+- ```J```: Go to the last child node
+
+#### Managing Tabs
+- ```t```: Open file in a new tab
+- ```T```: Open file in a new tab but stay in NERDTree
+- ```gt```: Go to the next tab
+- ```gT```: Go to the previous tab
+- ```{number}gt```: Jump to a specific tab (e.g., 2gt for the second tab)
+- ```:tabnew```: Open a new empty tab
+- ```:tabclose```: Close the current tab
+- ```:tabonly```: Close all tabs except the current one
+- ```:tabs```: List all open tabs
+
+#### File & Directory Management
+- ```m```: Show menu for file operations (create, delete, rename, etc.)
+- ```a```: Add a new file/directory (append / for directories)
+- ```d```: Delete file/directory
+- ```r```: Rename file/directory
+- ```c```: Copy file/directory
+- ```x```: Cut file/directory
+- ```p```: Paste file/directory
+
+#### Bookmarking
+- ```B```: Toggle bookmarks
+- ```b```: Add/remove a bookmark
+- ```qb```: List all bookmarks
+
+#### Miscellaneous
+- ```u```: Move up a directory level (collapse parent)
+- ```R```: Refresh the NERDTree
+- ```q```: Close NERDTree
