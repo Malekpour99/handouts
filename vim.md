@@ -2,6 +2,32 @@
 Vim is a powerful text editor often used in command-line environments.
 Here I will provide and update a simple handout for VIM editor key bindings and modes, along side its robust features and plugins.
 
+## Table of Contents
+- [VIM](#vim)
+  - [Table of Contents](#table-of-contents)
+  - [Installation \& configuration](#installation--configuration)
+    - [Plugin configuration](#plugin-configuration)
+  - [Vim Modes](#vim-modes)
+  - [Basic Operations](#basic-operations)
+  - [Configurations](#configurations)
+  - [Movements \& Navigation](#movements--navigation)
+  - [Editing](#editing)
+    - [Deleting \& Cutting](#deleting--cutting)
+    - [Copying (Yanking)](#copying-yanking)
+    - [Pasting](#pasting)
+    - [Changing](#changing)
+    - [Undo and Redo](#undo-and-redo)
+  - [Searching \& Navigation](#searching--navigation)
+  - [Indentation](#indentation)
+  - [Substitution](#substitution)
+  - [Marking \& Jumping](#marking--jumping)
+  - [Registers](#registers)
+  - [Macros](#macros)
+  - [Plugins](#plugins)
+    - [Vim Move - vim-move](#vim-move---vim-move)
+    - [Surround - vim-surround](#surround---vim-surround)
+    - [Comment - vim-commentary](#comment---vim-commentary)
+    - [NERD Tree - nerdtree](#nerd-tree---nerdtree)
 ## Installation & configuration
 To install VIM on linux:
 ```
@@ -142,7 +168,7 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```ctrl + r```: Redo changes
 - ```.```: Repeat the last command
 
-## Seaching & Navigation
+## Searching & Navigation
 > All of this search and navigations can be combined with yank, change or delete actions!
 - ```%```: Jumps between matching parentheses or brackets 
 - ```t<character>```: Searches for the character's next occurrence on the current line and jumps <u>right before</u> that character
