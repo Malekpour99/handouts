@@ -63,8 +63,16 @@ git add -A
 # Add matching names to the staging area
 git add *.py
 
-# Add specific file to the staging area
+# Add a specific file to the staging area
 git add <file_name>
+
+# Add patches from a specific file to the staging area
+git add -p <file_name>
+# y - stage the hunk
+# n - skip staging the hunk
+# s - split the hunk into smaller parts
+# e - manually edit the hunk (use this to select specific lines)
+# q - quit
 
 # Commit changes with a message
 git commit -m "Commit message"
