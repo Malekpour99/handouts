@@ -14,7 +14,6 @@ Plug 'https://github.com/navarasu/onedark.nvim'
 Plug 'https://github.com/morhetz/gruvbox'
 Plug 'https://github.com/vim-airline/vim-airline-themes'
 Plug 'https://github.com/mbbill/undotree'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'https://github.com/lepture/vim-jinja'
 Plug 'https://github.com/tpope/vim-fugitive'
 Plug 'https://github.com/matze/vim-move'
@@ -37,6 +36,8 @@ set smarttab
 set encoding=UTF-8
 set visualbell
 set scrolloff=5
+" Install from NERD fonts
+set guifont=Hack\ Nerd\ Font\ 12
 
 " :colorscheme base16-onedark
 :colorscheme onedark
@@ -44,8 +45,6 @@ let g:airline_theme='onedark'
 
 " :colorscheme gruvbox
 " let g:airline_theme='gruvbox'
-
-" lua require('test')
 
 " NERDTree Configuration
 
@@ -83,13 +82,10 @@ let g:airline_symbols.linenr = ''
 
 nmap <F6> :TagbarToggle<CR>
 
-inoremap <silent><expr> <CR> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
-
 " Note -> Use CocList diagnostics to get all linter errors, Note -> .vim
 " folder is created for every project where linter is specified
 
 nnoremap <F3> :noh<CR>
-
 
 
 let g:floaterm_keymap_new    = '<F7>'
@@ -97,11 +93,6 @@ let g:floaterm_keymap_prev   = '<F8>'
 let g:floaterm_keymap_next   = '<F9>'
 let g:floaterm_keymap_toggle = '<F12>'
 nnoremap <F5> :w<CR>:FloatermNew --autoclose=0 python3 %<CR>
-
-
-let g:coc_disable_startup_warning = 1
-
-let g:python_highlight_all = 1
 
 " au BufNewFile,BufRead *.html,*.htm,*.shtml,*.stm set ft=jinja
 
@@ -116,3 +107,27 @@ inoremap <expr> <S-Tab> pumvisible() ? "\<C-P>" : "\<C-H>"
 :imap <3-MiddleMouse> <Nop>
 :map <4-MiddleMouse> <Nop>
 :imap <4-MiddleMouse> <Nop>
+
+" NERDTrees File highlighting
+function! NERDTreeHighlightFile(extension, fg, bg, guifg, guibg)
+ exec 'autocmd FileType nerdtree highlight ' . a:extension .' ctermbg='. a:bg .' ctermfg='. a:fg .' guibg='. a:guibg .' guifg='. a:guifg
+ exec 'autocmd FileType nerdtree syn match ' . a:extension .' #^\s\+.*'. a:extension .'$#'
+endfunction
+
+call NERDTreeHighlightFile('jade', 'green', 'none', 'green', '#151515')
+call NERDTreeHighlightFile('ini', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('yml', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('config', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('conf', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('json', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('html', 'yellow', 'none', 'yellow', '#151515')
+call NERDTreeHighlightFile('styl', 'cyan', 'none', 'cyan', '#151515')
+call NERDTreeHighlightFile('css', 'cyan', 'none', 'cyan', '#151515')
+call NERDTreeHighlightFile('coffee', 'Red', 'none', 'red', '#151515')
+call NERDTreeHighlightFile('js', 'Red', 'none', '#ffa500', '#151515')
+call NERDTreeHighlightFile('php', 'Magenta', 'none', '#ff00ff', '#151515')
+call NERDTreeHighlightFile('ds_store', 'Gray', 'none', '#686868', '#151515')
+call NERDTreeHighlightFile('gitconfig', 'Gray', 'none', '#686868', '#151515')
+call NERDTreeHighlightFile('gitignore', 'Gray', 'none', '#686868', '#151515')
+call NERDTreeHighlightFile('bashrc', 'Gray', 'none', '#686868', '#151515')
+call NERDTreeHighlightFile('bashprofile', 'Gray', 'none', '#686868', '#151515')
