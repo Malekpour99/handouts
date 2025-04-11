@@ -138,10 +138,10 @@ git merge --no-ff feature-branch
 git merge <commit-hash>
 
 # Stops the merge and restores the previous state
-git rebase --abort
+git merge --abort
 
 # Ignores the conflicting commit and continues merging
-git rebase --skip
+git merge --skip
 
 # Continue merge after resolving conflicts
 git merge --continue
