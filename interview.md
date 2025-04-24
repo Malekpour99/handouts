@@ -11,6 +11,8 @@
       - [2. **Abstraction**](#2-abstraction)
       - [3. **Inheritance**](#3-inheritance)
       - [4. **Polymorphism**](#4-polymorphism)
+    - [What are different types of design patterns?](#what-are-different-types-of-design-patterns)
+    - [What is the Singleton Design Pattern?](#what-is-the-singleton-design-pattern)
   - [Django](#django)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
@@ -177,7 +179,68 @@ animal_movement(fish)  # Output: Swims in the water
 
 ---
 
+### What are different types of design patterns?
+**Design patterns** are reusable solutions to common problems in software design. They represent best practices refined over time by experienced developers.
 
+|Category   | Purpose                            | Example Patterns                   |
+|-----------|------------------------------------|------------------------------------|
+|Creational | Object creation logic              | Singleton, Factory, Abstract Factory,  Builder, Prototype        |
+|Structural | Object composition and flexibility | Adapter, Decorator, Proxy, Facade, Composite, Bridge, Flyweight  |
+|Behavioral | Communication & responsibility     | Observer, Strategy, Command, State, Chain of Responsibility, Template Method, Visitor, Interpreter, Iterator |
+
+---
+
+### What is the Singleton Design Pattern?
+
+The **Singleton pattern** ensures that a **class has only one instance** throughout the lifetime of an application and provides a **global point of access** to that instance.
+
+Use cases:
+- When exactly **one object** is needed to coordinate actions across the system.
+- Useful for things like:
+  - Database connections
+  - Logging services
+  - Configuration managers
+  - Caching layers
+
+---
+
+```python
+# Magic method implementation
+class Singleton:
+    _instance = None
+
+    def __new__(cls, *args, **kwargs):
+        if not cls._instance:
+            cls._instance = super(Singleton, cls).__new__(cls, *args, **kwargs)
+        return cls._instance
+
+# Usage
+a = Singleton()
+b = Singleton()
+
+print(a is b)  # Output: True
+
+# Decorator implementation
+def singleton(cls):
+    _instances = {}
+
+    def get_instance(*args, **kwargs):
+        if cls not in _instances:
+            _instances[cls] = cls(*args, **kwargs)
+        return _instances[cls]
+
+    return get_instance
+
+@singleton
+class Config:
+    def __init__(self):
+        self.settings = {"debug": True}
+
+config1 = Config()
+config2 = Config()
+
+print(config1 is config2)  # Output: True
+```
 
 
 
