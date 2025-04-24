@@ -24,6 +24,11 @@
     - [Explain Factory Design Pattern](#explain-factory-design-pattern)
     - [Factory Vs. Abstract Factory Design Patterns](#factory-vs-abstract-factory-design-patterns)
     - [Explain Decorator Design Pattern](#explain-decorator-design-pattern)
+    - [List Vs. Tuple](#list-vs-tuple)
+    - [Instance Method VS. Class Method Vs. Static Method](#instance-method-vs-class-method-vs-static-method)
+    - [Explain Context Manager in Python](#explain-context-manager-in-python)
+    - [Explain Generators in Python](#explain-generators-in-python)
+    - [Iterators Vs. Generators in Python](#iterators-vs-generators-in-python)
   - [Django](#django)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
@@ -596,6 +601,137 @@ say_hello()
 ```
 
 ---
+
+### List Vs. Tuple
+
+|Feature          | List   | Tuple |
+|-----------------|--------|-------|
+|Mutable          | Yes    | No    |
+|Ordered          | Yes    | Yes   |
+|Indexable        | Yes    | Yes   |
+|Use as Dict Key  | No     | Yes   |
+|Iteration Speed  | Slower | Faster|
+|Memory Efficient | Less   | More  |
+
+---
+
+### Instance Method VS. Class Method Vs. Static Method
+
+|Feature          | Instance Method   | Class Method | Static Method |
+|-----------------|-------------------|--------------|---------------|
+|Decorator        | (none)            | @classmethod | @staticmethod |
+|First parameter  | self (instance)   | cls (class)  | No default first arg |
+|Access instance? | Yes               | No           | No |
+|Access class?    | Via self.class    | Yes          | No |
+|Use case         | Instance behavior | Factory methods, alter class state | Utility/helper function |
+
+---
+
+### Explain Context Manager in Python
+
+A **context manager** is a construct in Python that allows you to **allocate and release resources** precisely when you want to.
+It is commonly used with the **`with`** statement.
+
+- Use Cases:
+    - File handling
+    - Managing database connections
+    - Acquiring/releasing locks
+    - Managing network connections or sockets
+    - Opening/closing resources like web pages or APIs
+    - Temporary environment changes (e.g., mocking, config override)
+
+```python
+with <context_manager> as <var>:
+    # Do something
+    pass
+
+# How context manager works internally
+class MyContext:
+    def __enter__(self):
+        # Setup code
+        return self
+    
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        # Cleanup code
+        pass
+
+# Example
+class ManagedFile:
+    def __init__(self, filename):
+        self.filename = filename
+
+    def __enter__(self):
+        self.file = open(self.filename, 'r')
+        return self.file
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        self.file.close()
+
+with ManagedFile('example.txt') as f:
+    print(f.read())
+
+# turn a generator into a context manager (python's library)
+from contextlib import contextmanager
+
+@contextmanager
+def open_file(name):
+    f = open(name, 'r')
+    try:
+        yield f
+    finally:
+        f.close()
+
+with open_file('example.txt') as f:
+    print(f.read())
+```
+
+---
+
+### Explain Generators in Python
+
+A **generator** is a special type of **iterable** in Python that **yields** items one at a time using the `yield` keyword, instead of returning them all at once.
+
+It helps you **generate values on the fly**, saving memory and improving performance, especially with large datasets.
+
+**Benefits**:
+- Memory Efficient: Only one item is loaded into memory at a time.
+- Lazy Evaluation: Values are produced only when needed.
+- Infinite Sequences: Perfect for streams or infinite data (e.g., Fibonacci).
+
+**Use Cases**:
+- Reading large files line by line
+- Producing infinite sequences (like itertools.count)
+- Streaming data processing (e.g., logs, APIs)
+- Implementing pipelines (data transformations)
+
+```python
+def fibonacci():
+    a, b = 0, 1
+    while True:
+        yield a
+        a, b = b, a + b
+
+gen = fibonacci()
+for _ in range(5):
+    print(next(gen))
+```
+
+---
+
+### Iterators Vs. Generators in Python
+
+|Feature | Iterator | Generator |
+|--------|----------|-----------|
+|Definition | Object with __iter__() and __next__() | Uses yield in a function |
+|Creation | Manually (class + methods) | Using generator function or expression |
+|Memory Usage | Depends on implementation | Memory-efficient (lazy eval) |
+|Infinite Sequences | Yes | Yes |
+|Syntax | More boilerplate | Simple, clean syntax |
+|Performance | Slightly slower (custom classes) | Faster for large/lazy sequences |
+|State Management | Manual | Automatic (via yield) |
+
+---
+
 
 
 
