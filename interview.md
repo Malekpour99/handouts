@@ -53,6 +53,135 @@
 
 ---
 
+### What is OOP?
+**Object-Oriented Programming (OOP)** is a programming paradigm based on the concept of **"objects"**, which bundle **data (attributes)** and **behavior (methods)** together. It aims to structure software in a modular and reusable way.
+
+OOP is used to design systems that are **scalable**, **maintainable**, and **closely modeled around real-world entities**.
+
+---
+
+### Four Main Principles of OOP
+
+#### 1. **Encapsulation**
+**Definition**: Encapsulation is the bundling of data and methods that operate on that data within a class, and restricting direct access to some components.
+
+**Goal**: Hide internal state and require all interactions to occur through an object’s methods.
+
+**Example**:
+```python
+class BankAccount:
+    def __init__(self, balance):
+        self.__balance = balance  # private attribute
+
+    def deposit(self, amount):
+        self.__balance += amount
+
+    def get_balance(self):
+        return self.__balance
+
+account = BankAccount(1000)
+account.deposit(500)
+print(account.get_balance())  # Output: 1500
+# print(account.__balance) -> ❌ Raises AttributeError (encapsulation)
+```
+
+---
+
+#### 2. **Abstraction**
+**Definition**:  
+Abstraction means hiding the internal implementation details and showing only the necessary parts of an object. It allows developers to work with ideas rather than specifics.
+
+**Goal**:  
+Reduce complexity by exposing only essential functionalities and hiding irrelevant details.
+
+**Example**:
+```python
+from abc import ABC, abstractmethod
+
+class PaymentProcessor(ABC):
+    @abstractmethod
+    def process_payment(self, amount):
+        pass
+
+class StripeProcessor(PaymentProcessor):
+    def process_payment(self, amount):
+        print(f"Processing ${amount} through Stripe.")
+
+# Using abstraction
+def checkout(processor: PaymentProcessor, amount):
+    processor.process_payment(amount)
+
+checkout(StripeProcessor(), 100)
+# Output: Processing $100 through Stripe.
+```
+
+---
+
+#### 3. **Inheritance**
+**Definition**:
+Inheritance allows a new class (child or subclass) to acquire properties and behaviors (methods) of an existing class (parent or superclass).
+
+**Goal**:
+Encourage code reuse and establish a logical hierarchy between classes.
+
+**Example**:
+```python
+class Animal:
+    def speak(self):
+        print("Animal makes a sound")
+
+class Dog(Animal):
+    def speak(self):
+        print("Dog barks")
+
+class Cat(Animal):
+    def speak(self):
+        print("Cat meows")
+
+dog = Dog()
+cat = Cat()
+
+dog.speak()  # Output: Dog barks
+cat.speak()  # Output: Cat meows
+```
+
+---
+
+#### 4. **Polymorphism**
+
+**Definition**:
+Polymorphism means many forms. It allows different classes to define methods with the same name that behave differently.
+
+**Goal**:
+Write flexible code that works with objects of different types through a common interface.
+
+**Example**:
+```python
+class Bird:
+    def move(self):
+        print("Flies in the sky")
+
+class Fish:
+    def move(self):
+        print("Swims in the water")
+
+def animal_movement(animal):
+    animal.move()
+
+bird = Bird()
+fish = Fish()
+
+animal_movement(bird)  # Output: Flies in the sky
+animal_movement(fish)  # Output: Swims in the water
+```
+
+---
+
+
+
+
+
+
 ## Django
 
 ## Database
