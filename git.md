@@ -64,15 +64,18 @@ git add -A
 git add *.py
 
 # Add a specific file to the staging area
-git add <file_name>
+git add <file>
 
 # Add patches from a specific file to the staging area
-git add -p <file_name>
+git add -p <file>
 # y - stage the hunk
 # n - skip staging the hunk
 # s - split the hunk into smaller parts
 # e - manually edit the hunk (use this to select specific lines)
 # q - quit
+
+# Unstage file (Keeping its changes)
+git restore --staged <file>
 
 # Commit changes with a message
 git commit -m "Commit message"
