@@ -21,6 +21,9 @@
     - [What are different types of design patterns?](#what-are-different-types-of-design-patterns)
     - [Explain Singleton Design Pattern](#explain-singleton-design-pattern)
     - [Which SOLID Principles Does Singleton Violate?](#which-solid-principles-does-singleton-violate)
+    - [Explain Factory Design Pattern](#explain-factory-design-pattern)
+    - [Factory Vs. Abstract Factory Design Patterns](#factory-vs-abstract-factory-design-patterns)
+    - [Explain Decorator Design Pattern](#explain-decorator-design-pattern)
   - [Django](#django)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
@@ -436,6 +439,164 @@ While this sounds helpful, it can **violate** multiple **SOLID principles**:
     ```
 
 ---
+
+### Explain Factory Design Pattern
+
+The **Factory Pattern** is a **creational design pattern** that provides an **interface for creating objects** in a superclass, but **allows subclasses to alter the type of objects** that will be created.
+Instead of calling a class constructor directly, you use a **factory method** to get the instance.
+
+```python
+class Notification:
+    def notify(self, message):
+        raise NotImplementedError
+
+class EmailNotification(Notification):
+    def notify(self, message):
+        print(f"Email: {message}")
+
+class SMSNotification(Notification):
+    def notify(self, message):
+        print(f"SMS: {message}")
+
+# Without Factory
+notif = EmailNotification()  # tightly coupled to a concrete class
+notif.notify("Hello!")
+
+# With Factory
+class NotificationFactory:
+    @staticmethod
+    def get_notification(method: str) -> Notification:
+        if method == "email":
+            return EmailNotification()
+        elif method == "sms":
+            return SMSNotification()
+        else:
+            raise ValueError("Unsupported notification method")
+
+
+notif = NotificationFactory.get_notification("email")
+notif.notify("Factory pattern in action!")
+```
+
+---
+
+### Factory Vs. Abstract Factory Design Patterns
+
+Both **Factory** and **Abstract Factory** are **creational design patterns**, but they solve different levels of object creation problems.
+
+- Factory Method Pattern
+  - Creates **one type of object** based on some input.
+  - Used when the exact type of the object isn't known until runtime.
+  - Example:
+    ```python
+    class Button:
+        def click(self):
+            raise NotImplementedError
+
+    class WindowsButton(Button):
+        def click(self):
+            print("Windows button clicked!")
+
+    class MacButton(Button):
+        def click(self):
+            print("Mac button clicked!")
+
+    class ButtonFactory:
+        @staticmethod
+        def create_button(os_type):
+            if os_type == "windows":
+                return WindowsButton()
+            elif os_type == "mac":
+                return MacButton()
+    ```
+
+- Abstract Factory Pattern
+  - Creates **families of related or dependent objects**.
+  - Used when there are multiple products that need to work together.
+  - Example:
+    ```python
+    # --- Abstract products
+    class Button:
+        def click(self): pass
+
+    class Checkbox:
+        def check(self): pass
+
+    # --- Concrete products
+    class WindowsButton(Button):
+        def click(self):
+            print("Windows Button")
+
+    class WindowsCheckbox(Checkbox):
+        def check(self):
+            print("Windows Checkbox")
+
+    class MacButton(Button):
+        def click(self):
+            print("Mac Button")
+
+    class MacCheckbox(Checkbox):
+        def check(self):
+            print("Mac Checkbox")
+
+    # --- Abstract Factory
+    class GUIFactory:
+        def create_button(self): pass
+        def create_checkbox(self): pass
+
+    # --- Concrete Factories
+    class WindowsFactory(GUIFactory):
+        def create_button(self):
+            return WindowsButton()
+        def create_checkbox(self):
+            return WindowsCheckbox()
+
+    class MacFactory(GUIFactory):
+        def create_button(self):
+            return MacButton()
+        def create_checkbox(self):
+            return MacCheckbox()
+
+    # --- Client
+    def render_gui(factory: GUIFactory):
+        button = factory.create_button()
+        checkbox = factory.create_checkbox()
+        button.click()
+        checkbox.check()
+
+    # Use:
+    factory = WindowsFactory()
+    render_gui(factory)
+    ```
+
+---
+
+### Explain Decorator Design Pattern
+
+The **Decorator Pattern** is a **structural design pattern** that lets you **dynamically add behavior** or responsibilities to an object **without modifying its original code** (by wrapping around it).
+It's often used to **extend functionality** in a flexible and reusable way.
+
+```python
+def log_decorator(func):
+    def wrapper(*args, **kwargs):
+        print(f"Calling {func.__name__}")
+        return func(*args, **kwargs)
+        print(f"{func.__name__} Finished")
+    return wrapper
+
+@log_decorator
+def say_hello():
+    print("Hello!")
+
+say_hello()
+# Output:
+# Calling say_hello
+# Hello!
+# say_hello Finished
+```
+
+---
+
 
 
 ## Django
