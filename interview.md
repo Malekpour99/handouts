@@ -11,8 +11,16 @@
       - [2. **Abstraction**](#2-abstraction)
       - [3. **Inheritance**](#3-inheritance)
       - [4. **Polymorphism**](#4-polymorphism)
+    - [What are SOLID principles?](#what-are-solid-principles)
+      - [**S - Single Responsibility Principle (SRP)**](#s---single-responsibility-principle-srp)
+      - [**O - Open/Closed Principle (OCP)**](#o---openclosed-principle-ocp)
+      - [**L - Liskov Substitution Principle (LSP)**](#l---liskov-substitution-principle-lsp)
+      - [**I - Interface Segregation Principle (ISP)**](#i---interface-segregation-principle-isp)
+      - [**D - Dependency Inversion Principle (DIP)**](#d---dependency-inversion-principle-dip)
+    - [What is Dependency Injection?](#what-is-dependency-injection)
     - [What are different types of design patterns?](#what-are-different-types-of-design-patterns)
-    - [What is the Singleton Design Pattern?](#what-is-the-singleton-design-pattern)
+    - [Explain Singleton Design Pattern](#explain-singleton-design-pattern)
+    - [Which SOLID Principles Does Singleton Violate?](#which-solid-principles-does-singleton-violate)
   - [Django](#django)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
@@ -179,6 +187,167 @@ animal_movement(fish)  # Output: Swims in the water
 
 ---
 
+### What are SOLID principles?
+
+**SOLID** is an acronym representing **five core design principles** that make software:
+
+- More understandable
+- Flexible
+- Maintainable
+- Scalable
+
+|Principle | Focus                  | Goal                              |
+|----------|------------------------|-----------------------------------|
+|**S**ingle Responsibility Principle | Responsibility         | One class = one reason to change  |
+|**O**pen/Closed Principle           | Extension              | Add behavior without changing code|
+|**L**iscov Substitution Principle   | Substitutability       | Use subclass without surprises    |
+|**I**nterface Segregation Principle | Interface size         | No bloated interfaces             |
+|**D**ependency Inversion Principle  | Abstraction dependency | High-level code stays clean       |
+
+
+#### **S - Single Responsibility Principle (SRP)**
+
+> A class should have only one reason to change.
+
+Every class should do **one thing** and do it well. If a class handles more than one responsibility, it becomes harder to maintain and test.
+
+```python
+class InvoicePrinter:
+    def print(self, invoice):
+        print(f"Printing invoice #{invoice.id}")
+
+class InvoiceSaver:
+    def save(self, invoice):
+        print(f"Saving invoice #{invoice.id}")
+```
+
+#### **O - Open/Closed Principle (OCP)**
+
+Software entities should be open for extension but closed for modification.
+
+You should be able to add new behavior without modifying existing code.
+
+```python
+class PaymentProcessor:
+    def pay(self, amount):
+        raise NotImplementedError
+
+class PayPal(PaymentProcessor):
+    def pay(self, amount):
+        print(f"Paid ${amount} via PayPal")
+
+class Stripe(PaymentProcessor):
+    def pay(self, amount):
+        print(f"Paid ${amount} via Stripe")
+```
+
+#### **L - Liskov Substitution Principle (LSP)**
+
+Subclasses should be replaceable for their base class without breaking the application.
+
+If B is a subclass of A, then we should be able to use B anywhere we use A and expect it to behave correctly.
+
+```python
+class Bird:
+    def fly(self):
+        pass
+
+class Sparrow(Bird):
+    def fly(self):
+        print("Sparrow flying")
+
+class Ostrich(Bird):
+    def fly(self):
+        raise Exception("Ostriches can't fly")  # ❌ Violates LSP
+# Fix: Separate behaviors into interfaces (or base classes).
+```
+
+#### **I - Interface Segregation Principle (ISP)**
+
+Clients should not be forced to depend on methods they do not use.
+
+Avoid bloated interfaces. Instead, use multiple, smaller, specific interfaces.
+
+```python
+class Printable:
+    def print(self):
+        pass
+
+class Scannable:
+    def scan(self):
+        pass
+
+class Printer(Printable):
+    def print(self):
+        print("Printing...")
+
+class Scanner(Scannable):
+    def scan(self):
+        print("Scanning...")
+```
+
+#### **D - Dependency Inversion Principle (DIP)**
+
+High-level modules should not depend on low-level modules. Both should depend on abstractions.
+
+Depend on interfaces or abstract classes, not concrete implementations.
+
+```python
+class NotificationService:
+    def __init__(self, sender):
+        self.sender = sender
+
+    def send(self, message):
+        self.sender.send(message)
+
+class EmailSender:
+    def send(self, message):
+        print(f"Email: {message}")
+
+# Inject EmailSender (low-level) into NotificationService (high-level)
+notifier = NotificationService(EmailSender())
+notifier.send("Hello")
+```
+
+---
+
+### What is Dependency Injection?
+
+**Dependency Injection (DI)** is a **design pattern** in which an object receives (or is "injected" with) its dependencies **from the outside**, rather than creating them itself. which
+
+- Promotes **loose coupling**
+- Increases **testability**
+- Improves **modularity**
+- Makes code more **maintainable and reusable**
+
+```python
+# Without DI:
+class EmailService:
+    def send(self, to, message):
+        print(f"Sending email to {to}: {message}")
+
+class UserNotifier:
+    def __init__(self):
+        self.email_service = EmailService()  # tightly coupled
+
+    def notify(self, user):
+        self.email_service.send(user, "Welcome!")
+
+# With DI:
+class UserNotifier:
+    def __init__(self, service):
+        self.service = service  # injected from outside
+
+    def notify(self, user):
+        self.service.send(user, "Welcome!")
+
+# Inject dependency
+email_service = EmailService()
+notifier = UserNotifier(email_service)
+```
+
+---
+
 ### What are different types of design patterns?
 **Design patterns** are reusable solutions to common problems in software design. They represent best practices refined over time by experienced developers.
 
@@ -190,7 +359,7 @@ animal_movement(fish)  # Output: Swims in the water
 
 ---
 
-### What is the Singleton Design Pattern?
+### Explain Singleton Design Pattern
 
 The **Singleton pattern** ensures that a **class has only one instance** throughout the lifetime of an application and provides a **global point of access** to that instance.
 
@@ -242,7 +411,31 @@ config2 = Config()
 print(config1 is config2)  # Output: True
 ```
 
+---
 
+### Which SOLID Principles Does Singleton Violate?
+
+The **Singleton Pattern** ensures that a class has **only one instance** and provides a global point of access to it.
+
+While this sounds helpful, it can **violate** multiple **SOLID principles**:
+1. Single Responsibility Principle (SRP)
+   - A Singleton class often has **two responsibilities**:
+      1. **Core logic** (e.g., logging or config management)
+      2. **Controlling its own instantiation**
+
+      This mixes object logic with lifecycle management, making it harder to maintain and extend.
+
+2. Open/Closed Principle (OCP)
+   - Singleton tightly controls its instantiation and usage.
+   - You **cannot extend** the behavior easily (e.g., switching to a mock or subclass requires modifying internal logic or breaking the pattern).
+
+3. Dependency Inversion Principle (DIP)
+   - Instead of **injecting dependencies**, classes often **directly call** the Singleton:
+    ```python
+    Logger.get_instance().log("error")  # tightly coupled
+    ```
+
+---
 
 
 ## Django
