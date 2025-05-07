@@ -126,6 +126,12 @@ git branch -d <branch_name>
 
 # Delete a branch remotely
 git push origin --delete <branch_name>
+
+# Rename current branch
+git branch -m <new-branch-name>
+
+# Rename another branch
+git branch -m <old-branch-name> <new-branch-name>
 ```
 
 ## Merging
