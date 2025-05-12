@@ -141,6 +141,7 @@ any action in the editing section **can be combined with numbers** which multipl
 - ```de```: Deletes to the end of the word
 - ```dd```: Deletes the current line
 - ```d0```: Deletes from the cursor to the beginning of the current line
+- ```:[start],[end]d```: Deletes lines *start* through *end*
 - ```<S-d>``` or ```d$```: Deletes from the cursor to the end of the current line
 - note that **deleting is the same as cutting** and you can paste any deleted text where you want it!
 
