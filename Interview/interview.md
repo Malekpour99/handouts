@@ -37,6 +37,8 @@
     - [Mutable Vs. Immutable Types in Python](#mutable-vs-immutable-types-in-python)
     - [Encryption Vs. Hashing](#encryption-vs-hashing)
   - [Django](#django)
+    - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
+    - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
   - [Network](#network)
@@ -909,6 +911,89 @@ The idea is that the probe sequence grows quadratically with the number of attem
 
 
 ## Django
+
+### MVT in Django - MVT vs. MVC
+
+**MVC** stands for **Model-View-Controller**. It's a software design pattern used for developing user interfaces.
+
+**MVT** stands for **Model-View-Template**, and it's Django's variant of the MVC architecture.
+
+- **Model**:
+  - Defines the data structure.
+  - Interacts with the database.
+  - Written in `models.py`.
+
+- **View**:
+  - Contains the business logic. (Better to decouple business logic using **services**)
+  - Fetches data from the model and sends it to the template.
+  - Written in `views.py`.
+
+- **Template**:
+  - Handles the presentation layer (HTML, CSS).
+  - Receives data from the view and renders the final page.
+
+| Concept        | MVC                        | Django (MVT)                |
+|----------------|-----------------------------|-----------------------------|
+| **Model**      | Manages the data and logic  | Same                        |
+| **View**       | Handles presentation/UI     | Called a **Template** in Django |
+| **Controller** | Handles user input and updates model/view | **View** in Django (handles logic) |
+| **Template**   | Optional layer              | Explicit layer for HTML rendering |
+
+User -> Controller -> Model -> View -> User
+
+User -> Django (Controller) -> View -> Model -> Template -> User
+
+---
+
+### Django Request-Response Lifecycle
+
+**Browser -> WSGI/ASGI Server (e.g., Gunicorn, Uvicorn) -> Django Middleware (Request Phase) -> URL Dispatcher (urls.py) -> View (views.py) -> Models (if needed) -> Templates (if needed) -> Django Middleware (Response Phase) -> WSGI/ASGI Server -> Browser (Rendered Response)**
+
+**- Browser Sends a Request**
+  - A user initiates an HTTP request by entering a URL or submitting a form.
+  - This request is received by Django's WSGI-compatible web server (e.g., Gunicorn, uWSGI).
+
+**- WSGI/ASGI Server Passes Request to Django**
+  - The WSGI/ASGI server passes the request to Django via a callable interface defined in `wsgi.py` or `asgi.py`.
+  - Django initializes necessary components to handle the request.
+
+**- Middleware Processing (Request Phase)**
+  - The request passes through **middleware** defined in `MIDDLEWARE` setting.
+  - Middleware are Python classes that WWcan:
+    - Modify the request.
+    - Block the request.
+    - Add metadata.
+    - Perform authentication or logging.
+
+**- URL Routing**
+  - Django uses urls.py to match the request path with a corresponding view function.
+  - It checks from top to bottom until it finds a match using path() or re_path().
+
+**- View Execution**
+  - The matched view function or class-based view (CBV) is called.
+  - This view:
+    - May fetch data from the model.
+    - Passes data to a template.
+    - Returns an HttpResponse object.
+
+**- Template Rendering (Optional)**
+  - If the view uses render(), Django:
+    - Loads the template (.html file).
+    - Renders it with the context data.
+    - Produces HTML output.
+
+**- Middleware Processing (Response Phase)**
+  - Before the final response is returned to the browser, it passes back through middleware (in reverse order).
+  - Middleware can:
+    - Modify the response.
+    - Add headers.
+    - Compress or encrypt content.
+
+**- Response Sent to Client**
+  - Django returns the final Response object (HTML, JSON, file, etc.).
+  - The WSGI/ASGI server sends it back to the client (browser or API consumer).
+
+---
 
 ## Database
 
