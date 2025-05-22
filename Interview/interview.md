@@ -36,6 +36,9 @@
     - [Why Can't Mutable Types Be Dictionary Keys?](#why-cant-mutable-types-be-dictionary-keys)
     - [Mutable Vs. Immutable Types in Python](#mutable-vs-immutable-types-in-python)
     - [Encryption Vs. Hashing](#encryption-vs-hashing)
+    - [Sequential Execution in Python](#sequential-execution-in-python)
+    - [Async Execution in Python](#async-execution-in-python)
+    - [Coroutine Vs. Regular function in Python](#coroutine-vs-regular-function-in-python)
   - [Django](#django)
     - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
@@ -905,6 +908,65 @@ The idea is that the probe sequence grows quadratically with the number of attem
 |Output Size | Output size depends on the algorithm (e.g., AES, RSA) | Output is fixed size (e.g., SHA-256 always outputs 256 bits) |
 |Use Cases | Encrypting sensitive data (files, messages, etc.) | Verifying data integrity, storing passwords |
 |Reversibility | Reversible (decryptable with the key) | Irreversible (cannot be undone) |
+
+---
+
+### Sequential Execution in Python
+
+**Sequential execution** in Python means that the program runs **line by line**, **from top to bottom**, in the **exact order** in which the statements are written—unless control flow (like conditionals or loops) changes it.
+
+It’s the **default mode of execution** in Python and most programming languages.
+
+---
+
+### Async Execution in Python
+
+**Asynchronous execution** allows a program to perform **non-blocking operations**, so it can continue doing other work **while waiting** (e.g., for I/O operations like file access, web requests, or database queries).
+
+Instead of **waiting** for one task to finish before starting another, async execution enables **concurrent** tasks using **coroutines**.
+
+- Key Concepts
+
+  - `async` and `await`
+    - `async def` defines an **asynchronous function** (coroutine).
+    - `await` pauses execution **until** an awaitable (like another coroutine or async I/O) completes.
+
+  - Event Loop
+    - Manages and schedules coroutines.
+    - Runs in a **single thread**, but switches between tasks during I/O waits.
+
+```python
+import asyncio
+
+async def fetch_data():
+    print("Start fetching...")
+    await asyncio.sleep(2)  # Simulates I/O delay
+    print("Done fetching!")
+    return {"data": 123}
+
+async def main():
+    print("Before fetch")
+    result = await fetch_data()
+    print("Result:", result)
+
+# Run the event loop
+asyncio.run(main())
+```
+
+---
+
+### Coroutine Vs. Regular function in Python
+
+A **coroutine** is a **special function** that can be **paused** and **resumed**, allowing Python to perform **asynchronous programming** without using threads or processes.
+
+In Python, coroutines are defined using `async def` and are executed with `await` or by scheduling them in an event loop.
+
+| Feature             | Regular Function        | Coroutine                    |
+|---------------------|-------------------------|------------------------------|
+| Defined with        | `def`                   | `async def`                  |
+| Executes with       | Direct call             | `await`, `asyncio.run()`, etc. |
+| Blocking            | Yes                     | No (can pause on `await`)    |
+| Return type         | Returns value directly  | Returns a coroutine object   |
 
 ---
 
