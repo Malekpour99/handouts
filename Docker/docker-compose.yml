@@ -1,0 +1,18 @@
+services:
+  logstash:
+    image: logstash:8.18.0
+    container_name: logstash
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - "./config:/etc/logstash/conf.d:Z"
+    ports:
+      - "5010:5000"
+    networks:
+      logging:
+        aliases:
+          - logstash
+
+networks:
+  logging:
+    name: elk_logging
+    driver: bridge
