@@ -1,7 +1,6 @@
 services:
-
   elasticsearch:
-    image: elasticsearch:8:18.0
+    image: elasticsearch:8.18.0
     container_name: elasticsearch
     environment:
       - node.name=elasticsearch
@@ -22,6 +21,18 @@ services:
         aliases:
           - elasticsearch
 
+  kibana:
+    image: kibana:8.18.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_URL="http://elasticsearch:9300"
+    ports:
+      - "5601:5601"
+    networks:
+      backend:
+        aliases:
+          - kibana
+
   logstash:
     image: logstash:8.18.0
     container_name: logstash
@@ -34,6 +45,10 @@ services:
       backend:
         aliases:
           - logstash
+
+volumes:
+  es_data_1:
+    driver: local
 
 networks:
   backend:
