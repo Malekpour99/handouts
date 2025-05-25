@@ -1,4 +1,22 @@
 services:
+  redis_server:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    networks:
+      cache:
+        aliases:
+          - "redis"
+
+  redis_insight:
+    image: redis/redisinsight:latest
+    ports:
+      - "5540:5540"
+    networks:
+      cache:
+        aliases:
+          - "redis_insight"
+
   elasticsearch:
     image: elasticsearch:8.18.0
     container_name: elasticsearch
@@ -16,6 +34,12 @@ services:
     ports:
       - "9200:9200"
       - "9300:9300"
+    healthcheck:
+      test: "curl -s http://localhost:9200/ | grep docker || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
     networks:
       logging:
         aliases:
@@ -46,11 +70,33 @@ services:
         aliases:
           - "logstash"
 
+  zipkin:
+    image: openzipkin/zipkin
+    container_name: zipkin
+    depends_on:
+      - elasticsearch
+    environment:
+      - STORAGE_TYPE=elasticsearch
+      - "ES_HOSTS=elasticsearch:9300"
+      - JAVA_OPTS=-Xms8g -Xmx8g
+    ports:
+      - "9411:9411"
+    networks:
+      tracing:
+        aliases:
+          - "zipkin"
+      logging:
+        aliases:
+          - "zipkin"
+
 volumes:
   es_data_1:
     driver: local
 
 networks:
+  cache:
+    driver: bridge
   logging:
-    name: elk_logging
+    driver: bridge
+  tracing:
     driver: bridge
