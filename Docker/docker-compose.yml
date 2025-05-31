@@ -89,8 +89,37 @@ services:
         aliases:
           - "zipkin"
 
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./prometheus:/etc/prometheus:Z
+    ports:
+      - "9090:9090"
+    networks:
+      monitoring:
+        aliases:
+          - "prometheus"
+
+  grafana:
+    image: "grafana/grafana:latest"
+    container_name: grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - grafana-storage:/var/lib/grafana
+    ports:
+      - "3000:3000"
+    networks:
+      monitoring:
+        aliases:
+          - "grafana"
+
 volumes:
   es_data_1:
+    driver: local
+  grafana-storage:
     driver: local
 
 networks:
@@ -99,4 +128,6 @@ networks:
   logging:
     driver: bridge
   tracing:
+    driver: bridge
+  monitoring:
     driver: bridge
