@@ -9,6 +9,7 @@
     - [Create Elasticsearch](#create-elasticsearch)
     - [Create Kibana](#create-kibana)
     - [Create Logstash](#create-logstash)
+  - [ELK in Docker Compose](#elk-in-docker-compose)
 
 ## ELK
 
@@ -69,3 +70,21 @@ docker logs kibana (-f)
 docker run -d --name logstash --net elk-net -v ./config:/etc/logstash/conf.d -p 5010:5000 logstash:8.18.0 logstash -f /etc/logstash/conf.d/logstash.conf
 # Provided command after logstash image will override its default entrypoint!
 ```
+
+## ELK in Docker Compose
+
+When running ELK stack using docker compose, kibana requires a specific user (**kibana_system**) other than the default super-user of '_elastic_'!
+
+```sh
+docker compose exec -it elasticsearch sh
+
+cd bin
+
+elasticsearch-reset-password -u kibana_system
+# Generates a new password for 'kibana_system' user and prints it in the terminal
+
+elasticsearch-create-enrollment-token -s kibana
+# Generates an enrollment token for 'kibana' service (-s = --scope)
+```
+
+<!-- TODO: study more about this issue, since this custom user is not privileged to access kibana settings! -->
