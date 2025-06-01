@@ -4,7 +4,7 @@ services:
     ports:
       - "6379:6379"
     networks:
-      cache:
+      caching:
         aliases:
           - "redis"
 
@@ -13,7 +13,7 @@ services:
     ports:
       - "5540:5540"
     networks:
-      cache:
+      caching:
         aliases:
           - "redis_insight"
 
@@ -124,7 +124,7 @@ volumes:
     driver: local
 
 networks:
-  cache:
+  caching:
     driver: bridge
   logging:
     driver: bridge
