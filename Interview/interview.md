@@ -1,6 +1,7 @@
 # Interview Questions
 
 ## Table of Contents
+
 - [Interview Questions](#interview-questions)
   - [Table of Contents](#table-of-contents)
   - [Programming \& Python](#programming--python)
@@ -44,6 +45,8 @@
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
+  - [Git](#git)
+    - [What does actually a git commit stores in itself?](#what-does-actually-a-git-commit-stores-in-itself)
   - [Network](#network)
   - [Projects](#projects)
 
@@ -53,6 +56,7 @@
 
 - Python is my main programming language because of its **simplicity**, **readability**, and **wide ecosystem**. It allows me to write clean, maintainable code quickly, which is ideal for both prototyping and production-level applications.
 - Pros of Python:
+
   1. **Readability & Simplicity**  
      Python’s syntax is clean and expressive, resembling pseudo-code. This makes it easier to read, debug, and onboard new team members quickly.
 
@@ -69,6 +73,7 @@
      Python plays well with other languages and systems via APIs, bindings, and tools like Cython or PyBind.
 
 - Cons of Python:
+
   1. **Performance**  
      Being an interpreted and dynamically typed language, Python can be slower than compiled languages like C++ or Java. But this is often mitigated using tools like **C extensions** or offloading performance-heavy parts to optimized services.
 
@@ -84,6 +89,7 @@
 ---
 
 ### What is OOP?
+
 **Object-Oriented Programming (OOP)** is a programming paradigm based on the concept of **"objects"**, which bundle **data (attributes)** and **behavior (methods)** together. It aims to structure software in a modular and reusable way.
 
 OOP is used to design systems that are **scalable**, **maintainable**, and **closely modeled around real-world entities**.
@@ -93,11 +99,13 @@ OOP is used to design systems that are **scalable**, **maintainable**, and **clo
 ### Four Main Principles of OOP
 
 #### 1. **Encapsulation**
+
 **Definition**: Encapsulation is the bundling of data and methods that operate on that data within a class, and restricting direct access to some components.
 
 **Goal**: Hide internal state and require all interactions to occur through an object’s methods.
 
 **Example**:
+
 ```python
 class BankAccount:
     def __init__(self, balance):
@@ -118,6 +126,7 @@ print(account.get_balance())  # Output: 1500
 ---
 
 #### 2. **Abstraction**
+
 **Definition**:  
 Abstraction means hiding the internal implementation details and showing only the necessary parts of an object. It allows developers to work with ideas rather than specifics.
 
@@ -125,6 +134,7 @@ Abstraction means hiding the internal implementation details and showing only th
 Reduce complexity by exposing only essential functionalities and hiding irrelevant details.
 
 **Example**:
+
 ```python
 from abc import ABC, abstractmethod
 
@@ -148,6 +158,7 @@ checkout(StripeProcessor(), 100)
 ---
 
 #### 3. **Inheritance**
+
 **Definition**:
 Inheritance allows a new class (child or subclass) to acquire properties and behaviors (methods) of an existing class (parent or superclass).
 
@@ -155,6 +166,7 @@ Inheritance allows a new class (child or subclass) to acquire properties and beh
 Encourage code reuse and establish a logical hierarchy between classes.
 
 **Example**:
+
 ```python
 class Animal:
     def speak(self):
@@ -186,6 +198,7 @@ Polymorphism means many forms. It allows different classes to define methods wit
 Write flexible code that works with objects of different types through a common interface.
 
 **Example**:
+
 ```python
 class Bird:
     def move(self):
@@ -216,14 +229,13 @@ animal_movement(fish)  # Output: Swims in the water
 - Maintainable
 - Scalable
 
-|Principle | Focus                  | Goal                              |
-|----------|------------------------|-----------------------------------|
-|**S**ingle Responsibility Principle | Responsibility         | One class = one reason to change  |
-|**O**pen/Closed Principle           | Extension              | Add behavior without changing code|
-|**L**iscov Substitution Principle   | Substitutability       | Use subclass without surprises    |
-|**I**nterface Segregation Principle | Interface size         | No bloated interfaces             |
-|**D**ependency Inversion Principle  | Abstraction dependency | High-level code stays clean       |
-
+| Principle                           | Focus                  | Goal                               |
+| ----------------------------------- | ---------------------- | ---------------------------------- |
+| **S**ingle Responsibility Principle | Responsibility         | One class = one reason to change   |
+| **O**pen/Closed Principle           | Extension              | Add behavior without changing code |
+| **L**iscov Substitution Principle   | Substitutability       | Use subclass without surprises     |
+| **I**nterface Segregation Principle | Interface size         | No bloated interfaces              |
+| **D**ependency Inversion Principle  | Abstraction dependency | High-level code stays clean        |
 
 #### **S - Single Responsibility Principle (SRP)**
 
@@ -369,13 +381,14 @@ notifier = UserNotifier(email_service)
 ---
 
 ### What are different types of design patterns?
+
 **Design patterns** are reusable solutions to common problems in software design. They represent best practices refined over time by experienced developers.
 
-|Category   | Purpose                            | Example Patterns                   |
-|-----------|------------------------------------|------------------------------------|
-|Creational | Object creation logic              | Singleton, Factory, Abstract Factory,  Builder, Prototype        |
-|Structural | Object composition and flexibility | Adapter, Decorator, Proxy, Facade, Composite, Bridge, Flyweight  |
-|Behavioral | Communication & responsibility     | Observer, Strategy, Command, State, Chain of Responsibility, Template Method, Visitor, Interpreter, Iterator |
+| Category   | Purpose                            | Example Patterns                                                                                             |
+| ---------- | ---------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Creational | Object creation logic              | Singleton, Factory, Abstract Factory, Builder, Prototype                                                     |
+| Structural | Object composition and flexibility | Adapter, Decorator, Proxy, Facade, Composite, Bridge, Flyweight                                              |
+| Behavioral | Communication & responsibility     | Observer, Strategy, Command, State, Chain of Responsibility, Template Method, Visitor, Interpreter, Iterator |
 
 ---
 
@@ -384,6 +397,7 @@ notifier = UserNotifier(email_service)
 The **Singleton pattern** ensures that a **class has only one instance** throughout the lifetime of an application and provides a **global point of access** to that instance.
 
 Use cases:
+
 - When exactly **one object** is needed to coordinate actions across the system.
 - Useful for things like:
   - Database connections
@@ -438,22 +452,26 @@ print(config1 is config2)  # Output: True
 The **Singleton Pattern** ensures that a class has **only one instance** and provides a global point of access to it.
 
 While this sounds helpful, it can **violate** multiple **SOLID principles**:
-1. Single Responsibility Principle (SRP)
-   - A Singleton class often has **two responsibilities**:
-      1. **Core logic** (e.g., logging or config management)
-      2. **Controlling its own instantiation**
 
-      This mixes object logic with lifecycle management, making it harder to maintain and extend.
+1. Single Responsibility Principle (SRP)
+
+   - A Singleton class often has **two responsibilities**:
+
+     1. **Core logic** (e.g., logging or config management)
+     2. **Controlling its own instantiation**
+
+     This mixes object logic with lifecycle management, making it harder to maintain and extend.
 
 2. Open/Closed Principle (OCP)
+
    - Singleton tightly controls its instantiation and usage.
    - You **cannot extend** the behavior easily (e.g., switching to a mock or subclass requires modifying internal logic or breaking the pattern).
 
 3. Dependency Inversion Principle (DIP)
    - Instead of **injecting dependencies**, classes often **directly call** the Singleton:
-    ```python
-    Logger.get_instance().log("error")  # tightly coupled
-    ```
+   ```python
+   Logger.get_instance().log("error")  # tightly coupled
+   ```
 
 ---
 
@@ -502,9 +520,11 @@ notif.notify("Factory pattern in action!")
 Both **Factory** and **Abstract Factory** are **creational design patterns**, but they solve different levels of object creation problems.
 
 - Factory Method Pattern
+
   - Creates **one type of object** based on some input.
   - Used when the exact type of the object isn't known until runtime.
   - Example:
+
     ```python
     class Button:
         def click(self):
@@ -528,9 +548,11 @@ Both **Factory** and **Abstract Factory** are **creational design patterns**, bu
     ```
 
 - Abstract Factory Pattern
+
   - Creates **families of related or dependent objects**.
   - Used when there are multiple products that need to work together.
   - Example:
+
     ```python
     # --- Abstract products
     class Button:
@@ -616,26 +638,26 @@ say_hello()
 
 ### List Vs. Tuple
 
-|Feature          | List   | Tuple |
-|-----------------|--------|-------|
-|Mutable          | Yes    | No    |
-|Ordered          | Yes    | Yes   |
-|Indexable        | Yes    | Yes   |
-|Use as Dict Key  | No     | Yes   |
-|Iteration Speed  | Slower | Faster|
-|Memory Efficient | Less   | More  |
+| Feature          | List   | Tuple  |
+| ---------------- | ------ | ------ |
+| Mutable          | Yes    | No     |
+| Ordered          | Yes    | Yes    |
+| Indexable        | Yes    | Yes    |
+| Use as Dict Key  | No     | Yes    |
+| Iteration Speed  | Slower | Faster |
+| Memory Efficient | Less   | More   |
 
 ---
 
 ### Instance Method VS. Class Method Vs. Static Method
 
-|Feature          | Instance Method   | Class Method | Static Method |
-|-----------------|-------------------|--------------|---------------|
-|Decorator        | (none)            | @classmethod | @staticmethod |
-|First parameter  | self (instance)   | cls (class)  | No default first arg |
-|Access instance? | Yes               | No           | No |
-|Access class?    | Via self.class    | Yes          | No |
-|Use case         | Instance behavior | Factory methods, alter class state | Utility/helper function |
+| Feature          | Instance Method   | Class Method                       | Static Method           |
+| ---------------- | ----------------- | ---------------------------------- | ----------------------- |
+| Decorator        | (none)            | @classmethod                       | @staticmethod           |
+| First parameter  | self (instance)   | cls (class)                        | No default first arg    |
+| Access instance? | Yes               | No                                 | No                      |
+| Access class?    | Via self.class    | Yes                                | No                      |
+| Use case         | Instance behavior | Factory methods, alter class state | Utility/helper function |
 
 ---
 
@@ -645,12 +667,12 @@ A **context manager** is a construct in Python that allows you to **allocate and
 It is commonly used with the **`with`** statement.
 
 - Use Cases:
-    - File handling
-    - Managing database connections
-    - Acquiring/releasing locks
-    - Managing network connections or sockets
-    - Opening/closing resources like web pages or APIs
-    - Temporary environment changes (e.g., mocking, config override)
+  - File handling
+  - Managing database connections
+  - Acquiring/releasing locks
+  - Managing network connections or sockets
+  - Opening/closing resources like web pages or APIs
+  - Temporary environment changes (e.g., mocking, config override)
 
 ```python
 with <context_manager> as <var>:
@@ -662,7 +684,7 @@ class MyContext:
     def __enter__(self):
         # Setup code
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
         # Cleanup code
         pass
@@ -706,11 +728,13 @@ A **generator** is a special type of **iterable** in Python that **yields** item
 It helps you **generate values on the fly**, saving memory and improving performance, especially with large datasets.
 
 **Benefits**:
+
 - Memory Efficient: Only one item is loaded into memory at a time.
 - Lazy Evaluation: Values are produced only when needed.
 - Infinite Sequences: Perfect for streams or infinite data (e.g., Fibonacci).
 
 **Use Cases**:
+
 - Reading large files line by line
 - Producing infinite sequences (like itertools.count)
 - Streaming data processing (e.g., logs, APIs)
@@ -732,15 +756,15 @@ for _ in range(5):
 
 ### Iterators Vs. Generators in Python
 
-|Feature | Iterator | Generator |
-|--------|----------|-----------|
-|Definition | Object with __iter__() and __next__() | Uses yield in a function |
-|Creation | Manually (class + methods) | Using generator function or expression |
-|Memory Usage | Depends on implementation | Memory-efficient (lazy eval) |
-|Infinite Sequences | Yes | Yes |
-|Syntax | More boilerplate | Simple, clean syntax |
-|Performance | Slightly slower (custom classes) | Faster for large/lazy sequences |
-|State Management | Manual | Automatic (via yield) |
+| Feature            | Iterator                              | Generator                              |
+| ------------------ | ------------------------------------- | -------------------------------------- |
+| Definition         | Object with **iter**() and **next**() | Uses yield in a function               |
+| Creation           | Manually (class + methods)            | Using generator function or expression |
+| Memory Usage       | Depends on implementation             | Memory-efficient (lazy eval)           |
+| Infinite Sequences | Yes                                   | Yes                                    |
+| Syntax             | More boilerplate                      | Simple, clean syntax                   |
+| Performance        | Slightly slower (custom classes)      | Faster for large/lazy sequences        |
+| State Management   | Manual                                | Automatic (via yield)                  |
 
 ---
 
@@ -774,21 +798,25 @@ print("Deep Copy:", deep_copy)  # [1, 2, [3, 4]]
 In Python, **lists** are not traditional arrays (like in languages such as C or Java). Instead, they are implemented as **dynamic arrays** (also called "resizable arrays").
 
 Key Features:
+
 - **Dynamic resizing**: Python lists can grow or shrink in size as elements are added or removed.
 - **Homogeneous**: Lists can store elements of different data types (unlike traditional arrays in low-level languages).
 - **Overhead**: Python lists store extra information to manage dynamic resizing.
 
 At a low level, Python lists are implemented as **arrays of pointers** to the objects they store. Here's how it works:
 
-1. **Contiguous Memory Block**: 
+1. **Contiguous Memory Block**:
+
    - Internally, Python uses a contiguous block of memory to store pointers to the objects in the list. These pointers reference the actual data objects (which can be of any type).
    - This is different from traditional C arrays, which store actual data values directly in memory.
 
 2. **Dynamic Array**:
+
    - When the list exceeds its current capacity, Python **doubles** the size of the array to accommodate more elements. This dynamic resizing ensures that appending new elements remains efficient on average.
    - This resizing operation incurs a cost, but it happens relatively infrequently (amortized constant time).
 
 3. **Memory Layout**:
+
    - Python lists are implemented as **arrays of references (pointers)** to objects.
    - Each element in the list holds a reference (pointer) to an object stored elsewhere in memory.
    - The actual memory layout of Python lists is managed by the **Python memory allocator** (via CPython's implementation).
@@ -804,6 +832,7 @@ At a low level, Python lists are implemented as **arrays of pointers** to the ob
 A **Python dictionary** is an **unordered** collection of key-value pairs. It is implemented using a **hash table** at a low level, which allows for efficient **O(1)** average-time complexity for lookups, insertions, and deletions.
 
 Key Features:
+
 - **Key-Value Pairs**: Every dictionary consists of pairs where each **key** is mapped to a corresponding **value**.
 - **Unordered**: The order of the items in a dictionary is not guaranteed (prior to Python 3.7).
 - **Keys Must Be Hashable**: Only immutable types (like strings, numbers, or tuples) can be used as keys in a dictionary.
@@ -811,14 +840,17 @@ Key Features:
 Low-Level Handling of Python Dictionaries
 
 1. At the core of Python dictionaries is a **hash table**.
+
    - **Hashing**: Each key is passed through a **hash function** to compute a unique index (called the **hash value**), which determines where the key-value pair will be stored.
    - **Collision Resolution**: If two keys hash to the same index (i.e., a collision), Python uses a technique called **open addressing** (specifically, **quadratic probing**) to resolve these collisions and find an available slot.
 
 2. **Memory Layout**
+
    - **Dynamically Resized**: Like lists, Python dictionaries automatically resize when they grow too large. The dictionary increases in size to maintain efficiency, usually by **doubling** its size.
    - **Buckets**: Internally, a dictionary is composed of a series of "buckets" where key-value pairs are stored. The number of buckets changes as the dictionary grows, typically during resizing operations.
 
 3. **Efficiency**
+
    - **Lookup Efficiency**: Dictionary lookups, insertions, and deletions are generally **O(1)** on average because the hash function allows direct access to the bucket where the key-value pair is stored.
    - **Amortized Cost of Resizing**: While resizing is an expensive operation (O(n) time), it happens less frequently and only when the dictionary exceeds its capacity, meaning the operation is **amortized O(1)**.
 
@@ -849,20 +881,20 @@ How Quadratic Probing Works:
 
 - Initial Hash Calculation:
 
-    The hash function is applied to a key to get an initial index where the key should be placed.
+  The hash function is applied to a key to get an initial index where the key should be placed.
 
 - Collision Occurs:
 
-    If the calculated index is already occupied (a collision), quadratic probing is used to search for the next available slot.
+  If the calculated index is already occupied (a collision), quadratic probing is used to search for the next available slot.
 
-    The probe sequence increases quadratically as \( i \) increases, ensuring that the search space expands more rapidly after each collision.
+  The probe sequence increases quadratically as \( i \) increases, ensuring that the search space expands more rapidly after each collision.
 
 - Probe Sequence:
 
 $$ New Index = (h(k) + i^2) \mod N $$
 
-
 Where:
+
 - ( $h(k)$ ) is the original hash value of the key ( $k$ ).
 - ( $i$ ) is the number of collisions encountered so far (starting from 1).
 - ( $N$ ) is the size of the hash table (used to ensure the index stays within bounds).
@@ -876,38 +908,38 @@ The idea is that the probe sequence grows quadratically with the number of attem
 
 1. Changing Hash Values
 
-    The hash value of a dictionary key must remain constant. If the hash value of a key changes after it has been inserted into the dictionary, the dictionary will not be able to locate the key correctly.
+   The hash value of a dictionary key must remain constant. If the hash value of a key changes after it has been inserted into the dictionary, the dictionary will not be able to locate the key correctly.
 
-    Mutable types like lists or dictionaries can have their contents modified, which would change their hash value. This would disrupt the dictionary's internal data structure and lead to errors or unexpected behavior.
+   Mutable types like lists or dictionaries can have their contents modified, which would change their hash value. This would disrupt the dictionary's internal data structure and lead to errors or unexpected behavior.
 
 2. Equality Comparisons
 
-    If the contents of a mutable object change, it might affect how the object is compared for equality. For instance, if you modify a list used as a dictionary key, it might not be "equal" to itself based on its new state, leading to inconsistencies when looking up the key.
+   If the contents of a mutable object change, it might affect how the object is compared for equality. For instance, if you modify a list used as a dictionary key, it might not be "equal" to itself based on its new state, leading to inconsistencies when looking up the key.
 
 ---
 
 ### Mutable Vs. Immutable Types in Python
 
-|Feature | Mutable Objects | Immutable Objects |
-|--------|-----------------|-------------------|
-|Modification | Can be changed after creation | Cannot be changed after creation |
-|Examples | ```list, dict, set, bytearray``` | ```int, str, tuple, frozenset``` |
-|Hashability | Not hashable (cannot be used as dictionary keys) | Hashable (can be used as dictionary keys) |
-|Efficiency | Typically more efficient for modifications | May require creating new objects for modifications |
-|Memory | Same object in memory is modified | A new object is created for each modification |
+| Feature      | Mutable Objects                                  | Immutable Objects                                  |
+| ------------ | ------------------------------------------------ | -------------------------------------------------- |
+| Modification | Can be changed after creation                    | Cannot be changed after creation                   |
+| Examples     | `list, dict, set, bytearray`                     | `int, str, tuple, frozenset`                       |
+| Hashability  | Not hashable (cannot be used as dictionary keys) | Hashable (can be used as dictionary keys)          |
+| Efficiency   | Typically more efficient for modifications       | May require creating new objects for modifications |
+| Memory       | Same object in memory is modified                | A new object is created for each modification      |
 
 ---
 
 ### Encryption Vs. Hashing
 
-|Feature | Encryption | Hashing |
-|--------|------------|---------|
-|Direction | Bi-directional (can decrypt to get original data) | One-way (cannot retrieve original data) |
-|Purpose | Confidentiality (protect data from unauthorized access) | Integrity (verify data hasn't been tampered with) |
-|Key | Requires a key for encryption and decryption | No key needed, only the hash function is used |
-|Output Size | Output size depends on the algorithm (e.g., AES, RSA) | Output is fixed size (e.g., SHA-256 always outputs 256 bits) |
-|Use Cases | Encrypting sensitive data (files, messages, etc.) | Verifying data integrity, storing passwords |
-|Reversibility | Reversible (decryptable with the key) | Irreversible (cannot be undone) |
+| Feature       | Encryption                                              | Hashing                                                      |
+| ------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
+| Direction     | Bi-directional (can decrypt to get original data)       | One-way (cannot retrieve original data)                      |
+| Purpose       | Confidentiality (protect data from unauthorized access) | Integrity (verify data hasn't been tampered with)            |
+| Key           | Requires a key for encryption and decryption            | No key needed, only the hash function is used                |
+| Output Size   | Output size depends on the algorithm (e.g., AES, RSA)   | Output is fixed size (e.g., SHA-256 always outputs 256 bits) |
+| Use Cases     | Encrypting sensitive data (files, messages, etc.)       | Verifying data integrity, storing passwords                  |
+| Reversibility | Reversible (decryptable with the key)                   | Irreversible (cannot be undone)                              |
 
 ---
 
@@ -928,6 +960,7 @@ Instead of **waiting** for one task to finish before starting another, async exe
 - Key Concepts
 
   - `async` and `await`
+
     - `async def` defines an **asynchronous function** (coroutine).
     - `await` pauses execution **until** an awaitable (like another coroutine or async I/O) completes.
 
@@ -961,16 +994,14 @@ A **coroutine** is a **special function** that can be **paused** and **resumed**
 
 In Python, coroutines are defined using `async def` and are executed with `await` or by scheduling them in an event loop.
 
-| Feature             | Regular Function        | Coroutine                    |
-|---------------------|-------------------------|------------------------------|
-| Defined with        | `def`                   | `async def`                  |
-| Executes with       | Direct call             | `await`, `asyncio.run()`, etc. |
-| Blocking            | Yes                     | No (can pause on `await`)    |
-| Return type         | Returns value directly  | Returns a coroutine object   |
+| Feature       | Regular Function       | Coroutine                      |
+| ------------- | ---------------------- | ------------------------------ |
+| Defined with  | `def`                  | `async def`                    |
+| Executes with | Direct call            | `await`, `asyncio.run()`, etc. |
+| Blocking      | Yes                    | No (can pause on `await`)      |
+| Return type   | Returns value directly | Returns a coroutine object     |
 
 ---
-
-
 
 ## Django
 
@@ -981,11 +1012,13 @@ In Python, coroutines are defined using `async def` and are executed with `await
 **MVT** stands for **Model-View-Template**, and it's Django's variant of the MVC architecture.
 
 - **Model**:
+
   - Defines the data structure.
   - Interacts with the database.
   - Written in `models.py`.
 
 - **View**:
+
   - Contains the business logic. (Better to decouple business logic using **services**)
   - Fetches data from the model and sends it to the template.
   - Written in `views.py`.
@@ -994,12 +1027,12 @@ In Python, coroutines are defined using `async def` and are executed with `await
   - Handles the presentation layer (HTML, CSS).
   - Receives data from the view and renders the final page.
 
-| Concept        | MVC                        | Django (MVT)                |
-|----------------|-----------------------------|-----------------------------|
-| **Model**      | Manages the data and logic  | Same                        |
-| **View**       | Handles presentation/UI     | Called a **Template** in Django |
+| Concept        | MVC                                       | Django (MVT)                       |
+| -------------- | ----------------------------------------- | ---------------------------------- |
+| **Model**      | Manages the data and logic                | Same                               |
+| **View**       | Handles presentation/UI                   | Called a **Template** in Django    |
 | **Controller** | Handles user input and updates model/view | **View** in Django (handles logic) |
-| **Template**   | Optional layer              | Explicit layer for HTML rendering |
+| **Template**   | Optional layer                            | Explicit layer for HTML rendering  |
 
 User -> Controller -> Model -> View -> User
 
@@ -1012,54 +1045,111 @@ User -> Django (Controller) -> View -> Model -> Template -> User
 **Browser -> WSGI/ASGI Server (e.g., Gunicorn, Uvicorn) -> Django Middleware (Request Phase) -> URL Dispatcher (urls.py) -> View (views.py) -> Models (if needed) -> Templates (if needed) -> Django Middleware (Response Phase) -> WSGI/ASGI Server -> Browser (Rendered Response)**
 
 **- Browser Sends a Request**
-  - A user initiates an HTTP request by entering a URL or submitting a form.
-  - This request is received by Django's WSGI-compatible web server (e.g., Gunicorn, uWSGI).
+
+- A user initiates an HTTP request by entering a URL or submitting a form.
+- This request is received by Django's WSGI-compatible web server (e.g., Gunicorn, uWSGI).
 
 **- WSGI/ASGI Server Passes Request to Django**
-  - The WSGI/ASGI server passes the request to Django via a callable interface defined in `wsgi.py` or `asgi.py`.
-  - Django initializes necessary components to handle the request.
+
+- The WSGI/ASGI server passes the request to Django via a callable interface defined in `wsgi.py` or `asgi.py`.
+- Django initializes necessary components to handle the request.
 
 **- Middleware Processing (Request Phase)**
-  - The request passes through **middleware** defined in `MIDDLEWARE` setting.
-  - Middleware are Python classes that WWcan:
-    - Modify the request.
-    - Block the request.
-    - Add metadata.
-    - Perform authentication or logging.
+
+- The request passes through **middleware** defined in `MIDDLEWARE` setting.
+- Middleware are Python classes that WWcan:
+  - Modify the request.
+  - Block the request.
+  - Add metadata.
+  - Perform authentication or logging.
 
 **- URL Routing**
-  - Django uses urls.py to match the request path with a corresponding view function.
-  - It checks from top to bottom until it finds a match using path() or re_path().
+
+- Django uses urls.py to match the request path with a corresponding view function.
+- It checks from top to bottom until it finds a match using path() or re_path().
 
 **- View Execution**
-  - The matched view function or class-based view (CBV) is called.
-  - This view:
-    - May fetch data from the model.
-    - Passes data to a template.
-    - Returns an HttpResponse object.
+
+- The matched view function or class-based view (CBV) is called.
+- This view:
+  - May fetch data from the model.
+  - Passes data to a template.
+  - Returns an HttpResponse object.
 
 **- Template Rendering (Optional)**
-  - If the view uses render(), Django:
-    - Loads the template (.html file).
-    - Renders it with the context data.
-    - Produces HTML output.
+
+- If the view uses render(), Django:
+  - Loads the template (.html file).
+  - Renders it with the context data.
+  - Produces HTML output.
 
 **- Middleware Processing (Response Phase)**
-  - Before the final response is returned to the browser, it passes back through middleware (in reverse order).
-  - Middleware can:
-    - Modify the response.
-    - Add headers.
-    - Compress or encrypt content.
+
+- Before the final response is returned to the browser, it passes back through middleware (in reverse order).
+- Middleware can:
+  - Modify the response.
+  - Add headers.
+  - Compress or encrypt content.
 
 **- Response Sent to Client**
-  - Django returns the final Response object (HTML, JSON, file, etc.).
-  - The WSGI/ASGI server sends it back to the client (browser or API consumer).
+
+- Django returns the final Response object (HTML, JSON, file, etc.).
+- The WSGI/ASGI server sends it back to the client (browser or API consumer).
 
 ---
 
 ## Database
 
 ## Docker & Containerization
+
+## Git
+
+### What does actually a git commit stores in itself?
+
+A Git commit **_stores a snapshot of the entire working tree_**, not just the changes.
+
+However, Git optimizes storage by:
+
+- Storing the full snapshot only for the first commit.
+- For subsequent commits, Git stores the snapshot as a set of differences (deltas) internally to save space — but conceptually, **each commit represents a full snapshot** of your project at that point in time.
+
+1. Tree Object (Snapshot)
+
+   Points to a tree object, which represents the directory structure and content (blobs) of the project at the time of the commit.
+   This tree is what contains the actual files and folders (via SHA-1/SHA-256 hashes).
+
+2. Parent Commits
+
+   Points to one (or more) parent commits:
+
+   - A normal commit has 1 parent.
+   - The first commit has no parent.
+   - A merge commit has 2 or more parents.
+
+3. Author Information
+
+   Includes the name and email of the person who originally wrote the changes.
+   Also includes a timestamp (with timezone).
+
+4. Committer Information
+
+   Includes the name and email of the person who made the commit.
+   Usually the same as the author, but can differ (e.g., if someone else applies your patch).
+   Also includes a timestamp.
+
+5. Commit Message
+
+   A human-readable message describing what the commit does.
+   Often includes details on what changed and why.
+
+6. Commit Hash
+
+   A SHA-1 or SHA-256 hash of the commit content (including metadata and tree).
+   This hash uniquely identifies the commit and changes if any part of the commit changes.
+
+7. Optional: GPG Signature
+
+   A commit may be signed with a GPG key to verify its authenticity.
 
 ## Network
 
