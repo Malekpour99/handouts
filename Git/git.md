@@ -117,9 +117,11 @@ git branch <branch_name>
 
 # Switch to a branch
 git checkout <branch_name>
+git switch <branch_name>
 
 # Create and switch to a new branch
 git checkout -b <branch_name>
+git switch -c <branch_name>
 
 # Delete a branch locally
 git branch -d <branch_name>
