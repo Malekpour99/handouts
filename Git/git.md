@@ -431,6 +431,9 @@ git push --delete origin <tag_name>
 # Remove a file from local working directory and git history
 git rm <file>
 
+# Remove a file from git history (keeps the file in your local working directory)
+git rm --cached <file>
+
 # Show what would be deleted (Dry Run)
 git clean -n
 
