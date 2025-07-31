@@ -7,6 +7,7 @@
   - [Installation](#installation)
   - [Introduction](#introduction)
   - [Network](#network)
+  - [Volume-Mount \& Bind-Mount](#volume-mount--bind-mount)
   - [DockerFile](#dockerfile)
   - [Images](#images)
   - [Containers](#containers)
@@ -86,6 +87,38 @@ docker network connect <network> <container>
 
 # remove container from network
 docker network disconnect <network> <container>
+```
+
+## Volume-Mount & Bind-Mount
+
+| Volume                           | Bind-Mount                          |
+| -------------------------------- | ----------------------------------- |
+| Managed by Docker daemon         | Managed by non-Docker processes     |
+| Path: `/var/lib/docker/volumes/` | Path: Any where on the host system  |
+| Can be used in `Dockerfile`      | Can **not** be used in `Dockerfile` |
+
+```sh
+# list volumes
+docker volume ls
+
+# remove unused volumes
+docker volume prune
+
+# remove volume(s)
+docker volume rm <volume(s)>
+
+# remove all volumes
+docker volume rm $(docker volumes ls -q)
+
+# volume mount
+docker run -v <volume>:<app-data-path> <image>
+docker run --mount type=volume,source=<volume>,target=<app-data-path> <image>
+# volume gets created if it doesn't exist!
+
+# bind mount
+docker run -v <host-path>:<app-data-path> <image>
+docker run --mount type=bind,source=<host-path>,target=<app-data-path> <image>
+# use absolute paths!
 ```
 
 ## DockerFile
@@ -173,14 +206,26 @@ docker build -t <image-name>:<version> -f <DockerFile>
 
 ```sh
 # create container
-docker run --name <container-name> -p <system-port>:<container-port> <image>:<image-version>
+docker run --name <container-name> -p <system-port>:<container-port> -v <volume>:<data-path> <image>:<image-version>
+# General configuration
 # `--name`: dedicate a name to container (when not provided a random name will be dedicated to container)
-# `-p` `--publish`: publish container's port(s) to the host
-# `-d` `--detach`: run container in background (print container ID as response)
 # `-e`: set environment variables for running container
+
+# Life-cycle configuration
+# `-d` `--detach`: run container in background (print container ID as response)
 # `--rm`: remove container after exiting
 # `--restart=<condition>:<max-retry>`: restart container on the mentioned 'condition' and retry for 'max-retry' times
+
+# Network configuration
+# `-p` `--publish`: publish container's port(s) to the host
 # `--network <network>`: add container to the desired network (if network doesn't exist, it will be created!)
+
+# Persisting data configuration
+# `-v <volume>:<data-path>`: volume mount (volume gets created if it doesn't exist)
+# `-v <host-path>:<data-path>`: bind-mount (no volume gets created)
+# `--mount type=volume,source=<volume>,target=<data-path>`: volume mount (volume gets created if it doesn't exist) -new syntax-
+# `--mount type=bind,source=<host-path>,target=<data-path>`: bind mount (volume gets created if it doesn't exist) -new syntax-
+
 
 # list Up containers
 docker ps
@@ -252,7 +297,8 @@ docker inspect <container/image/volume/network>
 ```sh
 # inspecting containers config related details
 docker inspect -f '{{.Config}}' <container>
-# using format string (-f) instead of grep since it works better on JSON objects!
+# using format string (-f --format) instead of grep since it works better on JSON objects!
+# {{.Mounts}} -> Data Mounting configuration
 # {{.Config.Env}} -> environment variables
 # {{.Config.ExposedPorts}} -> exposed ports
 # {{.NetworkSettings.Networks.bridge.IPAddress}} -> Running container's IP address
