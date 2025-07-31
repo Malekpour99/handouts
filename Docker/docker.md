@@ -6,6 +6,7 @@
   - [Table of Contents](#table-of-contents)
   - [Installation](#installation)
   - [Introduction](#introduction)
+  - [Network](#network)
   - [DockerFile](#dockerfile)
   - [Images](#images)
   - [Containers](#containers)
@@ -58,6 +59,35 @@ docker logout
 
 for handling containers, both their **name** and **ID** can be used!
 
+## Network
+
+**Default Networks and drivers**
+| Network Name | Driver | Description |
+| ------------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
+| `bridge` | `bridge` | The default network for containers on a single host if none is specified. Suitable for container-to-container communication on the same host. |
+| `host` | `host` | Shares the host’s network stack directly. Container uses the host’s IP address and ports. Only available on Linux. |
+| `none` | `null` | Disables networking entirely. The container has no network access. Useful for security or testing. |
+
+- Networks are isolated in docker.
+- Container's IP address is not static, so it's better to use it's name or define an alias for it, when you need communication in the same network.
+
+```sh
+# list networks
+docker network ls
+
+# remove unused networks
+docker network prune
+
+# create a new network
+docker network create <name>
+
+# add container to network
+docker network connect <network> <container>
+
+# remove container from network
+docker network disconnect <network> <container>
+```
+
 ## DockerFile
 
 - `FROM`: **Sets the base image (scratch)** for subsequent instructions
@@ -104,6 +134,9 @@ for handling containers, both their **name** and **ID** can be used!
 # list images
 docker image ls
 
+# remove unused images
+docker image prune
+
 # download an image from registry
 docker pull <image>:<version>
 # if version tag is not mentioned 'latest' will be considered!
@@ -144,9 +177,10 @@ docker run --name <container-name> -p <system-port>:<container-port> <image>:<im
 # `--name`: dedicate a name to container (when not provided a random name will be dedicated to container)
 # `-p` `--publish`: publish container's port(s) to the host
 # `-d` `--detach`: run container in background (print container ID as response)
-# `-e`: setting environment variables for running container
+# `-e`: set environment variables for running container
 # `--rm`: remove container after exiting
 # `--restart=<condition>:<max-retry>`: restart container on the mentioned 'condition' and retry for 'max-retry' times
+# `--network <network>`: add container to the desired network (if network doesn't exist, it will be created!)
 
 # list Up containers
 docker ps
@@ -213,8 +247,6 @@ docker top <container>
 docker inspect <container/image/volume/network>
 ```
 
----
-
 ## Examples
 
 ```sh
@@ -231,6 +263,15 @@ docker inspect -f '{{.Name}} ---> {{.NetworkSettings.Networks.bridge.IPAddress}}
 # creating an ubuntu container which gets removed after exiting
 docker run -exec -it --rm ubuntu /bin/bash
 # if /bin/bash is not executed, ubuntu exits immediately after running since it doesn't have an entrypoint
+
+# ping another container in the same network
+docker exec -it <container> ping <target-container>
+# if you saw 'executable file not found in $PATH', it means 'ping' command is not available; you can install it by following below process.
+
+# installing ping command on a container
+docker exec -if <container> /bin/bash
+apt-get update
+apt-get install iputils-ping
 
 # running a MySQL database
 docker run --name mysql-db -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:8.0.21
