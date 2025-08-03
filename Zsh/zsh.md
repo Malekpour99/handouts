@@ -93,7 +93,7 @@ git clone https://github.com/zsh-users/zsh-autosuggestions \
 
 vim ~/.zshrc
 
-# add `zsh-syntax-highlighting` to plugins and include its source:
+# add `zsh-autosuggestions` to plugins and include its source:
 plugins=(... zsh-autosuggestions)
 
 # OPTIONAL (if suggestions are faint), add below line to `.zshrc`
