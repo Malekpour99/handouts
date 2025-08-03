@@ -13,6 +13,7 @@
   - [Containers](#containers)
   - [Inspecting](#inspecting)
   - [Examples](#examples)
+  - [Docker Compose](#docker-compose)
 
 ## Installation
 
@@ -323,4 +324,37 @@ apt-get install iputils-ping
 docker run --name mysql-db -e MYSQL_ROOT_PASSWORD=my-secret-pw -d mysql:8.0.21
 # By using 'MYSQL_RANDOM_ROOT_PASSWORD' as environment variable, a random password is generated for root user;
 # which can be found in the container logs (look for GENERATED ROOT PASSWORD)
+```
+
+## Docker Compose
+
+Best option for managing multiple dependent services with just one file, and creating dependency for order of running containers, also you can specify condition checks for your dependencies.
+
+By default Docker Compose will look for `docker-compose.yaml` file, in order to use different files, you must use `-f` flag for passing your file
+
+```sh
+# Parse, resolve and render compose file in canonical format
+docker compose -f <docker-compose-file> config
+
+# download service image(s)
+docker compose -f <docker-compose-file> pull
+
+# build/rebuild service image(s)
+docker compose -f <docker-compose-file> build
+# `--no-cache`: Do not use cache when building the image
+
+# create and run service containers
+docker compose -f <docker-compose-file> up
+# `--build`: build images before starting containers
+# `-d`: run containers in detached mode
+
+# stop and remove service containers, networks (keeps volumes)
+docker compose -f <docker-compose-file> down
+# `-v`: removing volumes as well!
+
+# stop service containers (doesn't remove them)
+docker compose -f <docker-compose-file> stop
+
+# start service containers
+docker compose -f <docker-compose-file> start
 ```
