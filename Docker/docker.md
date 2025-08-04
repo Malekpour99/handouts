@@ -357,4 +357,29 @@ docker compose -f <docker-compose-file> stop
 
 # start service containers
 docker compose -f <docker-compose-file> start
+
+# snapshot of service containers logs
+docker compose -f <docker-compose-file> logs
+# `-f`: follow logs
+# `-t`: add timestamp to logs
+
+# running an interactive bash shell on desired service
+docker compose -f <docker-compose-file> exec -it <service> /bin/bash
+
+# running a command inside your container's shell
+docker compose -f <docker-compose-file> exec <service> sh -c "<command>"
+
+# list service containers status
+docker compose -f <docker-compose-file> ps
+
+# list service containers images
+docker compose -f <docker-compose-file> images
+
+# list service containers processes
+docker compose -f <docker-compose-file> top
+
+# scaling docker compose services
+docker compose -f <docker-compose-file> scale <service-1>=<n> <service2>=<m> ...
 ```
+
+- you can also run docker compose commands explicitly on your desired services if you provide the **service's name** after you command!
