@@ -14,6 +14,12 @@
   - [Inspecting](#inspecting)
   - [Examples](#examples)
   - [Docker Compose](#docker-compose)
+  - [Docker Swarm](#docker-swarm)
+    - [Nodes (servers)](#nodes-servers)
+      - [Manager Nodes (Master)](#manager-nodes-master)
+      - [Worker Nodes (Slave)](#worker-nodes-slave)
+    - [Setup Docker Swarm](#setup-docker-swarm)
+      - [Swarm Cluster Network Configuration](#swarm-cluster-network-configuration)
 
 ## Installation
 
@@ -383,3 +389,88 @@ docker compose -f <docker-compose-file> scale <service-1>=<n> <service2>=<m> ...
 ```
 
 - you can also run docker compose commands explicitly on your desired services if you provide the **service's name** after you command!
+
+## Docker Swarm
+
+**Benefits**
+
+- Automation
+- Load balancing
+- Scaling
+- Fail-over
+- Rolling update (zero downtime)
+
+### Nodes (servers)
+
+![docker swarm](./images/swarm-diagram.webp)
+
+#### Manager Nodes (Master)
+
+- Manager are aware of the cluster status and configuration
+- Manager have a **RAFT consensus group** (consider RAFT as some kind of database which holds cluster and services configuration)
+- There must be more than one manager nodes in order to work with RAFT consensus group (usually an _odd_ number is chosen to have tie-breakers in consensus)
+- usually there is only **one _Leader_** between manager nodes (leader-follower design)
+
+#### Worker Nodes (Slave)
+
+- Workers are responsible for running service's containers
+- Workers are **not connected to the RAFT consensus group**, so they are not aware of the cluster configuration
+- Workers can not work without managers
+
+![swarm service life-cycle](./images/swarm-service-lifecycle.webp)
+
+### Setup Docker Swarm
+
+- **docker-machine**: can be used for creating virtual nodes and simulating a cluster.
+
+```sh
+# change node's name
+hostnamectl set-hostname <name> && bash
+
+# check swarm status
+docker info
+
+# initializing swarm & making this node manager(leader)
+docker swarm init
+# `--advertise-addr <IP>`: specify which IP address should be used for swarm services communication, from your NIC IPs
+
+# remove current node from swarm cluster
+docker swarm leave
+# NOTE: if this is the last manager node you must use `--force` flag for leaving!
+
+# shows join-token based on the provided role
+docker swarm join-token <manager/worker>
+# Run the provided join command on the node your want to join this swarm cluster based on its role
+
+# joining swarm cluster
+docker swarm join --token <token>
+# based on the provided token, this node's role is specified (master/worker)
+```
+
+#### Swarm Cluster Network Configuration
+
+- **TCP/port 2377**: Cluster management communications
+- **TCP & UDP/port 7946**: Communication among nodes (for container network discovery)
+- **UDP/port 4789**: _Overlay_ network traffic (for container ingress network)
+
+- **Overlay Network**: Default network driver for swarm cluster
+
+```sh
+# Network configuration on Manger nodes
+firewall-cmd --add-port=2377/tcp --permanent
+firewall-cmd --add-port=7946/tcp --permanent
+firewall-cmd --add-port=7946/udp --permanent
+firewall-cmd --add-port=4789/udp --permanent
+
+# Network configuration on Worker nodes
+firewall-cmd --add-port=7946/tcp --permanent
+firewall-cmd --add-port=7946/udp --permanent
+firewall-cmd --add-port=4789/udp --permanent
+
+# restarting firewall and docker to apply configurations
+firewall-cmd --reload
+systemctl restart docker
+
+# check docker firewall status
+systemctl status firewalld
+```
