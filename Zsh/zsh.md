@@ -102,8 +102,10 @@ ZSH_AUTOSUGGEST_HIGHLIGHT_STYLE='fg=#999999'
 
 #### **Shortcuts**
 
-| Key               | Action                                        |
-| ----------------- | --------------------------------------------- |
-| `→` (Right arrow) | Accept suggestion                             |
-| `<C-F>`           | Accept full suggestion                        |
-| `<A-→>`           | Accept next word of suggestion (customizable) |
+| Action                   | Shortcut Key      | Description                                                |
+| ------------------------ | ----------------- | ---------------------------------------------------------- |
+| **Accept suggestion**    | `→` (Right Arrow) | Accept the entire suggestion                               |
+| **Accept one word**      | `<C-→>`           | Accept only the next word from the suggestion (if enabled) |
+| **Accept one character** | `<C-F>`           | Accept the next character from the suggestion              |
+| **Clear suggestion**     | `<C-C>`           | Clears the current line and suggestion                     |
+| **Force a suggestion**   | `<C-Space>`       | Triggers suggestion immediately (if bound)                 |
