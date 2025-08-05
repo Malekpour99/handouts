@@ -20,6 +20,10 @@
       - [Worker Nodes (Slave)](#worker-nodes-slave)
     - [Setup Docker Swarm](#setup-docker-swarm)
       - [Swarm Cluster Network Configuration](#swarm-cluster-network-configuration)
+      - [Routing Mesh](#routing-mesh)
+    - [Commands](#commands)
+    - [Rolling Update](#rolling-update)
+      - [Configuration \& Commands](#configuration--commands)
 
 ## Installation
 
@@ -473,4 +477,155 @@ systemctl restart docker
 
 # check docker firewall status
 systemctl status firewalld
+```
+
+```sh
+# creating an overlay network
+docker network create --driver overlay <name>
+
+# creating a service in overlay network
+docker service create --name webhost -p 8085:80 -d --network <overlay-network> nginx
+# Now because of routing mesh, Nginx service is accessible via every node on 8085 published port in the swarm cluster specified network!
+```
+
+#### Routing Mesh
+
+**Routing Mesh** is a mechanism in Docker Swarm that allows you to **expose a service on every node in the swarm**, regardless of where the service tasks (containers) are actually running.
+Even if a container of that service is running on only a single node, any node in the swarm can accept incoming traffic and route it to the appropriate container.
+
+**Key Purpose of Routing Mesh**:
+
+- Global Accessibility: You can publish a service on a specific port, and any node in the swarm will listen on that port.
+- Load Distribution: It automatically routes traffic to the appropriate container instance (task), wherever it's running.
+- Simplified Networking: Clients don't need to know which node actually runs the container.
+
+**How Routing Mesh Works**:
+
+1. **Published Ports & IPVS**
+
+- When you run a service with a published port, Docker sets up a listener on that port on all nodes.
+- Docker uses IPVS (IP Virtual Server) inside the Linux kernel for load balancing incoming requests.
+
+2. **Ingress Network (Overlay Network)**
+
+- Docker Swarm uses a special "ingress" overlay network.
+- This network allows incoming requests to be forwarded from any node to a node where the service task is running.
+- Nodes in the swarm use an **encrypted VXLAN tunnel for cross-node communication**.
+
+3. **Connection Flow**
+
+- Here’s what happens when a request comes in:
+  - A client sends a request to a swarm node on a published port.
+  - The node checks if it has a local task (container) for that service.
+  - If Yes: It sends traffic to the container directly.
+  - If No: It routes the traffic over the ingress overlay network to a node that has a running task.
+  - **IPVS ensures even load distribution across tasks**.
+
+**When to Use or Avoid Routing Mesh**:
+
+- Use Routing Mesh:
+
+  - When you want to expose a service externally without worrying about which node it runs on.
+  - When you need a simple external Load Balancer.
+
+- Avoid Routing Mesh (Use DNS Round-Robin Instead):
+  - For internal microservice communication.
+  - When you want more direct control over which node handles the traffic.
+
+### Commands
+
+```sh
+# list cluster nodes (only works on manager nodes!)
+docker node ls
+
+# promote a worker not to manager (only works on manager nodes!)
+docker node promote <note-hostname>
+
+# demote a manager to worker (only works on manager nodes!)
+docker node demote <note-hostname>
+
+# running a sample ping service in swarm cluster
+docker service create --name pingGoogle --replicas 4 alpine:latest ping 8.8.4.4
+# 'verify: service converged' --means--> deployment was successful!
+
+# list running services
+docker service ls
+
+# check service status and see in which node it's running
+docker service ps <service>
+
+# inspecting service information and status
+docker service inspect --pretty <service>
+# `--pretty`: prettifies the output
+
+# list current running services (tasks) on current node
+docker node ps
+
+# list current running services (tasks) on desired noe
+docker node ps <node-hostname>
+
+# checking for swarm cluster containers
+docker container ls
+# Swarm container names: <TaskName>.<RandomString>
+
+# show service logs
+docker service logs <service>
+
+# removing a service
+docker service rm <service>
+# In Docker Swarm, you can not stop a service!
+
+# updating service replicas
+docker service update <service> --replicas 5
+```
+
+- you manage task assignment more by using **constraint** and **labeling**!
+
+### Rolling Update
+
+**Process Flow**
+
+1. You update the service definition (new image version, new env vars, etc.)
+
+2. Swarm orchestrator plans an update:
+
+- It checks the update configuration (parallelism, delay, failure action).
+- It determines which tasks need to be replaced.
+
+3. Update happens in steps (batches):
+
+- Stops an existing task.
+- Starts a new task with the updated specification (new image, env vars, etc.).
+- Waits for the new task to become healthy.
+- Proceeds to update the next task(s).
+
+4. Monitors for failures:
+
+- If a task fails to update, Docker can pause, continue, or roll back the update based on your settings.
+
+#### Configuration & Commands
+
+- **Parallelism**: `1` -> Number of containers which simultaneously will be updated (default)
+- **delay**: 5m -> Delay duration between starting updates
+- **On Failure**: `pause`(/`continue`/`rollback`) -> Pauses update if failure happens (default)
+- **Update order**: `stop-first`(/`start-first`) -> First stops the task and then start updated task
+- **Monitoring Period**: 5s -> Monitors process every 5 seconds
+- **Max Failure Ratio**: 0 -> Max number of retries if failure happens
+
+```sh
+# update rolling update delay duration
+docker service update --update-delay 1h1m1s <service>
+
+# update rolling update parallelism
+docker service update --update-parallelism 2 <service>
+
+# update rolling update failure action to rollback
+docker service update --update-failure-action rollback <service>
+
+# update rollback failure action to continue
+docker service update --rollback-failure-action continue <service>
+# Now, rollback continues even if failure occurs during rollback process!
+
+# performing rolling update on service(s) (updating services' image)
+docker service update --image <new-image:new-version> <service>
 ```
