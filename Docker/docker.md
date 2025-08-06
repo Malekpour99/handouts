@@ -22,8 +22,11 @@
       - [Swarm Cluster Network Configuration](#swarm-cluster-network-configuration)
       - [Routing Mesh](#routing-mesh)
     - [Commands](#commands)
+      - [Nodes](#nodes)
+      - [Services](#services)
     - [Rolling Update](#rolling-update)
       - [Configuration \& Commands](#configuration--commands)
+    - [Stack Deploy](#stack-deploy)
 
 ## Installation
 
@@ -486,6 +489,15 @@ docker network create --driver overlay <name>
 # creating a service in overlay network
 docker service create --name webhost -p 8085:80 -d --network <overlay-network> nginx
 # Now because of routing mesh, Nginx service is accessible via every node on 8085 published port in the swarm cluster specified network!
+
+# add a service to a network
+docker service update --network-add <network> <service>
+
+# remove a service from a network
+docker service update --network-rm <network> <service>
+
+# updating a service published port
+docker service update --publish-rm published=8080,target=80 --publish-add published=8083,target=80 <service>
 ```
 
 #### Routing Mesh
@@ -534,6 +546,8 @@ Even if a container of that service is running on only a single node, any node i
 
 ### Commands
 
+#### Nodes
+
 ```sh
 # list cluster nodes (only works on manager nodes!)
 docker node ls
@@ -544,9 +558,48 @@ docker node promote <note-hostname>
 # demote a manager to worker (only works on manager nodes!)
 docker node demote <note-hostname>
 
+# list current running services (tasks) on current node
+docker node ps
+
+# inspecting node information and status
+docker node inspect --pretty <node>
+# `--pretty`: prettifies the output
+
+# list current running services (tasks) on desired noe
+docker node ps <node-hostname>
+
+# deactivating (draining) a node
+docker node update --availability drain <node>
+# by draining a node, its tasks will be distributed among other active nodes
+
+# activating a node
+docker node update --availability active <node>
+# node will be activated, but tasks won't be distributed again
+
+# adding label
+docker node update --label-add <key>=<value> <node>
+# label sample: region=iran
+
+# removing label
+docker node update --label-rm <key>=<value> <node>
+```
+
+- you manage task assignment more by using **constraint** and **labeling**!
+
+#### Services
+
+```sh
 # running a sample ping service in swarm cluster
 docker service create --name pingGoogle --replicas 4 alpine:latest ping 8.8.4.4
 # 'verify: service converged' --means--> deployment was successful!
+
+# creating a service and distribute it between nodes which have the given label's key-value
+docker service create --name webhost -p 8080:80 --replicas 3 --constraint node.labels.<key>==<value> nginx:alpine
+
+# limiting max number of replicas per node
+docker service create --name ... --replicas 3 --replicas-max-per-node 1 <service>
+# you can also update this property after creating your service
+# `--restart-delay`: adding a delay before restarting services
 
 # list running services
 docker service ls
@@ -557,12 +610,6 @@ docker service ps <service>
 # inspecting service information and status
 docker service inspect --pretty <service>
 # `--pretty`: prettifies the output
-
-# list current running services (tasks) on current node
-docker node ps
-
-# list current running services (tasks) on desired noe
-docker node ps <node-hostname>
 
 # checking for swarm cluster containers
 docker container ls
@@ -577,9 +624,10 @@ docker service rm <service>
 
 # updating service replicas
 docker service update <service> --replicas 5
-```
 
-- you manage task assignment more by using **constraint** and **labeling**!
+# forcing service task distribution (used after activating nodes in the cluster)
+docker service update --force <service>
+```
 
 ### Rolling Update
 
@@ -628,4 +676,30 @@ docker service update --rollback-failure-action continue <service>
 
 # performing rolling update on service(s) (updating services' image)
 docker service update --image <new-image:new-version> <service>
+
+# rollback update
+docker service rollback <service>
+docker service update --rollback <service>
+# you can only revert last change, not further!!
+```
+
+### Stack Deploy
+
+- **Docker Compose**: used for test/integration/development on a single Docker engine
+- **Docker Stack**: used for production on Docker Swarm
+
+you can create a docker compose file for both deployments; any configuration which is not supported by either Docker Compose or Docker Swarm will be ignored by them. similar to Docker Compose, specified volumes and overlay networks will be created by Docker Swarm; since stack is used for production it doesn't have _build_ command!
+
+```sh
+# deploying a stack compose file
+docker stack deploy -c <stack-compose-file> <stack-name>
+
+# list deployed stacks
+docker stack ls
+
+# list stack deployed services
+docker stack services <stack-name>
+
+# remove deployed stack
+docker stack rm <stack-name>
 ```
