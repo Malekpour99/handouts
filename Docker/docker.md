@@ -27,6 +27,8 @@
     - [Rolling Update](#rolling-update)
       - [Configuration \& Commands](#configuration--commands)
     - [Stack Deploy](#stack-deploy)
+    - [Docker Secrets](#docker-secrets)
+    - [Docker Local Registry](#docker-local-registry)
 
 ## Installation
 
@@ -399,13 +401,39 @@ docker compose -f <docker-compose-file> scale <service-1>=<n> <service2>=<m> ...
 
 ## Docker Swarm
 
-**Benefits**
+**Docker Swarm Vs. Kubernetes**
+| Aspect | **Docker Swarm** | **Kubernetes** |
+| ------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
+| **Origin** | Developed by Docker, Inc. | Open-source by Google, now CNCF project |
+| **Ease of Setup** | ⭐⭐⭐⭐⭐ (Very Simple, `docker swarm init`) | ⭐⭐ (Complex, needs kubeadm, k3s, or managed services) |
+| **Architecture Simplicity** | Single Binary (Docker Engine with Swarm Mode) | Modular components (API Server, Scheduler, etc.) |
+| **Networking** | Simple Overlay Network | More advanced (Service Mesh, Ingress Controllers) |
+| **Scaling Services** | Simple (`docker service scale`) | Declarative (kubectl apply with ReplicaSets/Deployments) |
+| **Load Balancing** | Built-in routing mesh | Service abstraction + Ingress Controllers |
+| **Secrets Management** | Built-in, basic (docker secrets) | Advanced (namespaced, RBAC-protected secrets) |
+| **Rolling Updates & Rollbacks** | Supported (basic) | Very advanced (strategies, probes, health checks) |
+| **Storage Volumes** | Limited support (Swarm-native volumes) | Pluggable (PersistentVolumeClaims, StorageClasses) |
+| **Auto-Healing** | Recreates failed tasks | Advanced (Controllers watch desired state constantly) |
+| **Declarative Configuration** | Limited (docker-compose.yml for stacks) | Fully declarative YAML manifests (Deployment, Service, etc.) |
+| **RBAC (Access Control)** | Limited (manual node-level access) | Fine-grained Role-Based Access Control (RBAC) |
+| **Ecosystem (Addons)** | Very limited (no official service mesh, operators, etc.) | Huge ecosystem (Helm charts, Operators, Service Mesh, etc.) |
+| **Cloud Native Integration** | Minimal (Docker-centric) | Full ecosystem (GKE, EKS, AKS, Rancher, etc.) |
+| **Production Readiness** | Suitable for small/simple workloads | Industry standard for large, complex systems |
+| **Community & Adoption** | Smaller, Docker-focused | Massive community, CNCF backed |
 
-- Automation
-- Load balancing
-- Scaling
-- Fail-over
-- Rolling update (zero downtime)
+**When to Use Docker Swarm**:
+
+- You want a lightweight, easy-to-deploy orchestrator.
+- Small to medium dev/test environments.
+- Teams already heavily invested in Docker CLI.
+- Need quick clustering without managing complex architecture.
+
+**When to Use Kubernetes**:
+
+- You need scalability and robustness at production-grade.
+- Require features like auto-scaling, advanced networking, observability, CI/CD pipelines.
+- Working in cloud-native or hybrid-cloud environments.
+- Need ecosystem integrations (Helm, Prometheus, Istio, Operators, etc.).
 
 ### Nodes (servers)
 
@@ -703,3 +731,225 @@ docker stack services <stack-name>
 # remove deployed stack
 docker stack rm <stack-name>
 ```
+
+### Docker Secrets
+
+A Docker Secret is a secure mechanism provided by Docker to **store and manage sensitive data** such as passwords, API keys, TLS certificates, SSH private keys, etc., **outside of application code and environment variables**.
+
+Secrets are:
+
+- Encrypted at rest and in transit.
+- Only accessible to services that need them.
+- Not baked into images or visible via docker inspect.
+- Designed to work with Docker Swarm services (though with workarounds, they can be used in standalone containers).
+
+Why is Docker Secret Used?
+
+- **Security**: Prevent hardcoding secrets in images, Dockerfiles, or environment variables.
+- **Access Control**: Only specific services/tasks get access to required secrets.
+- **Encryption**: Secrets are encrypted during storage and when distributed over the Docker network.
+- **Automated Secret Rotation**: Facilitates easier secret updates in production.
+
+```sh
+# create secret from file
+docker secret create <secret-name> <secret-file-path>
+
+# piping StdIn (standard input) to create a new secret
+echo "password" | docker secret create <secret-name> -
+
+# secrets are stored under the path `/run/secrets/<secret-name>`
+
+# inspecting secret information
+docker secret inspect <secret-name>
+
+# list of secrets
+docker secret ls
+
+# creating a service with secret
+docker service create --name ... --secret <secret-name> -e MYSQL_ROOT_PASSWORD_FILE=/run/secrets/<secret-name> mysql
+```
+
+**_Stack-Compose sample_**
+
+```yaml
+version: "3.8"
+
+secrets:
+  db_password:
+    external: true # Assume secret is created with `docker secret create db_password ...`
+
+networks:
+  app_net:
+    driver: overlay
+    attachable: true
+
+volumes:
+  pg_data:
+
+services:
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      POSTGRES_DB: myapp_db
+    secrets:
+      - db_password
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - app_net
+    deploy:
+      mode: replicated
+      replicas: 1
+      placement:
+        constraints:
+          - node.role == manager # Keep DB on manager node
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 10s
+        max_attempts: 5
+      update_config:
+        parallelism: 1
+        delay: 30s
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  web:
+    image: my-django-app:latest
+    environment:
+      DJANGO_SETTINGS_MODULE: myapp.settings.production
+      DATABASE_NAME: myapp_db
+      DATABASE_USER: django_user
+      DATABASE_PASSWORD_FILE: /run/secrets/db_password
+      DATABASE_HOST: db
+      DATABASE_PORT: 5432
+    secrets:
+      - db_password
+    depends_on:
+      - db
+    networks:
+      - app_net
+    deploy:
+      mode: replicated
+      replicas: 3
+      placement:
+        constraints:
+          - node.labels.app == web
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 512M
+        reservations:
+          cpus: "0.5"
+          memory: 256M
+      restart_policy:
+        condition: on-failure
+        delay: 5s
+        max_attempts: 3
+      update_config:
+        parallelism: 1
+        delay: 10s
+      labels:
+        # using traefik as ingress router
+        - traefik.enable=true
+        - traefik.http.routers.django.rule=Host(`myapp.example.com`)
+        - traefik.http.services.django.loadbalancer.server.port=8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+```
+
+**_accessing secret in app (Python/Django)_**
+
+```python
+with open('/run/secrets/db_password', 'r') as file:
+    DB_PASSWORD = file.read().strip()
+```
+
+### Docker Local Registry
+
+```yaml
+services:
+  registry:
+    image: registry:2
+    ports:
+      - "5000:5000"
+    volumes:
+      - registry_data:/var/lib/registry
+    environment:
+      REGISTRY_AUTH: htpasswd
+      REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
+      REGISTRY_AUTH_HTPASSWD_PATH: /auth/htpasswd
+      REGISTRY_STORAGE_FILESYSTEM_ROOTDIRECTORY: /var/lib/registry
+      REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+    networks:
+      - registry_net
+    deploy:
+      placement:
+        constraints:
+          - node.role == manager # Only deploy Registry on Manager nodes
+      restart_policy:
+        condition: on-failure
+
+  craneoperator:
+    image: craneoperator/craneoperator:latest
+    ports:
+      - "8080:8080"
+    environment:
+      - REGISTRY_URL=http://registry:5000
+      - REGISTRY_NAME=Local Registry
+    depends_on:
+      - registry
+    networks:
+      - registry_net
+    restart: unless-stopped
+
+volumes:
+  registry_data:
+
+networks:
+  registry_net:
+    driver: bridge
+```
+
+```sh
+mkdir auth
+htpasswd -Bc auth/htpasswd <username>
+# `-B`: Use bcrypt encryption (recommended).
+# `-c`: Create the file (omit if adding more users later).
+# `auth/htpasswd`: Output file.
+
+# You'll be prompted to enter the password!
+
+# run local registry
+docker compose up -d
+
+# login to local registry
+docker login localhost:5000
+# `localhost:5000` is the local registry based on the above compose file configuration
+
+# tag images for local registry
+docker image tag <image> localhost:5000/<image>
+
+# push images to local registry
+docker push localhost:5000/<image>
+
+# pull images from local registry
+docker pull localhost:5000/<image>
+```
+
+- you can also configure nginx with above compose file and stack deploy your local registry on Docker Swarm and use labeling constraints to only deploy it on manager nodes!
+- you can also host a local registry using **Nexus** which unlike Docker's official registry, can also be used for managing multi artifacts like Maven, npm, PyPI, etc.
