@@ -10,6 +10,7 @@
   - [Queue (FIFO)](#queue-fifo)
   - [Circular Queue](#circular-queue)
   - [Singly Linked List](#singly-linked-list)
+  - [Doubly Linked List](#doubly-linked-list)
 
 ## Array (List)
 
@@ -108,3 +109,20 @@ Operations:
 - Search: O(n)
 
 **Implementation**: [Singly Linked List](Data-Structures/singly_linked_list.py)
+
+## Doubly Linked List
+
+Key Features:
+
+- Forward and backward traversal.
+- Each node holds **prev** as a reference to the pervious node.
+
+![Doubly Linked List](images/doubly-linked-list.webp)
+
+Operations:
+
+- Insert/Delete at head: O(1)
+- Insert/Delete at tail or by value: O(n)
+- Search: O(n)
+
+**Implementation**: [Doubly Linked List](Data-Structures/doubly_linked_list.py)
