@@ -13,6 +13,11 @@
   - [Doubly Linked List](#doubly-linked-list)
   - [Circular Linked List](#circular-linked-list)
   - [Circular Doubly Linked List](#circular-doubly-linked-list)
+  - [Tree](#tree)
+    - [Binary Tree](#binary-tree)
+      - [Full Binary Tree Formulas](#full-binary-tree-formulas)
+      - [Binary Tree Traversal Methods](#binary-tree-traversal-methods)
+    - [Binary Search Tree](#binary-search-tree)
 
 ## Array (List)
 
@@ -163,3 +168,103 @@ Operations:
 
 _Not implemented since its very similar to the circular linked list_.
 **Refer to**: [Circular Linked List](Data-Structures/circular_linked_list.py)
+
+## Tree
+
+Key Features:
+
+- `Root`: The topmost node in a tree (**only one root**, **level = 0**).
+- `data`: Value stored in the node.
+- `Left`: A pointer to the current node's left child.
+- `right`: A pointer to the current node's right child.
+
+---
+
+- `Parent`: A node that has child nodes.
+- `Child`: A node that descends from another node.
+- `Leaf` (External Node): A node with no children (**degree = 0**, **height = 0**).
+- `Subtree`: Any node along with its descendants forms a subtree.
+- `Edge`: Connection between two nodes.
+- `Degree`
+  - The **degree of a node** is the **number of children** it has.
+  - The **degree of a tree** is the _maximum degree_ among all its nodes.
+- `Level (depth)`
+  - The level of a node is the **number of edges from the root to the node**.
+  - Root is always at level 0 (sometimes level 1, depending on convention).
+- `Height`
+  - The height of a node is the number of edges on **the longest path from that node to a leaf**.
+  - The height of the tree is the height of the root node.
+  - A leaf node has height 0.
+
+![Tree](images/tree.png)
+
+### Binary Tree
+
+Key Features:
+
+- `Binary Tree`: each node has ≤ 2 children (**Max Degree ≤ 2**)
+- `Full Binary Tree`: a tree where every node has either **0 or 2 children** — never just one.
+- `Non-Full Binary Tree`: a tree that has **a node with exactly one child**.
+- `Balanced Binary Tree`: a tree where **the left and right subtrees of every node differ in height by at most 1**.
+- `Unbalanced Binary Tree`: a tree where **the height difference between the left and right subtrees of any node is more than 1**.
+
+![Balanced Vs. Unbalanced Binary Tree](images/balance-vs-unbalance-binnary-tree.webp)
+
+Operations:
+
+- Search/Insert/Delete: O(log n) average, O(n) worst (unbalanced)
+
+**Implementation**: [Binary Tree](Data-Structures/binary_tree.py)
+
+#### Full Binary Tree Formulas
+
+- `h` = height of the tree (root at height 0)
+- `n` = number of nodes
+- `L` = level number (starting from 0)
+
+- `MaxNodes(h) = 2^(h + 1) - 1`
+- `MinNodes(h) = 2 * h + 1`
+- `MaxHeight(n) = (n - 1) / 2`
+- `NodesAtLevel(L) = 2^L`
+- `Height(n) = ⌊log₂(n + 1)⌋ - 1`
+
+#### Binary Tree Traversal Methods
+
+- traversing means visiting each node exactly once!
+
+1. **Depth-First Traversal (DFS)**
+
+   - _In-order_ (Left → Root → Right )
+   - _Pre-order_ (Root → Left → Right)
+   - _Post-order_ (Left → Right → Root)
+
+- If you have two out of the DFS traverses and one of them is _in-order_, you can draw the whole tree!
+
+2. **Breadth-First Traversal (BFS)**
+   - Visits nodes level by level from left to right.
+
+| Traversal   | Order                     | Use Case                 |
+| ----------- | ------------------------- | ------------------------ |
+| In-order    | Left → Root → Right       | Sort nodes (in BST)      |
+| Pre-order   | Root → Left → Right       | Tree copy, serialization |
+| Post-order  | Left → Right → Root       | Deletion, freeing memory |
+| Level-order | Top → Bottom (Left→Right) | Shortest path, BFS       |
+
+![Tree Traversal Techniques](images/Tree-Traversal-Techniques.webp)
+
+### Binary Search Tree
+
+Key Features:
+
+- `left` < `root` < `right`
+- **In-order** traversing of the BST will returns an **ordered list** of its nodes!
+
+![Binary Search Tree](images/Binary-Search-Tree.webp)
+
+Operations:
+
+- Search/Insert/Delete: O(log n)
+
+**Implementation**: [Binary Search Tree](Data-Structures/binary_search_tree.py)
+
+<!-- TODO: add heap and graph data-structures -->
