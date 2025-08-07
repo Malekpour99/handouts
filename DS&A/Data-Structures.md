@@ -11,6 +11,7 @@
   - [Circular Queue](#circular-queue)
   - [Singly Linked List](#singly-linked-list)
   - [Doubly Linked List](#doubly-linked-list)
+  - [Circular Linked List](#circular-linked-list)
 
 ## Array (List)
 
@@ -48,7 +49,7 @@ Key Features:
 
 - Last-In-First-Out structure
 - Can be implemented using an array
-- Has a **limit** which determines size of the stack
+- Has a `limit` which determines size of the stack
 
 ![Stack](images/stack.png)
 
@@ -64,9 +65,9 @@ Operations:
 Key Features:
 
 - First-In-First-Out structure
-- **front** points to the first member of queue
-- **rear** points to the last member of queue
-- Has a **limit** which determines size of the queue
+- `front` points to the first member of queue
+- `rear` points to the last member of queue
+- Has a `limit` which determines size of the queue
 
 ![Queue](images/queue.png)
 
@@ -96,8 +97,8 @@ Operations:
 
 Key Features:
 
-- Each link list starts from **head** node
-- Each node holds **data** and a reference to the **next** node.
+- Each link list starts from `head` node
+- Each node holds `data` and a reference to the `next` node.
 - No direct indexing; traversal required.
 
 ![Singly Linked List](images/singly-linked-list.png)
@@ -126,3 +127,20 @@ Operations:
 - Search: O(n)
 
 **Implementation**: [Doubly Linked List](Data-Structures/doubly_linked_list.py)
+
+## Circular Linked List
+
+Key Features:
+
+- No `None` at the end, tail (end node) points to the `head`.
+- Can traverse infinitely if not careful.
+
+![Circular Linked List](images/circular-linked-list.webp)
+
+Operations:
+
+- Insert/Delete at head: O(1)
+- Insert/Delete at tail or by value: O(n)
+- Search: O(n)
+
+**Implementation**: [Circular Linked List](Data-Structures/circular_linked_list.py)
