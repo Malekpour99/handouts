@@ -1,9 +1,10 @@
-# Data-Structures & Algorithms
+# Algorithms
 
 ## Table of Contents
 
-- [Data-Structures \& Algorithms](#data-structures--algorithms)
+- [Algorithms](#algorithms)
 	- [Table of Contents](#table-of-contents)
+	- [Asymptotic Notations](#asymptotic-notations)
 	- [Sorting Algorithms](#sorting-algorithms)
 		- [Bubble Sort](#bubble-sort)
 		- [Selection Sort](#selection-sort)
@@ -11,6 +12,29 @@
 		- [Merge Sort](#merge-sort)
 		- [Quick Sort](#quick-sort)
 		- [Heap Sort](#heap-sort)
+
+## Asymptotic Notations
+
+| Notation      | Meaning                          | Describes                                          |
+| ------------- | -------------------------------- | -------------------------------------------------- |
+| **Big O (O)** | Upper bound                      | Worst-case scenario (maximum time or space)        |
+| **Omega (Ω)** | Lower bound                      | Best-case scenario (minimum time or space)         |
+| **Theta (Θ)** | Tight bound (both upper & lower) | Exact runtime for all inputs (exact time or space) |
+
+- Most of the time, **Big O notation** is used for describing _time and space complexity_.
+- **Time complexity** describes how the number of operations grows as input size increases.
+- **Space Complexity** is the amount of memory an algorithm uses relative to the input size.
+
+| Complexity (Best to Worst) | Name         | Example Algorithm                                         |
+| -------------------------- | ------------ | --------------------------------------------------------- |
+| **O(1)**                   | Constant     | Accessing an array element                                |
+| **O(log n)**               | Logarithmic  | Binary search                                             |
+| **O(n)**                   | Linear       | Loop over array, DFS                                      |
+| **O(n log n)**             | Linearithmic | Merge sort, Heap sort, Quick sort (avg case)              |
+| **O(n²)**                  | Quadratic    | Nested loops, Bubble sort, Selection sort, Insertion sort |
+| **O(n³)**                  | Cubic        | Naive matrix multiplication                               |
+| **O(aⁿ)**                  | Exponential  | Recursive Fibonacci, brute-force subsets                  |
+| **O(n!)**                  | Factorial    | Traveling Salesman Problem (TSP), Permutations            |
 
 ## Sorting Algorithms
 
