@@ -6,6 +6,8 @@ here I will create and update a practical handout for anything I have learned an
 
 - [Git](https://github.com/Malekpour99/handouts/blob/main/Git/git.md)
 - [Interview](https://github.com/Malekpour99/handouts/blob/main/Interview/interview.md)
+- [Data-Structures](https://github.com/Malekpour99/handouts/blob/main/DS%26A/Data-Structures.md)
+- [Algorithms](https://github.com/Malekpour99/handouts/blob/main/DS%26A/Algorithms.md)
 - [PostgreSQL](https://github.com/Malekpour99/handouts/blob/main/Database/Postgres-Commands.sql)
 - [Docker](https://github.com/Malekpour99/handouts/blob/main/Docker/docker.md)
 - [TMUX](https://github.com/Malekpour99/handouts/blob/main/TMUX/tmux.md)
