@@ -8,6 +8,7 @@
   - [Hash Table (Dictionary)](#hash-table-dictionary)
   - [Stack (LIFO)](#stack-lifo)
   - [Queue (FIFO)](#queue-fifo)
+  - [Circular Queue](#circular-queue)
   - [Singly Linked List](#singly-linked-list)
 
 ## Array (List)
@@ -55,7 +56,7 @@ Operations:
 - Push/Pop: O(1)
 - Peek: O(1)
 
-**Implementation**: [Stack](Data-Structures/Stack.py)
+**Implementation**: [Stack](Data-Structures/stack.py)
 
 ## Queue (FIFO)
 
@@ -74,6 +75,22 @@ Operations:
 
 **Implementation**: [Queue](Data-Structures/queue.py)
 
+## Circular Queue
+
+Key Features:
+
+- Efficient use of space.
+- Front and rear move in a circular manner using modulo operator
+- In (simple) queue if the queue is full and you perform a dequeue, there is no way to enqueue another element until the queue gets fully empty; by using a circular queue this issue is solved.
+
+![Circular Queue](images/circular-queue.png)
+
+Operations:
+
+- Enqueue/Dequeue: O(1)
+
+**Implementation**: [Circular Queue](Data-Structures/circular_queue.py)
+
 ## Singly Linked List
 
 Key Features:
@@ -90,4 +107,4 @@ Operations:
 - Insert/Delete at tail or by value: O(n)
 - Search: O(n)
 
-**Implementation**: [Singly Linked List](Data-Structures/Singly_Linked_List.py)
+**Implementation**: [Singly Linked List](Data-Structures/singly_linked_list.py)
