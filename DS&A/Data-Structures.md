@@ -12,6 +12,7 @@
   - [Singly Linked List](#singly-linked-list)
   - [Doubly Linked List](#doubly-linked-list)
   - [Circular Linked List](#circular-linked-list)
+  - [Circular Doubly Linked List](#circular-doubly-linked-list)
 
 ## Array (List)
 
@@ -144,3 +145,21 @@ Operations:
 - Search: O(n)
 
 **Implementation**: [Circular Linked List](Data-Structures/circular_linked_list.py)
+
+## Circular Doubly Linked List
+
+Key Features:
+
+- Bi-directional circular structure
+- `Tail` node connects to `head` and vice versa
+
+![Circular Doubly Linked List](images/circular-doubly-linked-list.png)
+
+Operations:
+
+- Insert/Delete at head/tail: O(1)
+- Insert/Delete by value: O(n)
+- Search: O(n)
+
+_Not implemented since its very similar to the circular linked list_.
+**Refer to**: [Circular Linked List](Data-Structures/circular_linked_list.py)
