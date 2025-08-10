@@ -4,8 +4,15 @@
 
 - [Docker](#docker)
   - [Table of Contents](#table-of-contents)
-  - [Installation](#installation)
   - [Introduction](#introduction)
+    - [Container](#container)
+      - [Image](#image)
+      - [Engine](#engine)
+      - [Runtime](#runtime)
+    - [OCI - Open Container Initiative](#oci---open-container-initiative)
+    - [CRI - Container Runtime Interface](#cri---container-runtime-interface)
+  - [Installation](#installation)
+  - [Introduction](#introduction-1)
   - [Network](#network)
   - [Volume-Mount \& Bind-Mount](#volume-mount--bind-mount)
   - [DockerFile](#dockerfile)
@@ -29,6 +36,86 @@
     - [Stack Deploy](#stack-deploy)
     - [Docker Secrets](#docker-secrets)
     - [Docker Local Registry](#docker-local-registry)
+
+## Introduction
+
+![Virtualization Vs. Containerization](./images/virtualization-vs-containerization.webp)
+
+| Feature         | Virtualization                | Containerization                         |
+| --------------- | ----------------------------- | ---------------------------------------- |
+| OS per workload | Yes (Guest OS)                | No (shared Host OS)                      |
+| Isolation level | Strong (hardware-level)       | Process-level (kernel shared)            |
+| Startup time    | Minutes                       | Seconds or less                          |
+| Resource usage  | Heavy                         | Light                                    |
+| Portability     | OS-agnostic                   | Kernel-dependent                         |
+| Use cases       | Multi-OS apps, legacy systems | Microservices, DevOps, cloud-native apps |
+
+### Container
+
+#### Image
+
+A _read-only (immutable)_ package containing everything an app needs to run:
+
+- App code
+- Dependencies
+- System libraries
+- Environment configuration
+
+#### Engine
+
+The high-level tool you use to build, pull, and run containers.
+
+- Examples: `Docker Engine`, `Podman`, `CRI-O`.
+- Takes your container image and turns it into a running container.
+- Talks to the container runtime under the hood.
+- Handles networking, volumes, and other orchestration tasks.
+
+#### Runtime
+
+The low-level component that actually executes containers and provides isolation.
+
+- Examples:
+  - Low-level runtimes: `runc`, `crun`
+  - High-level runtimes: `containerd`, `CRI-O`
+- Talks directly to the OS kernel (using Linux namespaces, cgroups).
+- Creates the container process from the image’s filesystem and metadata.
+- Interactions with runtimes usually are _not direct_ and happens through container _engines_.
+
+### OCI - Open Container Initiative
+
+- An open standard for container images and runtimes.
+- Before OCI, different tools (Docker, CoreOS rkt, etc.) used their own formats, which hurt portability. OCI made a universal standard so containers could run anywhere.
+- Main Specs:
+
+  - **OCI Image Spec** – How container images are structured (layers, config JSON, manifests).
+  - **OCI Runtime Spec** – How to run a container from an unpacked image (filesystem layout, process config).
+  - **OCI Distribution Spec** – How images are pushed/pulled over registries.
+
+- Example:
+  - `runc` is an OCI-compliant runtime, meaning it can run any OCI-compliant container image.
+
+### CRI - Container Runtime Interface
+
+- A **gRPC API standard** that lets Kubernetes talk to container runtimes.
+- Kubernetes used to depend heavily on Docker’s engine API. That was limiting, so CRI was created to make Kubernetes runtime-agnostic.
+
+- How it works:
+
+  - Kubernetes’ **kubelet** calls the CRI API.
+  - Any runtime implementing CRI (via CRI-O, containerd, etc.) can respond.
+  - This allows Kubernetes to switch runtimes without changing kubelet code.
+
+**Stack View**
+
+```scss
+Kubernetes (kubelet)
+      ↓  CRI API
+High-level Runtime (containerd, CRI-O)
+      ↓  OCI Runtime Spec
+Low-level Runtime (runc, crun)
+      ↓  OCI Image Spec
+Container Image
+```
 
 ## Installation
 
@@ -79,11 +166,12 @@ for handling containers, both their **name** and **ID** can be used!
 ## Network
 
 **Default Networks and drivers**
-| Network Name | Driver | Description |
-| ------------ | -------- | -------------------------------------------------------------------------------------------------------------------- |
-| `bridge` | `bridge` | The default network for containers on a single host if none is specified. Suitable for container-to-container communication on the same host. |
-| `host` | `host` | Shares the host’s network stack directly. Container uses the host’s IP address and ports. Only available on Linux. |
-| `none` | `null` | Disables networking entirely. The container has no network access. Useful for security or testing. |
+
+| Network Name | Driver   | Description                                                                                                                                   |
+| ------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bridge`     | `bridge` | The default network for containers on a single host if none is specified. Suitable for container-to-container communication on the same host. |
+| `host`       | `host`   | Shares the host’s network stack directly. Container uses the host’s IP address and ports. Only available on Linux.                            |
+| `none`       | `null`   | Disables networking entirely. The container has no network access. Useful for security or testing.                                            |
 
 - Networks are isolated in docker.
 - Container's IP address is not static, so it's better to use it's name or define an alias for it, when you need communication in the same network.
@@ -402,24 +490,25 @@ docker compose -f <docker-compose-file> scale <service-1>=<n> <service2>=<m> ...
 ## Docker Swarm
 
 **Docker Swarm Vs. Kubernetes**
-| Aspect | **Docker Swarm** | **Kubernetes** |
+
+| Aspect                          | **Docker Swarm**                                         | **Kubernetes**                                               |
 | ------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
-| **Origin** | Developed by Docker, Inc. | Open-source by Google, now CNCF project |
-| **Ease of Setup** | ⭐⭐⭐⭐⭐ (Very Simple, `docker swarm init`) | ⭐⭐ (Complex, needs kubeadm, k3s, or managed services) |
-| **Architecture Simplicity** | Single Binary (Docker Engine with Swarm Mode) | Modular components (API Server, Scheduler, etc.) |
-| **Networking** | Simple Overlay Network | More advanced (Service Mesh, Ingress Controllers) |
-| **Scaling Services** | Simple (`docker service scale`) | Declarative (kubectl apply with ReplicaSets/Deployments) |
-| **Load Balancing** | Built-in routing mesh | Service abstraction + Ingress Controllers |
-| **Secrets Management** | Built-in, basic (docker secrets) | Advanced (namespaced, RBAC-protected secrets) |
-| **Rolling Updates & Rollbacks** | Supported (basic) | Very advanced (strategies, probes, health checks) |
-| **Storage Volumes** | Limited support (Swarm-native volumes) | Pluggable (PersistentVolumeClaims, StorageClasses) |
-| **Auto-Healing** | Recreates failed tasks | Advanced (Controllers watch desired state constantly) |
-| **Declarative Configuration** | Limited (docker-compose.yml for stacks) | Fully declarative YAML manifests (Deployment, Service, etc.) |
-| **RBAC (Access Control)** | Limited (manual node-level access) | Fine-grained Role-Based Access Control (RBAC) |
-| **Ecosystem (Addons)** | Very limited (no official service mesh, operators, etc.) | Huge ecosystem (Helm charts, Operators, Service Mesh, etc.) |
-| **Cloud Native Integration** | Minimal (Docker-centric) | Full ecosystem (GKE, EKS, AKS, Rancher, etc.) |
-| **Production Readiness** | Suitable for small/simple workloads | Industry standard for large, complex systems |
-| **Community & Adoption** | Smaller, Docker-focused | Massive community, CNCF backed |
+| **Origin**                      | Developed by Docker, Inc.                                | Open-source by Google, now CNCF project                      |
+| **Ease of Setup**               | ⭐⭐⭐⭐⭐ (Very Simple, `docker swarm init`)            | ⭐⭐ (Complex, needs kubeadm, k3s, or managed services)      |
+| **Architecture Simplicity**     | Single Binary (Docker Engine with Swarm Mode)            | Modular components (API Server, Scheduler, etc.)             |
+| **Networking**                  | Simple Overlay Network                                   | More advanced (Service Mesh, Ingress Controllers)            |
+| **Scaling Services**            | Simple (`docker service scale`)                          | Declarative (kubectl apply with ReplicaSets/Deployments)     |
+| **Load Balancing**              | Built-in routing mesh                                    | Service abstraction + Ingress Controllers                    |
+| **Secrets Management**          | Built-in, basic (docker secrets)                         | Advanced (namespaced, RBAC-protected secrets)                |
+| **Rolling Updates & Rollbacks** | Supported (basic)                                        | Very advanced (strategies, probes, health checks)            |
+| **Storage Volumes**             | Limited support (Swarm-native volumes)                   | Pluggable (PersistentVolumeClaims, StorageClasses)           |
+| **Auto-Healing**                | Recreates failed tasks                                   | Advanced (Controllers watch desired state constantly)        |
+| **Declarative Configuration**   | Limited (docker-compose.yml for stacks)                  | Fully declarative YAML manifests (Deployment, Service, etc.) |
+| **RBAC (Access Control)**       | Limited (manual node-level access)                       | Fine-grained Role-Based Access Control (RBAC)                |
+| **Ecosystem (Addons)**          | Very limited (no official service mesh, operators, etc.) | Huge ecosystem (Helm charts, Operators, Service Mesh, etc.)  |
+| **Cloud Native Integration**    | Minimal (Docker-centric)                                 | Full ecosystem (GKE, EKS, AKS, Rancher, etc.)                |
+| **Production Readiness**        | Suitable for small/simple workloads                      | Industry standard for large, complex systems                 |
+| **Community & Adoption**        | Smaller, Docker-focused                                  | Massive community, CNCF backed                               |
 
 **When to Use Docker Swarm**:
 
