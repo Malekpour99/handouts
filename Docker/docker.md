@@ -159,7 +159,7 @@ docker logout
 
 ![docker containers and images](<./images/Docker(containers-images).webp>)
 
-- **Entrypoint**: all containers have an entrypoint which run every time a container is started and applies the work-load. you can inspect container's entrypoint from the provided path by `.Config.Entrypoint`.
+- **Entrypoint**: all containers have an entrypoint which run every time a container is started and applies the work-load (Default: `/bin/sh -c <CMD>`). you can inspect container's entrypoint from the provided path by `.Config.Entrypoint`.
 
 for handling containers, both their **name** and **ID** can be used!
 
@@ -257,13 +257,18 @@ docker run --mount type=bind,source=<host-path>,target=<app-data-path> <image>
 - Use official images or minimal base images (Prefer _language-specific_ base images)
 - Use multi-stage builds (reduce image size by separating build and runtime environments)
 - Document exposed ports and metadata (e.g. maintainer, version, etc.)
+- Use Environment Variables (`ENV`) instead of hardcoding paths or other variables.
 - Set WORKDIR instead of cd (use WORKDIR to define working directory; it’s clearer and Docker-layer aware)
 - Install only what's necessary and combine RUN commands to reduce layers
 - Clean up temporary files (remove caches and temp files after installing packages)
 - Use non-root user (improves security by preventing privilege escalation in case of a container exploit)
 - Minimize COPY scope using docker ignore (only copy what’s needed, use `.dockerignore` to skip unnecessary files e.g. node_modules, .git, etc.)
 - Use ENTRYPOINT + CMD properly (ENTRYPOINT defines the fixed command; CMD defines default args -can be overridden-)
+- Use specific tag for each image which shows file-version (e.g. _jenkins:2.1.4_)
+- Use Linters for assessing Dockerfiles ([`hadolint`](https://github.com/hadolint/hadolint))
 - Add HEALTHCHECK (helps detect if the app inside the container is working correctly)
+- Limit containers processes during creation (use constraints like _CPU_ and _memory_ limits and _control group (cgroup)_ configurations)
+- Analyze docker image layers ([`dive`](https://github.com/wagoodman/dive))
 
 ## Images
 
