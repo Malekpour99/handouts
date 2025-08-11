@@ -18,7 +18,7 @@
   - [DockerFile](#dockerfile)
   - [Images](#images)
   - [Containers](#containers)
-  - [Inspecting](#inspecting)
+  - [Inspecting \& Logs](#inspecting--logs)
   - [Examples](#examples)
   - [Docker Compose](#docker-compose)
   - [Docker Swarm](#docker-swarm)
@@ -305,6 +305,12 @@ docker save -o <file> <image>
 # Load an image from a tar archive or STDIN
 docker load -i <file>
 
+# creating an image from container
+docker commit <container>
+
+# For moving images use 'save/load' commands!
+# For moving containers file-system use 'export/import' commands!
+
 # building a custom image from DockerFile
 docker build -t <image-name>:<version> -f <DockerFile>
 # only use small-letters for image name
@@ -379,13 +385,24 @@ docker cp <source-path> <container>:<container-path> # copy from local to contai
 docker cp <container>:<container-path> <source-path> # copy from container to local
 ```
 
-## Inspecting
+## Inspecting & Logs
+
+- `var/lib/docker` -> Docker log-driver default path
+- Docker logs path can be passed to `ELK` stack for managing and monitoring container logs!
+- You can also use `gelf` log-driver to manage logs directly with _logstash_; but use `local` log-driver instead to prevent losing logs when logstash connection fails!
+- `JSON` -> default log-driver format (change the format to _filesystem_ or any other format (e.g. `local`) for production)
+- `etc/docker/daemon.json` -> create/edit this file for logging configuration - [Docker Logging Configuration](https://docs.docker.com/engine/logging/configure/)
+- after configuration of logging, restart docker service (`systemctl restart docker.service`)
 
 ```sh
 # fetch logs of a container
 docker logs <container>
 # `-f`: follow log output
 # `-n <n>` `--tail <n>`: number of logs to show from the end of logs (default: all)
+
+# attaching to a container and following logs
+docker attach <container>
+# use <C-p><C-q> escape sequence for detaching from container without stopping it!
 
 # display a live stream of container(s) resource usage statistics
 docker stats <container>
