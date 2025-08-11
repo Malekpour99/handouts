@@ -176,6 +176,8 @@ for handling containers, both their **name** and **ID** can be used!
 - Networks are isolated in docker.
 - Container's IP address is not static, so it's better to use it's name or define an alias for it, when you need communication in the same network.
 
+![docker network structure](./images/docker-network-structure.png)
+
 ```sh
 # list networks
 docker network ls
@@ -184,13 +186,33 @@ docker network ls
 docker network prune
 
 # create a new network
-docker network create <name>
+docker network create --subnet=192.168.1.0/24 --gateway=192.168.1.1 <name>
+# `--driver <network-driver>`: creating a network with the specified driver
+# `subnet`: customizing network IP range
+# `gateway`: specifying network gateway
 
 # add container to network
-docker network connect <network> <container>
+docker network connect --alias <alias-name> <network> <container>
+# Use 'alias' for connecting containers, since their IP can change for any reason and interrupting network communications!
+# aliases help your system to operate.
 
 # remove container from network
 docker network disconnect <network> <container>
+```
+
+**`macvlan` Network Driver**
+
+- The `macvlan` network driver in Docker is a special type of network that allows a container to appear as if it’s a **physical device** directly connected to your network — with its own **MAC address** and **IP address** on the local LAN, instead of sharing the host’s network interface like with `bridge` or `host`.
+- **Native LAN access**: Containers can talk directly to the local network without NAT.
+- Useful for:
+  - Running legacy apps expecting to be on the LAN.
+  - Giving containers dedicated IP addresses for external services.
+  - Avoiding NAT overhead.
+
+```sh
+# creating a network with macvlan driver
+docker network create --driver macvlan --subnet=192.168.1.0/24 --gateway=192.168.1.1 -o parent=ens33 <name>
+# `-o parent=<NIC>` attaches macvlan network to the specified physical network interface on the host
 ```
 
 ## Volume-Mount & Bind-Mount
@@ -201,9 +223,20 @@ docker network disconnect <network> <container>
 | Path: `/var/lib/docker/volumes/` | Path: Any where on the host system  |
 | Can be used in `Dockerfile`      | Can **not** be used in `Dockerfile` |
 
+**Data Propagation**
+
+| Host  | Container | Mount                                                   |
+| ----- | --------- | ------------------------------------------------------- |
+| Empty | Data      | data is copied from **container to host**               |
+| Data  | Empty     | data is copied from **host to container**               |
+| Empty | Empty     | host and container are **synced**                       |
+| Data  | Data      | host data _over-rides_ container data (**over-shadow**) |
+
 ```sh
 # list volumes
 docker volume ls
+# 'anonymous volume': are volumes without names (some of them are created during build processes and used as cache for building layers)
+# to prevent filling storage, remove anonymous volumes once in a while
 
 # remove unused volumes
 docker volume prune
@@ -223,6 +256,12 @@ docker run --mount type=volume,source=<volume>,target=<app-data-path> <image>
 docker run -v <host-path>:<app-data-path> <image>
 docker run --mount type=bind,source=<host-path>,target=<app-data-path> <image>
 # use absolute paths!
+# by adding `readonly` after defining source and target, source becomes readonly and container can not change it!
+
+# temporary mount
+docker run --mount type=tmpfs,destination=<data-path> <image>
+# dedicates temporary memory space as source for destination, when container gets removed, its data is also removed!
+# useful to prevent writing sensitive data on disk
 ```
 
 ## DockerFile
@@ -315,6 +354,9 @@ docker commit <container>
 docker build -t <image-name>:<version> -f <DockerFile>
 # only use small-letters for image name
 # by default docker looks for 'DockerFile' if file is not mentioned (pass . to specify current directory)
+
+# search docker-hub and return matched images
+docker search <image>
 ```
 
 ## Containers
@@ -338,8 +380,8 @@ docker run --name <container-name> -p <system-port>:<container-port> -v <volume>
 # Persisting data configuration
 # `-v <volume>:<data-path>`: volume mount (volume gets created if it doesn't exist)
 # `-v <host-path>:<data-path>`: bind-mount (no volume gets created)
-# `--mount type=volume,source=<volume>,target=<data-path>`: volume mount (volume gets created if it doesn't exist) -new syntax-
-# `--mount type=bind,source=<host-path>,target=<data-path>`: bind mount (volume gets created if it doesn't exist) -new syntax-
+# `--mount type=volume,source=<volume>,target=<data-path>`: volume mount (volume gets created if it doesn't exist)
+# `--mount type=bind,source=<host-path>,target=<data-path>`: bind mount (no volume gets created)
 
 
 # list Up containers
@@ -508,6 +550,9 @@ docker compose -f <docker-compose-file> scale <service-1>=<n> <service2>=<m> ...
 ```
 
 - you can also run docker compose commands explicitly on your desired services if you provide the **service's name** after you command!
+- **SELinux context modifier**: managing volumes in docker compose (read-write access)
+  - `z`: private content - container specific
+  - `Z`: shared content across containers
 
 ## Docker Swarm
 
@@ -599,7 +644,7 @@ docker swarm join --token <token>
 - **TCP & UDP/port 7946**: Communication among nodes (for container network discovery)
 - **UDP/port 4789**: _Overlay_ network traffic (for container ingress network)
 
-- **Overlay Network**: Default network driver for swarm cluster
+- **Overlay Network**: Default network driver for swarm cluster, used for connecting docker networks from separate servers of VMs.
 
 ```sh
 # Network configuration on Manger nodes
