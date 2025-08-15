@@ -256,7 +256,7 @@ Operations:
 
 Key Features:
 
-- `left` < `root` < `right`
+- `left` < `root` < `right` on every sub-tree and node.
 - **In-order** traversing of the BST will returns an **ordered list** of its nodes!
 
 ![Binary Search Tree](images/Binary-Search-Tree.webp)

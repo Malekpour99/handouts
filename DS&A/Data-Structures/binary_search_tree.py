@@ -45,7 +45,12 @@ class BinarySearchTree:
         return root
 
     def delete(self, root, key):
-        "Deleting desired key from BST"
+        """
+        Deleting desired key from BST
+        When target node has both left and right node,
+        you can replace it with the out-most right node from its left sub-tree
+        or you can replace it with the in-most left node from its right sub-tree
+        """
         if root.key == key:
             if root.left and root.right:
                 rl = root.left
