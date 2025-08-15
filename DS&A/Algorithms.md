@@ -3,15 +3,15 @@
 ## Table of Contents
 
 - [Algorithms](#algorithms)
-	- [Table of Contents](#table-of-contents)
-	- [Asymptotic Notations](#asymptotic-notations)
-	- [Sorting Algorithms](#sorting-algorithms)
-		- [Bubble Sort](#bubble-sort)
-		- [Selection Sort](#selection-sort)
-		- [Insertion Sort](#insertion-sort)
-		- [Merge Sort](#merge-sort)
-		- [Quick Sort](#quick-sort)
-		- [Heap Sort](#heap-sort)
+  - [Table of Contents](#table-of-contents)
+  - [Asymptotic Notations](#asymptotic-notations)
+  - [Sorting Algorithms](#sorting-algorithms)
+    - [Bubble Sort](#bubble-sort)
+    - [Selection Sort](#selection-sort)
+    - [Insertion Sort](#insertion-sort)
+    - [Merge Sort](#merge-sort)
+    - [Quick Sort](#quick-sort)
+    - [Heap Sort](#heap-sort)
 
 ## Asymptotic Notations
 
@@ -281,7 +281,7 @@ def heapify(arr, n, i):
 
 def heap_sort(arr):
     n = len(arr)
-    # Build max-heap
+    # Build max-heap (floor(n/2) -1 gives you the last parent index)
     for i in range(n // 2 - 1, -1, -1):
         heapify(arr, n, i)
 
