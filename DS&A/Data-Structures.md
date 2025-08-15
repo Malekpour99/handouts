@@ -18,6 +18,7 @@
       - [Full Binary Tree Formulas](#full-binary-tree-formulas)
       - [Binary Tree Traversal Methods](#binary-tree-traversal-methods)
     - [Binary Search Tree](#binary-search-tree)
+    - [Heap (Priority Queue)](#heap-priority-queue)
 
 ## Array (List)
 
@@ -267,4 +268,26 @@ Operations:
 
 **Implementation**: [Binary Search Tree](Data-Structures/binary_search_tree.py)
 
-<!-- TODO: add heap and graph data-structures -->
+### Heap (Priority Queue)
+
+- A Heap is a specialized **complete binary tree** where each node satisfies the heap property:
+  - Complete binary tree means all levels are completely filled except possibly the last, which is filled from left to right.
+  - Usually implemented using `arrays`, not linked nodes.
+  - **`heapify`**: is converting an unsorted array into a **heap**.
+- **Max Heap**: Each parent’s value is greater than or equal to its children.
+- **Min Heap**: Each parent’s value is less than or equal to its children.
+- Not suitable for fast searching of arbitrary elements (only efficient for `root` access).
+- Efficient for **priority-based processing** (e.g., task scheduling, Dijkstra’s algorithm).
+
+![Heap](images/heaps.png)
+
+Operations:
+
+- peek(min/max) : O(1)
+- insertion/extract(min/max): O(log n)
+- Search/heapify: O(n)
+- sorting: O(n log n)
+
+**Implementation**: [Heap](Data-Structures/heap.py)
+
+<!-- TODO: add graph data-structure -->
