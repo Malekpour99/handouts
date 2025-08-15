@@ -19,6 +19,7 @@
       - [Binary Tree Traversal Methods](#binary-tree-traversal-methods)
     - [Binary Search Tree](#binary-search-tree)
     - [Heap (Priority Queue)](#heap-priority-queue)
+  - [Graph](#graph)
 
 ## Array (List)
 
@@ -274,6 +275,9 @@ Operations:
   - Complete binary tree means all levels are completely filled except possibly the last, which is filled from left to right.
   - Usually implemented using `arrays`, not linked nodes.
   - **`heapify`**: is converting an unsorted array into a **heap**.
+
+Key Features:
+
 - **Max Heap**: Each parent’s value is greater than or equal to its children.
 - **Min Heap**: Each parent’s value is less than or equal to its children.
 - Not suitable for fast searching of arbitrary elements (only efficient for `root` access).
@@ -291,4 +295,62 @@ Operations:
 
 **Implementation**: [Heap](Data-Structures/heap.py)
 
-<!-- TODO: add graph data-structure -->
+## Graph
+
+- A **Graph** is a collection of `vertices` (nodes) connected by `edges` (links).
+
+Key Features:
+
+- **Vertex (Node)** → Fundamental unit representing an entity (e.g., a city, a person/user).
+- **Edge (Link)** → Connection between two vertices.
+- **Degree** → Number of edges connected to a vertex.
+- **Path** → Sequence of vertices connected by edges.
+- **Cycle** → Path where the first and last vertices are the same.
+- **Weight** → Cost/length associated with an edge (in weighted graphs).
+- **Connected Graph** → Every vertex is reachable from any other vertex.
+- **Subgraph** → A subgraph is simply a smaller graph that is entirely contained within another graph.
+
+Types of Graphs
+
+- `By Direction`
+  - Undirected Graph → Edges have no direction (A - B).
+  - Directed Graph (Digraph) → Edges have a direction (A → B).
+- `By Weight`
+  - Weighted Graph → Edges have weights (distances, costs, etc.).
+  - Unweighted Graph → All edges have equal weight.
+- `By Connectivity`
+  - Connected Graph → At least one path exists between every pair of vertices.
+  - Disconnected Graph → Some vertices are unreachable from others.
+- `By Cycles`
+  - Acyclic Graph → No cycles.
+  - Cyclic Graph → Contains at least one cycle.
+  - DAG (Directed Acyclic Graph) → Directed and has no cycles (used in scheduling, dependency graphs).
+- `Special Graphs`
+  - Complete Graph (`Kn`) → Every vertex is connected to every other vertex. (All of the vertices degrees are equal)
+  - Bipartite Graph → Vertices can be divided into two sets with edges only between sets.
+  - Tree → Connected, acyclic, undirected graph.
+  - Sparse Graph → Few edges compared to maximum possible.
+  - Dense Graph → Many edges compared to maximum possible.
+
+| Representation       | Description                                             | Space Complexity | Pros / Cons                                           |
+| -------------------- | ------------------------------------------------------- | ---------------- | ----------------------------------------------------- |
+| **Adjacency Matrix** | 2D array; `matrix[i][j]` = 1 (or weight) if edge exists | O(V²)            | Fast lookups, but high memory use for sparse graphs   |
+| **Adjacency List**   | List of vertices with a list of connected neighbors     | O(V + E)         | Space efficient for sparse graphs, slower for lookups |
+| **Edge List**        | List of all edges `(u, v, w)`                           | O(E)             | Very compact but slower to traverse                   |
+
+![Graph](images/graph.webp)
+![Graph - Adjacency Matrix](images/graph+matrix.webp)
+![Graph - Bipartite](images/bipartite-graph.jpg)
+
+Operations:
+
+| Operation          | Adjacency List | Adjacency Matrix |
+| ------------------ | -------------- | ---------------- |
+| Add Vertex         | O(1)           | O(V²)            |
+| Add Edge           | O(1)           | O(1)             |
+| Remove Vertex      | O(V + E)       | O(V²)            |
+| Remove Edge        | O(E)           | O(1)             |
+| Check Edge Exists  | O(V)           | O(1)             |
+| Traverse (DFS/BFS) | O(V + E)       | O(V²)            |
+
+**Implementation**: [Graph](Data-Structures/graph.py) | [Graph - Traverse](Data-Structures/graph_traverse.py)
