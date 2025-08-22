@@ -1108,4 +1108,5 @@ docker pull localhost:5000/<image>
 ```
 
 - you can also configure nginx with above compose file and stack deploy your local registry on Docker Swarm and use labeling constraints to only deploy it on manager nodes!
+- When you are using exposed services it's best practice to generate **SSL certificate** for secure connection between your registry and other nodes!
 - you can also host a local registry using **Nexus** which unlike Docker's official registry, can also be used for managing multi artifacts like Maven, npm, PyPI, etc.
