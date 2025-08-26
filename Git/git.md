@@ -1,6 +1,7 @@
 # Git
 
 ## Table of Contents
+
 - [Git](#git)
   - [Table of Contents](#table-of-contents)
   - [Configuration](#configuration)
@@ -24,7 +25,8 @@
   - [Others](#others)
 
 ## Configuration
-```bash
+
+```sh
 # Set global username
 git config --global user.name "Your Name"
 
@@ -36,7 +38,8 @@ git config --global --list
 ```
 
 ## Initializing and Cloning
-```bash
+
+```sh
 # Initialize a new Git repository
 git init
 
@@ -48,7 +51,8 @@ git clone --branch=<branch_name> --depth=<n> <repository_url>
 ```
 
 ## Staging and Committing
-```bash
+
+```sh
 # Check the status of the repository
 git status
 
@@ -82,6 +86,7 @@ git commit -m "Commit message"
 
 # Commit changes
 git commit
+# `--no-verify`: commit without running pre-commit hooks
 # Then your default terminal editor opens and you can write your commit title and description
 
 # Edit the latest submitted commit
@@ -99,7 +104,8 @@ git show --pretty=short <commit_hash>
 ```
 
 ## Branching
-```bash
+
+```sh
 # List all branches
 git branch
 
@@ -137,7 +143,8 @@ git branch -m <old-branch-name> <new-branch-name>
 ```
 
 ## Merging
-```bash
+
+```sh
 # Merge 'branch_name' branch into the current branch (fast-forward)
 git merge <branch_name>
 git merge --ff <branch_name>
@@ -175,7 +182,8 @@ git merge -X theirs feature-branch
 ```
 
 ## Rebasing
-```bash
+
+```sh
 # Rebase the current branch onto the 'branch_name' branch
 git rebase <branch_name>
 
@@ -200,15 +208,17 @@ git rebase --skip
 # Continue rebase after resolving conflicts
 git rebase --continue
 ```
+
 - During interactive rebase:
-  - ***pick*** a commit: add a commit.
-  - ***Reword*** a commit message: modify a commit message.
-  - ***Squash*** multiple commits into one: merge commits.
-  - ***Drop*** a commit: removes a commit.
-  - *Reorder* commits: Simply move commit lines up/down in the rebase editor.
+  - **_pick_** a commit: add a commit.
+  - **_Reword_** a commit message: modify a commit message.
+  - **_Squash_** multiple commits into one: merge commits.
+  - **_Drop_** a commit: removes a commit.
+  - _Reorder_ commits: Simply move commit lines up/down in the rebase editor.
 
 ## Cherry-picking
-```bash
+
+```sh
 # Copies a commit from another branch to the current branch
 git cherry-pick <commit-hash>
 
@@ -232,7 +242,8 @@ git cherry-pick --continue
 ```
 
 ## Pushing and Pulling
-```bash
+
+```sh
 # Push changes to a remote repository
 git push origin <branch_name>
 
@@ -258,7 +269,8 @@ git pull
 ```
 
 ## Undoing Changes
-```bash
+
+```sh
 # Discards local changes in a tracked file and restores it to the last committed state
 git checkout -- <file>
 
@@ -280,7 +292,8 @@ git revert <commit_hash>
 ```
 
 ## Stashing Changes
-```bash
+
+```sh
 # Stash current changes
 git stash
 
@@ -328,7 +341,8 @@ git stash clear
 ```
 
 ## Working with Remotes
-```bash
+
+```sh
 # Add a remote repository
 git remote add origin <repository_url>
 
@@ -343,7 +357,8 @@ git remote rm <remote_name>
 ```
 
 ## Viewing History
-```bash
+
+```sh
 # Show commit history
 git log
 
@@ -395,7 +410,8 @@ git diff origin/main
 ```
 
 ## Tagging
-```bash
+
+```sh
 # Create a new tag
 git tag <tag_name>
 
@@ -429,7 +445,8 @@ git push --delete origin <tag_name>
 ```
 
 ## Deleting and Cleaning
-```bash
+
+```sh
 # Remove a file from local working directory and git history
 git rm <file>
 
@@ -459,7 +476,8 @@ git clean -f -X "*.log"
 ```
 
 ## Signing Commits and Tags
-```bash
+
+```sh
 # Configure Git to use GPG for signing
 git config --global user.signingkey <gpg_key_id>
 
@@ -479,7 +497,8 @@ git tag -v <tag_name>
 ```
 
 ## Blaming
-```bash
+
+```sh
 # Shows who last modified each line in a file
 git blame <file>
 
@@ -509,7 +528,8 @@ git blame <branch> <file>
 ```
 
 ## Bisect
-```bash
+
+```sh
 # Start a binary search to find a faulty commit
 git bisect start
 
@@ -533,7 +553,8 @@ git bisect run <script>
 ```
 
 ## Help
-```bash
+
+```sh
 # Show help for a specific command
 git help <command>
 
@@ -548,6 +569,7 @@ git help -g
 ```
 
 ## Others
-- ***api.github.com/users/<user_name>*** provides user information in a JSON format
+
+- **_api.github.com/users/<user_name>_** provides user information in a JSON format
 - Create a Github repository named after your **username** to provide a special representation of your profile in Github!
 - Create a Github repository named **username**.github.io to provide a web-page with this address for showing your resume or any other purpose!
