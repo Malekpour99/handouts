@@ -48,6 +48,9 @@
     - [When would you prefer prefetch_related over select_related, even if a JOIN is possible?](#when-would-you-prefer-prefetch_related-over-select_related-even-if-a-join-is-possible)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
+    - [Image Vs. Container](#image-vs-container)
+    - [Custom Image (Dockerfile) Best Practices](#custom-image-dockerfile-best-practices)
+    - [Multi-Staging](#multi-staging)
   - [Git](#git)
     - [What does actually a git commit stores in itself?](#what-does-actually-a-git-commit-stores-in-itself)
     - [Merge Vs. Rebase](#merge-vs-rebase)
@@ -1173,6 +1176,55 @@ In Go (GORM)
 ## Database
 
 ## Docker & Containerization
+
+### Image Vs. Container
+
+- **Docker Image**
+
+  - Think of it as a blueprint (or template).
+  - It’s a read-only snapshot that contains everything needed to run an application: code, dependencies, libraries, environment variables, and configs.
+  - Images are built in layers (each instruction in a Dockerfile creates a new layer).
+  - They are immutable — once built, they don’t change.
+
+- **Docker Container**
+
+  - A running instance of an image.
+  - Containers are mutable at runtime: they can write to their filesystem (a writable layer is added on top of the image).
+  - Multiple containers can be created from the same image, each isolated with its own process space, networking, and storage.
+  - Containers can be started, stopped, restarted, or destroyed without affecting the original image.
+
+### Custom Image (Dockerfile) Best Practices
+
+- Use official images or minimal base images (Prefer _language-specific_ base images)
+- Use multi-stage builds (reduce image size by separating build and runtime environments)
+- Document exposed ports and metadata (e.g. maintainer, version, etc.)
+- Use Environment Variables (`ENV`) instead of hardcoding paths or other variables.
+- Set WORKDIR instead of cd (use WORKDIR to define working directory; it’s clearer and Docker-layer aware)
+- Install only what's necessary and combine RUN commands to reduce layers
+- Clean up temporary files (remove caches and temp files after installing packages)
+- Use non-root user (improves security by preventing privilege escalation in case of a container exploit)
+- Minimize COPY scope using docker ignore (only copy what’s needed, use `.dockerignore` to skip unnecessary files e.g. node_modules, .git, etc.)
+- Use ENTRYPOINT + CMD properly (ENTRYPOINT defines the fixed command; CMD defines default args -can be overridden-)
+- Use specific tag for each image which shows file-version (e.g. _jenkins:2.1.4_)
+- Use Linters for assessing Dockerfiles ([`hadolint`](https://github.com/hadolint/hadolint))
+- Add HEALTHCHECK (helps detect if the app inside the container is working correctly)
+- Limit containers processes during creation (use constraints like _CPU_ and _memory_ limits and _control group (cgroup)_ configurations)
+- Analyze docker image layers ([`dive`](https://github.com/wagoodman/dive))
+
+### Multi-Staging
+
+Multi-staging allows you to separate the build environment (where you compile or bundle your app) from the runtime environment (where you actually run it).
+
+- Compile/build in one stage (with all the heavy tooling).
+- Copy only the final artifacts into a minimal base image.
+- Keep the final runtime image lean and secure.
+
+- **Benefits**
+
+  - Smaller images → Faster pulls, less attack surface.
+  - Cleaner Dockerfiles → You don’t need separate build scripts.
+  - Security → No leftover compilers or secrets in the runtime image.
+  - Flexibility → You can have multiple build stages for testing, linting, or packaging.
 
 ## Git
 
