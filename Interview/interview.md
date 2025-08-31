@@ -40,9 +40,10 @@
     - [Sequential Execution in Python](#sequential-execution-in-python)
     - [Async Execution in Python](#async-execution-in-python)
     - [Coroutine Vs. Regular function in Python](#coroutine-vs-regular-function-in-python)
-  - [Django](#django)
+  - [Backend](#backend)
     - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
+    - [N + 1 Problem](#n--1-problem)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
   - [Git](#git)
@@ -1003,7 +1004,7 @@ In Python, coroutines are defined using `async def` and are executed with `await
 
 ---
 
-## Django
+## Backend
 
 ### MVT in Django - MVT vs. MVC
 
@@ -1097,6 +1098,22 @@ User -> Django (Controller) -> View -> Model -> Template -> User
 - The WSGI/ASGI server sends it back to the client (browser or API consumer).
 
 ---
+
+### N + 1 Problem
+
+The N+1 problem happens when you run 1 query to fetch a list of records (N records), and then for each record, you run an additional query to fetch related data.
+
+- Total queries = 1 (initial fetch) + N (per record) = N+1 queries.
+- This quickly becomes inefficient at scale, especially with large datasets.
+
+In Django
+
+- Use `select_related` for **one-to-one** or **foreign key** relationships.
+- Use `prefetch_related` for **many-to-many** or **reverse** relationships.
+
+In Go (GORM)
+
+- Use **eager loading** (`Preload`).
 
 ## Database
 
