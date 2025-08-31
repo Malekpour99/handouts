@@ -45,6 +45,7 @@
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
     - [N + 1 Problem](#n--1-problem)
     - [Select-Related \& Prefetch-Related in Django](#select-related--prefetch-related-in-django)
+    - [When would you prefer prefetch_related over select_related, even if a JOIN is possible?](#when-would-you-prefer-prefetch_related-over-select_related-even-if-a-join-is-possible)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
   - [Git](#git)
@@ -1131,6 +1132,36 @@ In Go (GORM)
   - Query 1: Fetch base objects.
   - Query 2: Fetch related objects with an IN (...) filter.
 - Type of JOIN: None at SQL level (Django does a “manual join” in memory).
+
+### When would you prefer prefetch_related over select_related, even if a JOIN is possible?
+
+1. Risk of Row Explosion
+
+   - If I use select_related (JOIN), the result set size can blow up when one parent has many children.
+   - Example: A User with 10,000 Posts.
+   - select_related with a JOIN → returns 10,000 rows for 1 user, duplicating user fields in each row.
+   - That wastes network bandwidth, memory, and ORM processing time.
+
+   - prefetch_related avoids this by fetching:
+   - 1 row for the user
+   - 10,000 rows for posts (separate query)
+   - Then Django associates them in Python.
+
+2. Better Query Planner Performance
+
+   - A huge JOIN with multiple relations can confuse the database’s query planner, leading to slow execution.
+   - With prefetch_related, you keep queries simpler (SELECT ... WHERE id IN (...)) and let Django’s Python layer do the merge.
+   - This is often faster in real-world apps where relations are 1-to-many or many-to-many.
+
+3. Memory Efficiency in Python
+
+   - With JOINs (select_related), Django has to hydrate a model instance per duplicate row — even though most fields are identical.
+   - With prefetch_related, the base objects (User) are hydrated once, and the children (Posts) are hydrated separately and attached.
+
+4. Database Load Balancing
+
+   - In some setups (read replicas, sharded DBs), it’s useful to keep queries smaller and more cache-friendly.
+   - prefetch_related queries (WHERE ... IN (...)) can be batched or routed independently, while a giant JOIN can’t.
 
 ## Database
 
