@@ -44,6 +44,7 @@
     - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
     - [N + 1 Problem](#n--1-problem)
+    - [Select-Related \& Prefetch-Related in Django](#select-related--prefetch-related-in-django)
   - [Database](#database)
   - [Docker \& Containerization](#docker--containerization)
   - [Git](#git)
@@ -1114,6 +1115,22 @@ In Django
 In Go (GORM)
 
 - Use **eager loading** (`Preload`).
+
+### Select-Related & Prefetch-Related in Django
+
+`select_related` in Django:
+
+- Purpose: Optimizes access to single-valued relationships (ForeignKey, OneToOneField).
+- Mechanism: Generates a **SQL JOIN** to fetch related objects in the same query.
+- Type of JOIN: Django uses **INNER JOIN** by default, but it switches to **LEFT OUTER JOIN** if the relation is **nullable** (so you don’t lose rows when the related object doesn’t exist).
+
+`prefetch_related` in Django
+
+- Purpose: Optimizes access to multi-valued relationships (reverse foreign key, many-to-many).
+- Mechanism: Executes two separate queries and then does the **“join” in Python**, not SQL.
+  - Query 1: Fetch base objects.
+  - Query 2: Fetch related objects with an IN (...) filter.
+- Type of JOIN: None at SQL level (Django does a “manual join” in memory).
 
 ## Database
 
