@@ -57,6 +57,7 @@
     - [4-Way Handshake](#4-way-handshake)
     - [TLS Handshake](#tls-handshake)
     - [What happens when you type-in "www.google.com" in your browser?](#what-happens-when-you-type-in-wwwgooglecom-in-your-browser)
+    - [HTTP Request Methods](#http-request-methods)
   - [Projects](#projects)
 
 ## Programming & Python
@@ -1405,5 +1406,51 @@ The TLS handshake establishes a secure channel between client and server by agre
 9. User Sees Page
 
    - Finally, the rendered page appears in the browser window.
+
+### HTTP Request Methods
+
+- **GET**
+
+  - Retrieves a resource.
+  - Should not modify server state.
+  - Safe, idempotent.
+
+- **POST**
+
+  - Submits data to the server, often creating a new resource.
+  - Not idempotent.
+
+- **PUT**
+
+  - Replaces an existing resource with the provided data.
+  - Idempotent (sending the same request twice results in the same final state).
+
+- **PATCH**
+
+  - Partially updates a resource.
+  - Not always idempotent (depends on implementation).
+
+- **DELETE**
+
+  - Removes a resource.
+  - Idempotent (deleting the same resource twice still results in it being gone).
+
+- **HEAD**
+
+  - Same as GET, but returns only headers (no body).
+  - Useful for checking metadata (e.g., resource existence, content length).
+
+- **OPTIONS**
+
+  - Returns supported methods for a resource.
+  - Common in CORS preflight requests in browsers.
+
+- **TRACE**
+
+  - Echoes the received request, mainly for debugging. Rarely used (and often disabled for security).
+
+- **CONNECT**
+
+  - Establishes a tunnel to the server, often used for HTTPS via proxy.
 
 ## Projects
