@@ -50,6 +50,7 @@
   - [Docker \& Containerization](#docker--containerization)
   - [Git](#git)
     - [What does actually a git commit stores in itself?](#what-does-actually-a-git-commit-stores-in-itself)
+    - [Merge Vs. Rebase](#merge-vs-rebase)
   - [Network](#network)
   - [Projects](#projects)
 
@@ -1215,6 +1216,24 @@ However, Git optimizes storage by:
 7. Optional: GPG Signature
 
    A commit may be signed with a GPG key to verify its authenticity.
+
+### Merge Vs. Rebase
+
+`git merge`
+
+- Combines changes from one branch into another by creating a new merge commit (unless _fast-forward_ is possible).
+- Preserves the exact history of both branches.
+- **Fast-forward merge**
+  - Happens when the target branch has not diverged.
+  - Git just moves the pointer forward — no new commit is created.
+- **No fast-forward merge**
+  - Happens when both branches have diverged.
+  - Git creates a merge commit to tie them together.
+
+`git rebase`
+
+- Moves (or "replays") the commits from one branch on top of another branch, rewriting history.
+- Commits are recreated with new hashes.
 
 ## Network
 
