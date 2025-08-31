@@ -61,6 +61,8 @@
     - [TLS Handshake](#tls-handshake)
     - [What happens when you type-in "www.google.com" in your browser?](#what-happens-when-you-type-in-wwwgooglecom-in-your-browser)
     - [HTTP Request Methods](#http-request-methods)
+  - [Algorithms \& Data-structures](#algorithms--data-structures)
+  - [Design Systems](#design-systems)
   - [Projects](#projects)
 
 ## Programming & Python
@@ -1505,4 +1507,27 @@ The TLS handshake establishes a secure channel between client and server by agre
 
   - Establishes a tunnel to the server, often used for HTTPS via proxy.
 
+## Algorithms & Data-structures
+
+- **Two Sum** -> find the first two members of an array which their sum equals a target number.
+- **Roman to Integer** -> convert roman numbers to integers.
+- **Palindrome** -> determine whether a text/string/number is mirrored or not.
+- **The N-Nearest drives** -> create an efficient way to find 'N' nearest drivers to a passenger (hint: an optimized way is using a min-heap)
+- **Vectors** -> a class for storing vectors' X and Y coordinates and modify it so that these vectors can add-up with each other and print them in a customized way.
+
+## Design Systems
+
+- Design tweeter from the ground up
+- Consider we have a project with 100,000 RPS and these requests data is written on files, design a system for reading and using that data
+- Consider we have two postgres databases and a partition happens between them; what happens now?
+
 ## Projects
+
+- Torna-System -> File-Manager
+- Invex -> Block-Chain Wallet
+- Faraswap -> User registration + Wallet
+- Porsline -> Recommendation system based on user history and activity
+- Toman -> E-commerce CRUD endpoints
+- Torob -> Read, integrate and sort weather reports from a file
+- Remote Synergy (Partnerz) -> Refactor a SMTP mailing service
+- Maktabkhoone -> Design signals based on the observer design pattern (signal register + triggering)
