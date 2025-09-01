@@ -52,6 +52,8 @@
     - [ACID](#acid)
     - [BASE](#base)
     - [ACID Vs. BASE](#acid-vs-base)
+    - [Choosing a Database](#choosing-a-database)
+    - [Isolation Levels](#isolation-levels)
   - [Docker \& Containerization](#docker--containerization)
     - [Image Vs. Container](#image-vs-container)
     - [Custom Image (Dockerfile) Best Practices](#custom-image-dockerfile-best-practices)
@@ -1289,6 +1291,93 @@ Many NoSQL databases (Cassandra, DynamoDB, CouchDB, etc.) follow the BASE model 
 | Consistency  | Strong consistency                                          | Eventual consistency                                                        |
 | Availability | Can sacrifice availability (during conflicts or partitions) | Prioritizes availability                                                    |
 | Use Case     | Banking, reservations, systems needing strong guarantees    | Large-scale distributed systems, social media, e-commerce with huge traffic |
+
+### Choosing a Database
+
+1. **Data Model & Structure**
+
+- If data is highly relational with complex joins, foreign keys, and transactions → a Relational DB (PostgreSQL, MySQL, Oracle) makes sense.
+- If data is document-oriented, hierarchical, or schema-flexible (e.g., product catalogs, JSON-like structures) → a Document Store (MongoDB, Couchbase) is better.
+- If workload is time-series (metrics, IoT, monitoring) → use a Time-Series DB (InfluxDB, TimescaleDB).
+- If workload is graph-like (social networks, recommendation engines) → a Graph DB (Neo4j, ArangoDB) fits best.
+
+2. **Consistency vs Availability (CAP theorem)**
+
+- If the system needs strict correctness (e.g., financial transactions) → choose a strongly consistent ACID DB (PostgreSQL, MySQL, Oracle).
+- If the system prioritizes high availability and scale (e.g., social feeds, analytics) → a BASE / eventually consistent DB (Cassandra, DynamoDB) is more suitable.
+
+3. **Scalability Requirements**
+
+- For a single-region, moderate traffic system → vertical scaling with a relational DB works well.
+- For globally distributed, high-traffic apps → need a horizontally scalable DB like Cassandra, DynamoDB, or CockroachDB.
+
+4. **Query Patterns & Access Needs (Read/Write Heavy)**
+
+- Do we need ad-hoc queries, aggregations, joins? → SQL databases shine.
+- Do we mostly fetch by key/value lookups? → Key-Value stores (Redis, DynamoDB).
+- Do we need real-time analytics? → Columnar DBs (ClickHouse, BigQuery).
+
+5. **Transaction Requirements**
+
+- Strong transactional integrity (ACID) → SQL DBs (Postgres, MySQL).
+- Eventual consistency is okay (shopping cart, likes, logs) → NoSQL (MongoDB, Cassandra).
+
+6. **Ecosystem, Tooling & Operational Overhead**
+
+- Does the team have experience with SQL or NoSQL?
+- Is there cloud-native support (AWS RDS, DynamoDB, GCP Spanner)?
+- Do we need easy migrations, backups, replication?
+
+- **Example**
+
+  - Banking system / Payment gateway → PostgreSQL (ACID, strong consistency).
+  - Social media feed → Cassandra / DynamoDB (BASE, high availability).
+  - Product catalog with flexible schema → MongoDB.
+  - Analytics dashboard → ClickHouse or BigQuery.
+  - Cache / Session store → Redis.
+
+### Isolation Levels
+
+Concurrency Anomalies to Know:
+
+- **Dirty Read** – A transaction reads uncommitted data from another transaction.
+- **Non-Repeatable Read** – A transaction reads the same row twice and gets different results (because another transaction updated it in between).
+- **Phantom Read** – A transaction re-runs a query (e.g., SELECT ... WHERE condition) and new rows appear/disappear (because another transaction inserted/deleted rows).
+
+- **Read Uncommitted (Lowest level)**
+
+  - ✅ Allows dirty reads.
+  - Transactions can see uncommitted changes from others.
+  - Rarely used in practice (can lead to inconsistent states).
+  - Example use: analytics queries where stale data is acceptable.
+
+- **Read Committed**
+
+  - 🚫 Prevents dirty reads.
+  - Each read sees only committed data.
+  - But still allows non-repeatable reads and phantoms.
+  - This is the default in PostgreSQL & Oracle.
+
+- **Repeatable Read**
+
+  - 🚫 Prevents dirty reads and non-repeatable reads.
+  - Guarantees that if you read a row twice in the same transaction, it won’t change.
+  - Still allows phantom reads (new rows might appear that match the query condition).
+  - This is the default in MySQL (InnoDB).
+
+- **Serializable (Highest level)**
+
+  - 🚫 Prevents all three anomalies (dirty, non-repeatable, phantom).
+  - Transactions are executed as if they were serial (one after another).
+  - Strongest guarantee but lowest concurrency (can cause locking/contention).
+  - Best for financial apps requiring correctness over performance.
+
+| Isolation Level  | Dirty Read | Non-Repeatable Read | Phantom Read |
+| ---------------- | ---------- | ------------------- | ------------ |
+| Read Uncommitted | ✅ Allowed | ✅ Allowed          | ✅ Allowed   |
+| Read Committed   | ❌ No      | ✅ Allowed          | ✅ Allowed   |
+| Repeatable Read  | ❌ No      | ❌ No               | ✅ Allowed   |
+| Serializable     | ❌ No      | ❌ No               | ❌ No        |
 
 ## Docker & Containerization
 
