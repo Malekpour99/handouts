@@ -47,6 +47,11 @@
     - [Select-Related \& Prefetch-Related in Django](#select-related--prefetch-related-in-django)
     - [When would you prefer prefetch_related over select_related, even if a JOIN is possible?](#when-would-you-prefer-prefetch_related-over-select_related-even-if-a-join-is-possible)
   - [Database](#database)
+    - [CAP Theorem (Brewer's theorem)](#cap-theorem-brewers-theorem)
+    - [Trade-offs (CA, CP, AP)](#trade-offs-ca-cp-ap)
+    - [ACID](#acid)
+    - [BASE](#base)
+    - [ACID Vs. BASE](#acid-vs-base)
   - [Docker \& Containerization](#docker--containerization)
     - [Image Vs. Container](#image-vs-container)
     - [Custom Image (Dockerfile) Best Practices](#custom-image-dockerfile-best-practices)
@@ -1181,6 +1186,109 @@ In Go (GORM)
    - prefetch_related queries (WHERE ... IN (...)) can be batched or routed independently, while a giant JOIN can’t.
 
 ## Database
+
+### CAP Theorem (Brewer's theorem)
+
+In a distributed database/system, you cannot simultaneously guarantee all three of these properties:
+
+- **Consistency (C)**
+
+  - Every read gets the most recent write (all nodes see the same data at the same time).
+  - Example: If I write X=10, any read immediately after should return 10.
+
+- **Availability (A)**
+
+  - Every request receives a response, even if it might not be the latest version of the data.
+  - System stays responsive even under failure.
+
+- **Partition Tolerance (P)**
+
+  - The system continues to function despite network partitions (nodes not being able to communicate).
+
+CAP theorem says:
+In the presence of a **network partition**, you must choose between **Consistency** and **Availability**.
+
+### Trade-offs (CA, CP, AP)
+
+- **CP (Consistency + Partition tolerance)**
+
+  - Sacrifice availability during network failures.
+  - Strongly consistent systems. (e.g. Banking Systems)
+  - Example: HBase, MongoDB (with strong consistency configs).
+
+- **AP (Availability + Partition tolerance)**
+
+  - Sacrifice strict consistency → eventual consistency is allowed.
+  - Prioritize always responding, even if data might be stale. (e.g. Social Media Feeds)
+  - Example: Cassandra, DynamoDB.
+
+- **CA (Consistency + Availability)**
+
+  - Theoretically possible only if no network partitions exist → not practical in distributed systems.
+  - Example: traditional single-node RDBMS (like PostgreSQL on one machine).
+
+### ACID
+
+`ACID` is a set of properties that guarantee reliable transactions in databases (especially relational ones like PostgreSQL, MySQL, Oracle).
+
+1. **Atomicity**
+
+   - "All or nothing."
+   - A transaction is indivisible: either all operations succeed, or none do.
+   - Example: In a money transfer:
+     - Deduct $100 from Alice
+     - Add $100 to Bob
+     - If adding fails, the deduction is rolled back.
+
+2. **Consistency**
+
+   - Transactions bring the database from one valid state to another valid state, following all rules, constraints, and triggers.
+   - Example: If a column must be unique, inserting a duplicate violates consistency → transaction fails.
+
+3. **Isolation**
+
+   - Concurrent transactions should not interfere with each other.
+   - Intermediate states are not visible to other transactions.
+   - Different isolation levels exist:
+     - Read Uncommitted (dirty reads allowed)
+     - Read Committed
+     - Repeatable Read
+     - Serializable (highest, behaves like transactions are sequential).
+
+4. **Durability**
+
+   - Once a transaction is committed, it is permanent, even if the system crashes right after.
+   - Achieved via **write-ahead logs (WALs)**, **replication**, and **persistent storage**.
+
+### BASE
+
+Many NoSQL databases (Cassandra, DynamoDB, CouchDB, etc.) follow the BASE model to favor scalability and availability in distributed systems.
+
+1. **Basically Available**
+
+- The system guarantees availability, but not necessarily consistency at all times.
+- Even under failure, it tries to respond — possibly with stale data.
+- Example: Amazon DynamoDB or Cassandra nodes may return older values instead of failing.
+
+2. **Soft State**
+
+- The system state may change over time, even without input.
+- Because of replication and eventual consistency, different nodes may temporarily hold different values.
+- Example: A write to one replica may not immediately be visible on another.
+
+3. **Eventual Consistency**
+
+- Given enough time (assuming no new updates), all replicas will converge to the same state.
+- Strong consistency is sacrificed for performance and fault tolerance.
+- Example: In Cassandra, a read might not show the latest write, but eventually all nodes sync up.
+
+### ACID Vs. BASE
+
+| Property     | **ACID**                                                    | **BASE**                                                                    |
+| ------------ | ----------------------------------------------------------- | --------------------------------------------------------------------------- |
+| Consistency  | Strong consistency                                          | Eventual consistency                                                        |
+| Availability | Can sacrifice availability (during conflicts or partitions) | Prioritizes availability                                                    |
+| Use Case     | Banking, reservations, systems needing strong guarantees    | Large-scale distributed systems, social media, e-commerce with huge traffic |
 
 ## Docker & Containerization
 
