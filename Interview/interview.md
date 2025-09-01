@@ -58,6 +58,7 @@
   - [Git](#git)
     - [What does actually a git commit stores in itself?](#what-does-actually-a-git-commit-stores-in-itself)
     - [Merge Vs. Rebase](#merge-vs-rebase)
+    - [Cherry-Pick](#cherry-pick)
   - [Network](#network)
     - [TCP Vs. UDP](#tcp-vs-udp)
     - [3-Way Handshake](#3-way-handshake)
@@ -1395,6 +1396,16 @@ However, Git optimizes storage by:
 
 - Moves (or "replays") the commits from one branch on top of another branch, rewriting history.
 - Commits are recreated with new hashes.
+
+### Cherry-Pick
+
+`git cherry-pick` lets you apply a specific commit (or set of commits) from one branch onto another branch, **without merging** the whole branch.
+It takes the changes introduced by that commit and **creates a new commit** on top of your current branch.
+
+- Usage:
+  - **Hotfixes** → Apply a critical bug fix from a feature branch to main immediately.
+  - **Backporting** → Apply a patch to an older release branch.
+  - **Selective integration** → You want only one commit, not a whole merge.
 
 ## Network
 
