@@ -51,6 +51,10 @@
     - [Image Vs. Container](#image-vs-container)
     - [Custom Image (Dockerfile) Best Practices](#custom-image-dockerfile-best-practices)
     - [Multi-Staging](#multi-staging)
+    - [CMD Vs. RUN](#cmd-vs-run)
+    - [Entrypoint](#entrypoint)
+    - [Docker Vs. VM](#docker-vs-vm)
+    - [How Docker Containers Are Isolated from Each Other?](#how-docker-containers-are-isolated-from-each-other)
   - [Git](#git)
     - [What does actually a git commit stores in itself?](#what-does-actually-a-git-commit-stores-in-itself)
     - [Merge Vs. Rebase](#merge-vs-rebase)
@@ -1227,6 +1231,103 @@ Multi-staging allows you to separate the build environment (where you compile or
   - Cleaner Dockerfiles → You don’t need separate build scripts.
   - Security → No leftover compilers or secrets in the runtime image.
   - Flexibility → You can have multiple build stages for testing, linting, or packaging.
+
+### CMD Vs. RUN
+
+- `RUN`
+
+  - Purpose: Executes a command at build time.
+  - Used for: Installing software, modifying the image filesystem, etc.
+  - Effect: The result becomes part of the final image layer.
+
+- `CMD`
+
+  - Purpose: Specifies the default command to run when a container starts (runtime).
+  - Used for: Defining what the container should do by default.
+  - Effect: Does not affect the image during build.
+
+### Entrypoint
+
+`ENTRYPOINT` defines the main command that will always run when a container starts.
+It makes the container behave like an executable.
+Unlike `CMD`, which is more of a “default argument”, `ENTRYPOINT` is the fixed command — arguments from `docker run` are passed to it.
+
+- `ENTRYPOINT` -> fixed program.
+- `CMD` -> default arguments to that program (but can be _overridden_ at runtime).
+
+### Docker Vs. VM
+
+1. Architecture
+
+- VMs
+
+  - Run a full operating system (guest OS) on top of a **hypervisor** (like VMware, VirtualBox, KVM).
+  - Each VM includes its own kernel + system libraries + application.
+  - Heavyweight: more resource overhead.
+
+- Docker (containers)
+
+  - Run on the **host OS kernel** (no guest OS).
+  - Containers share the host kernel but isolate processes, filesystems, and networking using Linux namespaces & cgroups.
+  - Lightweight: no need to boot a full OS.
+
+2. Startup Time
+
+- VMs: Minutes (booting an OS).
+- Containers: Seconds or less (just starting processes).
+
+3. Resource Usage
+
+- VMs: Require dedicated CPU, memory, and disk. Duplicates OS overhead. (dedicated resources are not shared, even if they are not used!)
+- Containers: Share resources dynamically; many more containers can run on the same host.
+
+4. Portability
+
+- VMs: Images are big (GBs), less portable.
+- Containers: Images are layered and small (MBs), easy to move and deploy.
+
+5. Isolation & Security
+
+- VMs: Strong isolation — each VM has its own kernel. Good for untrusted workloads.
+- Containers: Weaker isolation — all containers share the host kernel. Security depends on kernel hardening, namespaces, SELinux/AppArmor.
+
+6. Use Cases
+
+- VMs: Best for running multiple OS types on the same host (e.g., Linux + Windows). Good when strong isolation is needed.
+- Containers (Docker): Best for microservices, CI/CD pipelines, cloud-native apps, fast scaling.
+
+### How Docker Containers Are Isolated from Each Other?
+
+1. Namespaces (provide isolation of resources)
+
+Namespaces create the illusion that each container has its own dedicated system.
+
+- **PID namespace** → Each container has its own process tree (can’t see or affect host/other containers’ processes).
+- **NET namespace** → Each container has its own network stack (interfaces, IPs, routing tables, ports).
+- **MNT namespace** → Separate filesystem view (different root FS, mounts).
+- **UTS namespace** → Each container can have its own hostname & domain name.
+- **IPC namespace** → Isolates inter-process communication (shared memory, semaphores, message queues).
+- **User namespace** → Maps container users to different host users (can make root inside container map to unprivileged UID on host).
+
+2. Control Groups (cgroups) (provide resource limits)
+
+- Limit and monitor resources: CPU, memory, I/O, network bandwidth.
+- Prevents one container from starving others.
+- Example: You can cap a container to 512MB RAM and 1 CPU core.
+
+3. Union File Systems (OverlayFS, AUFS, etc.)
+
+- Each container gets its own **filesystem layer**.
+- **Copy-on-write** ensures containers can modify files without affecting the base image or other containers.
+
+4. Capabilities & Seccomp
+
+- By default, containers drop many Linux capabilities (like loading kernel modules).
+- `Seccomp` (secure computing mode) filters syscalls to restrict what a containerized process can do.
+
+5. Security Modules
+
+- Tools like `AppArmor` and `SELinux` add mandatory access control policies to restrict container actions beyond namespaces/cgroups.
 
 ## Git
 
