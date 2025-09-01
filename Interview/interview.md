@@ -54,6 +54,7 @@
     - [ACID Vs. BASE](#acid-vs-base)
     - [Choosing a Database](#choosing-a-database)
     - [Isolation Levels](#isolation-levels)
+    - [Primary Indexing Vs. Secondary Indexing](#primary-indexing-vs-secondary-indexing)
   - [Docker \& Containerization](#docker--containerization)
     - [Image Vs. Container](#image-vs-container)
     - [Custom Image (Dockerfile) Best Practices](#custom-image-dockerfile-best-practices)
@@ -1378,6 +1379,32 @@ Concurrency Anomalies to Know:
 | Read Committed   | ❌ No      | ✅ Allowed          | ✅ Allowed   |
 | Repeatable Read  | ❌ No      | ❌ No               | ✅ Allowed   |
 | Serializable     | ❌ No      | ❌ No               | ❌ No        |
+
+### Primary Indexing Vs. Secondary Indexing
+
+- **Primary Index**
+
+  - Built on the primary key (or clustering key) of a table.
+  - The data file itself is ordered by this key (clustered index).
+  - Each table can have only one primary index.
+  - Lookup is very fast because the index order matches the physical storage order.
+
+- **Secondary Index**
+
+  - Built on non-primary key attributes (non-clustering key).
+  - The data file is not ordered by this key.
+  - A table can have multiple secondary indexes.
+  - Provides fast lookups on attributes other than the primary key.
+  - Usually implemented with an extra pointer (row ID / primary key reference) that links back to the actual row.Think of it as an extra search table that helps find rows quickly without scanning everything.
+  - too many secondary indexes slow down writes (since every insert/update must update all relevant indexes).
+
+| Feature             | Primary Index                         | Secondary Index                        |
+| ------------------- | ------------------------------------- | -------------------------------------- |
+| **Key Type**        | Built on primary key / clustering key | Built on non-primary key columns       |
+| **Ordering**        | Data stored in order of index         | Data not stored in index order         |
+| **Count per Table** | Only one                              | Many allowed                           |
+| **Access Method**   | Direct, since data is aligned         | Needs extra lookup (to row/primary)    |
+| **Performance**     | Faster for key-based searches         | Slight overhead (extra pointer lookup) |
 
 ## Docker & Containerization
 
