@@ -41,6 +41,7 @@
     - [Async Execution in Python](#async-execution-in-python)
     - [Coroutine Vs. Regular function in Python](#coroutine-vs-regular-function-in-python)
   - [Backend](#backend)
+    - [Authentication Vs. Authorization](#authentication-vs-authorization)
     - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
     - [N + 1 Problem](#n--1-problem)
@@ -1032,6 +1033,12 @@ In Python, coroutines are defined using `async def` and are executed with `await
 ---
 
 ## Backend
+
+### Authentication Vs. Authorization
+
+**Authentication**: The process of verifying who the user is. It’s about **identity verification**.
+
+**Authorization**: The process of verifying what the authenticated user can do. It’s about **permissions and access control**. Usually happens after authentication.
 
 ### MVT in Django - MVT vs. MVC
 
