@@ -13,6 +13,7 @@
     - [Choosing a Database](#choosing-a-database)
     - [Isolation Levels](#isolation-levels)
     - [Primary Indexing Vs. Secondary Indexing](#primary-indexing-vs-secondary-indexing)
+    - [Redis Vs. RabbitMQ Vs. Kafka](#redis-vs-rabbitmq-vs-kafka)
 
 ## Database
 
@@ -245,5 +246,21 @@ Concurrency Anomalies to Know:
 | **Count per Table** | Only one                              | Many allowed                           |
 | **Access Method**   | Direct, since data is aligned         | Needs extra lookup (to row/primary)    |
 | **Performance**     | Faster for key-based searches         | Slight overhead (extra pointer lookup) |
+
+---
+
+### Redis Vs. RabbitMQ Vs. Kafka
+
+| Feature                            | **Redis** (Pub/Sub / Streams)                                           | **RabbitMQ** (AMQP Broker)                                           | **Kafka** (Event Streaming)                                                                   |
+| ---------------------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| **Type**                           | In-memory datastore with pub/sub and streams                            | Traditional message broker                                           | Distributed event streaming/log platform                                                      |
+| **Persistence**                    | Optional (RDB / AOF); Pub/Sub is ephemeral                              | Durable queues on disk                                               | Always persistent (commit log)                                                                |
+| **Throughput**                     | Very high (microseconds latency)                                        | Medium–high (100k+ msgs/sec)                                         | Extremely high (millions msgs/sec)                                                            |
+| **Scalability**                    | Limited (Redis Cluster, sharding)                                       | Clustering, but scaling is harder                                    | Native horizontal scalability                                                                 |
+| **Ordering**                       | Not guaranteed in Pub/Sub; Streams maintain sequence within a stream    | Guaranteed per queue                                                 | Guaranteed per partition                                                                      |
+| **Delivery Promise**               | **At-most-once** (Pub/Sub) <br> **At-least-once** (Streams if ACK used) | **At-most-once**, **At-least-once**, **Exactly-once** (with plugins) | **At-least-once** by default; **Exactly-once** supported with transactions (since Kafka 0.11) |
+| **Repeatable (Re-read messages?)** | ❌ Pub/Sub: No replay <br> ✅ Streams: Replay possible while retained   | ❌ Once a consumer ACKs, message is gone                             | ✅ Yes, consumers can replay from offsets (log retained for hours–days–forever)               |
+| **Routing Flexibility**            | Basic (channels/streams)                                                | Rich (direct, fanout, topic, headers exchanges)                      | Partition-based, less flexible than RabbitMQ                                                  |
+| **Use Case Fit**                   | Lightweight messaging, caching, leaderboards, chat apps                 | Background job processing, workflows, task distribution              | Event-driven systems, analytics pipelines, log aggregation, event sourcing                    |
 
 ---
