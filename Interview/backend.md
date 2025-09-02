@@ -17,6 +17,8 @@
     - [When would you prefer prefetch_related over select_related, even if a JOIN is possible?](#when-would-you-prefer-prefetch_related-over-select_related-even-if-a-join-is-possible)
     - [Atomic Transactions in Django](#atomic-transactions-in-django)
     - [Handling Race Conditions in Django](#handling-race-conditions-in-django)
+    - [Celery](#celery)
+    - [Celery-Beat](#celery-beat)
 
 ## Backend
 
@@ -305,5 +307,56 @@ from django.db.models import F
 def increment_likes(post_id):
     Post.objects.filter(id=post_id).update(likes=F('likes') + 1)
 ```
+
+---
+
+### Celery
+
+Celery is a distributed task queue. It allows you to execute work (tasks) asynchronously (in the background) or synchronously, across multiple workers. It’s often used for background jobs like sending emails, processing images, running ML jobs, or periodic tasks (like CRON).
+
+Core Concepts:
+
+- **Producer (Client / App)**
+
+  - Your Django/FastAPI/Flask app defines tasks and submits them with `.delay()` or `.apply_async()`.
+
+- **Broker (Message Queue)**
+
+  - Tasks are pushed into a broker (e.g., RabbitMQ, Redis, Kafka).
+  - Broker acts like a "mailbox" — workers pick up messages (tasks) from it.
+
+- **Worker**
+
+  - Worker processes run in the background.
+  - They listen to the broker, pull tasks, execute them, and return results (if needed).
+
+- **Result Backend (Optional)**
+
+  - Stores the output of tasks (in Redis, database, or S3).
+  - Useful if you want to query task status (PENDING, STARTED, SUCCESS, FAILURE, RETRY).
+
+### Celery-Beat
+
+Celery Beat is a separate process that maintains a scheduler.
+The scheduler is basically a Python object in memory that holds your task schedule (beat_schedule).
+
+At startup, Beat loads the schedule from:
+
+- Configuration (`app.conf.beat_schedule`)
+- Or a persistent schedule file (default: `celerybeat-schedule`, usually _SQLite-like DB stored on disk_).
+- With **Django-Celery-Beat**, schedules are stored in the Django database (`PeriodicTask` model).
+  - Beat queries the DB periodically (using its _scheduler sync interval_).
+
+Beat then:
+
+- Keeps track of the next due time for each task.
+- Uses a simple loop to check “is anything due now?”.
+- When due, Beat publishes the task to the broker (Redis, RabbitMQ, etc.).
+- Workers then pick it up.
+
+Changing Celery-Beat Schedule, does it apply real-time:
+
+- **Vanilla Celery Beat** (file-based schedule): ❌ No, requires restart.
+- **Django-Celery-Beat** (DB-backed schedule): ✅ Yes, near real-time (Beat polls DB periodically). but if you need it instantly restart celery beat.
 
 ---
