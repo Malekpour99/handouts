@@ -43,6 +43,7 @@
   - [Backend](#backend)
     - [Authentication Vs. Authorization](#authentication-vs-authorization)
     - [Stateful Vs. Stateless](#stateful-vs-stateless)
+    - [JWT](#jwt)
     - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
     - [N + 1 Problem](#n--1-problem)
@@ -1049,6 +1050,36 @@ In Python, coroutines are defined using `async def` and are executed with `await
 | **Scaling**       | Easy (any server can serve request) | Harder (needs sticky sessions or shared state) |
 | **Failure**       | Recover easily (no session loss)    | Session loss if server crashes                 |
 | **Example**       | REST API, DNS, HTTP itself          | WebSockets, FTP, server-side sessions          |
+
+### JWT
+
+**JWT (JSON Web Token)** is a compact, URL-safe, self-contained token used to securely transmit information between parties.
+Commonly used for **authentication and authorization** in **stateless** systems.
+Instead of storing sessions on the server, the server issues a signed token to the client.
+
+A JWT consists of three parts separated by dots (.): `header.payload.signature`
+
+- **Header** → metadata about the token (e.g., type = JWT, signing algorithm = HS256 or RS256).
+
+```json
+{ "alg": "HS256", "typ": "JWT" }
+```
+
+- **Payload** → contains claims (statements about the user or context).
+
+  - Registered claims: iss (issuer), exp (expiration), sub (subject), aud (audience).
+  - Public claims: app-defined (like role).
+  - Private claims: agreed upon between parties.
+
+```json
+{ "sub": "123456", "name": "Alice", "role": "admin", "exp": 1735647390 }
+```
+
+- **Signature** → ensures integrity.
+
+```
+HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret)
+```
 
 ### MVT in Django - MVT vs. MVC
 
