@@ -42,6 +42,7 @@
     - [Coroutine Vs. Regular function in Python](#coroutine-vs-regular-function-in-python)
   - [Backend](#backend)
     - [Authentication Vs. Authorization](#authentication-vs-authorization)
+    - [Stateful Vs. Stateless](#stateful-vs-stateless)
     - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
     - [N + 1 Problem](#n--1-problem)
@@ -1039,6 +1040,15 @@ In Python, coroutines are defined using `async def` and are executed with `await
 **Authentication**: The process of verifying who the user is. It’s about **identity verification**.
 
 **Authorization**: The process of verifying what the authenticated user can do. It’s about **permissions and access control**. Usually happens after authentication.
+
+### Stateful Vs. Stateless
+
+| Aspect            | Stateless                           | Stateful                                       |
+| ----------------- | ----------------------------------- | ---------------------------------------------- |
+| **Server Memory** | Doesn’t store client state          | Stores client state (sessions, context)        |
+| **Scaling**       | Easy (any server can serve request) | Harder (needs sticky sessions or shared state) |
+| **Failure**       | Recover easily (no session loss)    | Session loss if server crashes                 |
+| **Example**       | REST API, DNS, HTTP itself          | WebSockets, FTP, server-side sessions          |
 
 ### MVT in Django - MVT vs. MVC
 
