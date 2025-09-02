@@ -15,6 +15,8 @@
     - [N + 1 Problem](#n--1-problem)
     - [Select-Related \& Prefetch-Related in Django](#select-related--prefetch-related-in-django)
     - [When would you prefer prefetch_related over select_related, even if a JOIN is possible?](#when-would-you-prefer-prefetch_related-over-select_related-even-if-a-join-is-possible)
+    - [Atomic Transactions in Django](#atomic-transactions-in-django)
+    - [Handling Race Conditions in Django](#handling-race-conditions-in-django)
 
 ## Backend
 
@@ -257,5 +259,51 @@ In Go (GORM)
 
    - In some setups (read replicas, sharded DBs), it’s useful to keep queries smaller and more cache-friendly.
    - prefetch_related queries (WHERE ... IN (...)) can be batched or routed independently, while a giant JOIN can’t.
+
+---
+
+### Atomic Transactions in Django
+
+In Django, an atomic transaction ensures that a block of database operations is treated as a single unit of work:
+
+- Either all of the operations succeed → commit.
+- Or if an error occurs → all are rolled back.
+
+This ensures **data consistency** and prevents partial writes.
+
+Django provides `transaction.atomic()` as a context manager or decorator.
+
+---
+
+### Handling Race Conditions in Django
+
+You can handle race condition by combining:
+
+- `transaction.atomic()` ensures all-or-nothing.
+- `select_for_update()` locks the row until the transaction completes → prevents others from reading stale data.
+- Example:
+
+```python
+from django.db import transaction
+
+def book_ticket(user, event):
+    with transaction.atomic():
+        ticket = Ticket.objects.select_for_update().get(event=event)
+        if ticket.remaining > 0:
+            ticket.remaining -= 1
+            ticket.save()
+        else:
+            raise Exception("Sold out")
+```
+
+- `F()` expressions (avoid race conditions on updates)
+- Example:
+
+```python
+from django.db.models import F
+
+def increment_likes(post_id):
+    Post.objects.filter(id=post_id).update(likes=F('likes') + 1)
+```
 
 ---
