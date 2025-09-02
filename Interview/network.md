@@ -1,0 +1,237 @@
+# Interview Questions
+
+## Table of Contents
+
+- [Interview Questions](#interview-questions)
+  - [Table of Contents](#table-of-contents)
+  - [Network](#network)
+    - [TCP Vs. UDP](#tcp-vs-udp)
+    - [3-Way Handshake](#3-way-handshake)
+    - [4-Way Handshake](#4-way-handshake)
+    - [TLS Handshake](#tls-handshake)
+    - [What happens when you type-in "www.google.com" in your browser?](#what-happens-when-you-type-in-wwwgooglecom-in-your-browser)
+    - [HTTP Request Methods](#http-request-methods)
+
+## Network
+
+### TCP Vs. UDP
+
+**TCP (Transmission Control Protocol)** and **UDP (User Datagram Protocol)** are both transport-layer protocols, but they serve very different purposes depending on the application’s requirements.
+
+1. Reliability & Delivery Guarantees:
+
+   - TCP is connection-oriented. It ensures reliable delivery by using acknowledgments (ACKs), retransmissions, and sequencing. This means data arrives in order and without duplication. It’s great for applications where correctness is critical — e.g., web traffic (HTTP/HTTPS), file transfers, database replication.
+   - UDP is connectionless. It does not guarantee delivery, ordering, or error correction beyond basic checksums. This makes it faster but unreliable. If packets are lost or arrive out of order, the application itself must handle that logic (if it cares).
+
+2. Performance & Overhead:
+
+   - TCP has more overhead due to connection setup (3-way handshake), state management, congestion control, and flow control. It prioritizes reliability over speed.
+   - UDP is lightweight, with very little overhead. There’s no connection handshake, which makes it suitable for low-latency and high-throughput scenarios.
+
+3. Use Cases:
+
+   - TCP: Web browsers, APIs over HTTP(S), SSH, FTP — basically anywhere where consistency and data integrity are essential.
+   - UDP: Real-time streaming, gaming, VoIP, DNS — where speed and low latency are more important than reliability, and occasional packet loss is tolerable.
+
+4. Network Behavior:
+
+   - TCP adapts to network conditions with congestion control (e.g., slow start, AIMD).
+   - UDP just keeps sending — it doesn’t care if the network is congested. That’s why protocols like QUIC were introduced: to bring TCP-like reliability over UDP while maintaining low latency.
+
+---
+
+### 3-Way Handshake
+
+The 3-way handshake is how TCP establishes a reliable, connection-oriented communication channel between two endpoints before exchanging data.
+
+1. **SYN (synchronize)**
+
+   - The client sends a packet with the SYN flag set and an initial sequence number (ISN_c).
+   - This tells the server: “I want to start a connection, and here’s my starting sequence number.”
+
+2. **SYN-ACK (synchronize + acknowledgment)**
+
+   - The server responds with a packet that has both the SYN and ACK flags set.
+   - It includes its own initial sequence number (ISN_s) and acknowledges the client’s ISN by setting ACK = ISN_c + 1.
+   - This says: “I got your request, here’s my sequence number, and I acknowledge yours.”
+
+3. **ACK (acknowledgment)**
+
+   - The client sends back a final packet with the ACK flag set, acknowledging the server’s ISN (ACK = ISN_s + 1).
+   - At this point, both sides have exchanged sequence numbers and acknowledgments. The connection is established.
+
+---
+
+### 4-Way Handshake
+
+The 4-way handshake is the process TCP uses to gracefully terminate a connection. Unlike setup, teardown requires four steps because TCP connections are full-duplex — each side must close its half of the connection independently.
+
+1. **FIN (finish) from client → server**
+
+   - The client sends a FIN packet, indicating it has no more data to send.
+   - The client enters the FIN_WAIT_1 state.
+
+2. **ACK from server → client**
+
+   - The server acknowledges the FIN with an ACK, meaning: “I know you’re done sending.”
+   - The server can still send data back if it has some left.
+   - The client enters the FIN_WAIT_2 state.
+
+3. **FIN from server → client**
+
+   - Once the server has finished sending its remaining data, it sends its own FIN.
+   - This tells the client: “I’m also done sending.”
+   - The server enters the LAST_ACK state.
+
+4. **ACK from client → server**
+
+   - The client responds with a final ACK, confirming the server’s FIN.
+   - At this point:
+     - The server transitions to the CLOSED state.
+     - The client enters the TIME_WAIT state (usually 2×MSL — maximum segment lifetime), to ensure delayed packets are handled properly before fully closing.
+
+---
+
+### TLS Handshake
+
+The TLS handshake establishes a secure channel between client and server by agreeing on encryption keys and verifying identities. The exact flow depends on TLS version (1.2 vs 1.3).
+
+1. TLS 1.2 Handshake (traditional)
+
+   - ClientHello
+
+     - Client sends: supported TLS version, list of cipher suites, random nonce.
+     - Says: “Here’s what I support.”
+
+   - ServerHello
+
+     - Server responds with chosen TLS version, cipher suite, its random nonce, and its certificate (X.509 cert containing public key).
+     - The certificate is signed by a trusted Certificate Authority (CA).
+     - The client validates the cert (domain name match, CA chain, expiration).
+
+   - Key Exchange
+
+     - If RSA: Client generates a random premaster secret, encrypts it with server’s public key, and sends it.
+     - If ECDHE (more common today): Client and server perform a Diffie-Hellman key exchange to generate a shared secret.
+     - Both sides now derive a session key from this secret + nonces.
+
+   - Finished Messages
+
+     - Client and server each send a “Finished” message encrypted with the new session key, proving encryption works.
+     - From this point forward, all communication is encrypted.
+
+2. TLS 1.3 Handshake (modern, what Google uses today)
+
+- TLS 1.3 is faster and more secure:
+
+  - Combines steps → handshake typically requires 1 round-trip (1-RTT) instead of 2.
+  - Always uses forward-secret key exchange (ECDHE) — no more static RSA.
+  - Encrypts more of the handshake itself for privacy.
+  - Supports 0-RTT resumption: if you’ve connected before, you can start sending encrypted data immediately.
+
+---
+
+### What happens when you type-in "www.google.com" in your browser?
+
+1. Browser Processing
+
+   - The browser checks if it already has a cached mapping of google.com → IP address (in browser cache, OS cache, or DNS cache).
+   - If cached, it uses it. Otherwise, it initiates a DNS lookup.
+
+2. DNS Resolution
+
+   - The browser/OS queries the configured DNS resolver (e.g., from ISP, or Google’s 8.8.8.8).
+   - The resolver may return the IP from its cache, or it recursively queries:
+   - Root DNS servers → TLD servers (.com) → Google’s authoritative DNS servers.
+   - Eventually, the resolver returns the IP address of google.com (actually, a set of IPs, often load-balanced).
+
+3. TCP Connection Establishment
+
+   - With the IP in hand, the browser opens a TCP connection to the server (default port 80 for HTTP or 443 for HTTPS).
+   - This involves the 3-way handshake (SYN → SYN-ACK → ACK).
+
+4. TLS Handshake (if HTTPS, which Google always is)
+
+   - The browser and server perform a TLS handshake:
+   - Negotiate protocol version & cipher suites.
+   - Exchange certificates (Google presents its SSL/TLS cert, which the browser validates against trusted Certificate Authorities).
+   - Derive session keys for encrypted communication.
+   - From now on, data is encrypted.
+
+5. HTTP Request
+
+   - The browser sends an HTTP GET request for / (the homepage) with headers (Host: google.com, User-Agent, etc.).
+   - This is transmitted over the secure TCP+TLS connection.
+
+6. Server Processing
+
+   - Google’s load balancer receives the request (possibly via anycast IP).
+   - The request may go through reverse proxies, caching layers (Google Frontend, CDNs), and eventually reach Google’s web servers.
+   - The server generates or retrieves the response (HTML, JSON, or redirect).
+
+7. HTTP Response
+
+   - The server sends back an HTTP response (status code, headers, and body).
+   - For Google, often it’s a redirect (302 to a localized domain like google.az) or directly the search page.
+
+8. Browser Rendering
+
+   - The browser parses the HTML:
+   - Builds the DOM tree.
+   - Fetches linked resources (CSS, JS, images). Each may trigger additional DNS lookups, TCP/TLS handshakes, and HTTP requests.
+   - Executes JS, applies styles, and paints pixels on the screen.
+   - This may involve parallel connections and caching strategies (HTTP/2 multiplexing, compression, etc.).
+
+9. User Sees Page
+
+   - Finally, the rendered page appears in the browser window.
+
+---
+
+### HTTP Request Methods
+
+- **GET**
+
+  - Retrieves a resource.
+  - Should not modify server state.
+  - Safe, idempotent.
+
+- **POST**
+
+  - Submits data to the server, often creating a new resource.
+  - Not idempotent.
+
+- **PUT**
+
+  - Replaces an existing resource with the provided data.
+  - Idempotent (sending the same request twice results in the same final state).
+
+- **PATCH**
+
+  - Partially updates a resource.
+  - Not always idempotent (depends on implementation).
+
+- **DELETE**
+
+  - Removes a resource.
+  - Idempotent (deleting the same resource twice still results in it being gone).
+
+- **HEAD**
+
+  - Same as GET, but returns only headers (no body).
+  - Useful for checking metadata (e.g., resource existence, content length).
+
+- **OPTIONS**
+
+  - Returns supported methods for a resource.
+  - Common in CORS preflight requests in browsers.
+
+- **TRACE**
+
+  - Echoes the received request, mainly for debugging. Rarely used (and often disabled for security).
+
+- **CONNECT**
+
+  - Establishes a tunnel to the server, often used for HTTPS via proxy.
+
+---
