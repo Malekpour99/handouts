@@ -46,6 +46,7 @@
     - [JWT](#jwt)
     - [MVT in Django - MVT vs. MVC](#mvt-in-django---mvt-vs-mvc)
     - [Django Request-Response Lifecycle](#django-request-response-lifecycle)
+    - [Design Patterns Used in Django](#design-patterns-used-in-django)
     - [N + 1 Problem](#n--1-problem)
     - [Select-Related \& Prefetch-Related in Django](#select-related--prefetch-related-in-django)
     - [When would you prefer prefetch_related over select_related, even if a JOIN is possible?](#when-would-you-prefer-prefetch_related-over-select_related-even-if-a-join-is-possible)
@@ -77,7 +78,7 @@
     - [TLS Handshake](#tls-handshake)
     - [What happens when you type-in "www.google.com" in your browser?](#what-happens-when-you-type-in-wwwgooglecom-in-your-browser)
     - [HTTP Request Methods](#http-request-methods)
-  - [Algorithms \& Data-structures](#algorithms--data-structures)
+  - [Algorithms \& Data-structures (Live Code)](#algorithms--data-structures-live-code)
   - [Design Systems](#design-systems)
   - [Projects](#projects)
 
@@ -1042,6 +1043,8 @@ In Python, coroutines are defined using `async def` and are executed with `await
 
 **Authorization**: The process of verifying what the authenticated user can do. It’s about **permissions and access control**. Usually happens after authentication.
 
+---
+
 ### Stateful Vs. Stateless
 
 | Aspect            | Stateless                           | Stateful                                       |
@@ -1080,6 +1083,8 @@ A JWT consists of three parts separated by dots (.): `header.payload.signature`
 ```
 HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), secret)
 ```
+
+---
 
 ### MVT in Django - MVT vs. MVC
 
@@ -1174,6 +1179,23 @@ User -> Django (Controller) -> View -> Model -> Template -> User
 
 ---
 
+### Design Patterns Used in Django
+
+- MVT is a variation of **MVC** pattern
+- ORM implements the **Active Record** pattern
+  - Each model class maps to a database table
+  - Each instance maps to a row
+  - CRUD operations are methods on the model itself
+- Model managers implement **Factory** pattern for generating querysets
+- Settings implement **Singleton** pattern (single global instance)
+- Database connections implement **Singleton** pattern (one per thread/request)
+- DTL (Django Template Language) implements **Template** pattern
+- Django signals implement **Observer/Signal** pattern
+- Middlewares implement **Chain of Responsibility** pattern
+- authentication and authorization uses **decorator** patterns (`@login_required, @csrf_exempt`)
+
+---
+
 ### N + 1 Problem
 
 The N+1 problem happens when you run 1 query to fetch a list of records (N records), and then for each record, you run an additional query to fetch related data.
@@ -1190,6 +1212,8 @@ In Go (GORM)
 
 - Use **eager loading** (`Preload`).
 
+---
+
 ### Select-Related & Prefetch-Related in Django
 
 `select_related` in Django:
@@ -1205,6 +1229,8 @@ In Go (GORM)
   - Query 1: Fetch base objects.
   - Query 2: Fetch related objects with an IN (...) filter.
 - Type of JOIN: None at SQL level (Django does a “manual join” in memory).
+
+---
 
 ### When would you prefer prefetch_related over select_related, even if a JOIN is possible?
 
@@ -1236,6 +1262,8 @@ In Go (GORM)
    - In some setups (read replicas, sharded DBs), it’s useful to keep queries smaller and more cache-friendly.
    - prefetch_related queries (WHERE ... IN (...)) can be batched or routed independently, while a giant JOIN can’t.
 
+---
+
 ## Database
 
 ### CAP Theorem (Brewer's theorem)
@@ -1259,6 +1287,8 @@ In a distributed database/system, you cannot simultaneously guarantee all three 
 CAP theorem says:
 In the presence of a **network partition**, you must choose between **Consistency** and **Availability**.
 
+---
+
 ### Trade-offs (CA, CP, AP)
 
 - **CP (Consistency + Partition tolerance)**
@@ -1277,6 +1307,8 @@ In the presence of a **network partition**, you must choose between **Consistenc
 
   - Theoretically possible only if no network partitions exist → not practical in distributed systems.
   - Example: traditional single-node RDBMS (like PostgreSQL on one machine).
+
+---
 
 ### ACID
 
@@ -1311,6 +1343,8 @@ In the presence of a **network partition**, you must choose between **Consistenc
    - Once a transaction is committed, it is permanent, even if the system crashes right after.
    - Achieved via **write-ahead logs (WALs)**, **replication**, and **persistent storage**.
 
+---
+
 ### BASE
 
 Many NoSQL databases (Cassandra, DynamoDB, CouchDB, etc.) follow the BASE model to favor scalability and availability in distributed systems.
@@ -1333,6 +1367,8 @@ Many NoSQL databases (Cassandra, DynamoDB, CouchDB, etc.) follow the BASE model 
 - Strong consistency is sacrificed for performance and fault tolerance.
 - Example: In Cassandra, a read might not show the latest write, but eventually all nodes sync up.
 
+---
+
 ### ACID Vs. BASE
 
 | Property     | **ACID**                                                    | **BASE**                                                                    |
@@ -1340,6 +1376,8 @@ Many NoSQL databases (Cassandra, DynamoDB, CouchDB, etc.) follow the BASE model 
 | Consistency  | Strong consistency                                          | Eventual consistency                                                        |
 | Availability | Can sacrifice availability (during conflicts or partitions) | Prioritizes availability                                                    |
 | Use Case     | Banking, reservations, systems needing strong guarantees    | Large-scale distributed systems, social media, e-commerce with huge traffic |
+
+---
 
 ### Choosing a Database
 
@@ -1385,6 +1423,8 @@ Many NoSQL databases (Cassandra, DynamoDB, CouchDB, etc.) follow the BASE model 
   - Analytics dashboard → ClickHouse or BigQuery.
   - Cache / Session store → Redis.
 
+---
+
 ### Isolation Levels
 
 Concurrency Anomalies to Know:
@@ -1428,6 +1468,8 @@ Concurrency Anomalies to Know:
 | Repeatable Read  | ❌ No      | ❌ No               | ✅ Allowed   |
 | Serializable     | ❌ No      | ❌ No               | ❌ No        |
 
+---
+
 ### Primary Indexing Vs. Secondary Indexing
 
 - **Primary Index**
@@ -1454,6 +1496,8 @@ Concurrency Anomalies to Know:
 | **Access Method**   | Direct, since data is aligned         | Needs extra lookup (to row/primary)    |
 | **Performance**     | Faster for key-based searches         | Slight overhead (extra pointer lookup) |
 
+---
+
 ## Docker & Containerization
 
 ### Image Vs. Container
@@ -1471,6 +1515,8 @@ Concurrency Anomalies to Know:
   - Containers are mutable at runtime: they can write to their filesystem (a writable layer is added on top of the image).
   - Multiple containers can be created from the same image, each isolated with its own process space, networking, and storage.
   - Containers can be started, stopped, restarted, or destroyed without affecting the original image.
+
+---
 
 ### Custom Image (Dockerfile) Best Practices
 
@@ -1490,6 +1536,8 @@ Concurrency Anomalies to Know:
 - Limit containers processes during creation (use constraints like _CPU_ and _memory_ limits and _control group (cgroup)_ configurations)
 - Analyze docker image layers ([`dive`](https://github.com/wagoodman/dive))
 
+---
+
 ### Multi-Staging
 
 Multi-staging allows you to separate the build environment (where you compile or bundle your app) from the runtime environment (where you actually run it).
@@ -1505,6 +1553,8 @@ Multi-staging allows you to separate the build environment (where you compile or
   - Security → No leftover compilers or secrets in the runtime image.
   - Flexibility → You can have multiple build stages for testing, linting, or packaging.
 
+---
+
 ### CMD Vs. RUN
 
 - `RUN`
@@ -1519,6 +1569,8 @@ Multi-staging allows you to separate the build environment (where you compile or
   - Used for: Defining what the container should do by default.
   - Effect: Does not affect the image during build.
 
+---
+
 ### Entrypoint
 
 `ENTRYPOINT` defines the main command that will always run when a container starts.
@@ -1527,6 +1579,8 @@ Unlike `CMD`, which is more of a “default argument”, `ENTRYPOINT` is the fix
 
 - `ENTRYPOINT` -> fixed program.
 - `CMD` -> default arguments to that program (but can be _overridden_ at runtime).
+
+---
 
 ### Docker Vs. VM
 
@@ -1569,6 +1623,8 @@ Unlike `CMD`, which is more of a “default argument”, `ENTRYPOINT` is the fix
 - VMs: Best for running multiple OS types on the same host (e.g., Linux + Windows). Good when strong isolation is needed.
 - Containers (Docker): Best for microservices, CI/CD pipelines, cloud-native apps, fast scaling.
 
+---
+
 ### How Docker Containers Are Isolated from Each Other?
 
 1. Namespaces (provide isolation of resources)
@@ -1601,6 +1657,8 @@ Namespaces create the illusion that each container has its own dedicated system.
 5. Security Modules
 
 - Tools like `AppArmor` and `SELinux` add mandatory access control policies to restrict container actions beyond namespaces/cgroups.
+
+---
 
 ## Git
 
@@ -1651,6 +1709,8 @@ However, Git optimizes storage by:
 
    A commit may be signed with a GPG key to verify its authenticity.
 
+---
+
 ### Merge Vs. Rebase
 
 `git merge`
@@ -1669,6 +1729,8 @@ However, Git optimizes storage by:
 - Moves (or "replays") the commits from one branch on top of another branch, rewriting history.
 - Commits are recreated with new hashes.
 
+---
+
 ### Cherry-Pick
 
 `git cherry-pick` lets you apply a specific commit (or set of commits) from one branch onto another branch, **without merging** the whole branch.
@@ -1678,6 +1740,8 @@ It takes the changes introduced by that commit and **creates a new commit** on t
   - **Hotfixes** → Apply a critical bug fix from a feature branch to main immediately.
   - **Backporting** → Apply a patch to an older release branch.
   - **Selective integration** → You want only one commit, not a whole merge.
+
+---
 
 ## Network
 
@@ -1705,6 +1769,8 @@ It takes the changes introduced by that commit and **creates a new commit** on t
    - TCP adapts to network conditions with congestion control (e.g., slow start, AIMD).
    - UDP just keeps sending — it doesn’t care if the network is congested. That’s why protocols like QUIC were introduced: to bring TCP-like reliability over UDP while maintaining low latency.
 
+---
+
 ### 3-Way Handshake
 
 The 3-way handshake is how TCP establishes a reliable, connection-oriented communication channel between two endpoints before exchanging data.
@@ -1724,6 +1790,8 @@ The 3-way handshake is how TCP establishes a reliable, connection-oriented commu
 
    - The client sends back a final packet with the ACK flag set, acknowledging the server’s ISN (ACK = ISN_s + 1).
    - At this point, both sides have exchanged sequence numbers and acknowledgments. The connection is established.
+
+---
 
 ### 4-Way Handshake
 
@@ -1752,6 +1820,8 @@ The 4-way handshake is the process TCP uses to gracefully terminate a connection
    - At this point:
      - The server transitions to the CLOSED state.
      - The client enters the TIME_WAIT state (usually 2×MSL — maximum segment lifetime), to ensure delayed packets are handled properly before fully closing.
+
+---
 
 ### TLS Handshake
 
@@ -1789,6 +1859,8 @@ The TLS handshake establishes a secure channel between client and server by agre
   - Always uses forward-secret key exchange (ECDHE) — no more static RSA.
   - Encrypts more of the handshake itself for privacy.
   - Supports 0-RTT resumption: if you’ve connected before, you can start sending encrypted data immediately.
+
+---
 
 ### What happens when you type-in "www.google.com" in your browser?
 
@@ -1845,6 +1917,8 @@ The TLS handshake establishes a secure channel between client and server by agre
 
    - Finally, the rendered page appears in the browser window.
 
+---
+
 ### HTTP Request Methods
 
 - **GET**
@@ -1891,7 +1965,9 @@ The TLS handshake establishes a secure channel between client and server by agre
 
   - Establishes a tunnel to the server, often used for HTTPS via proxy.
 
-## Algorithms & Data-structures
+---
+
+## Algorithms & Data-structures (Live Code)
 
 - **Two Sum** -> find the first two members of an array which their sum equals a target number.
 - **Roman to Integer** -> convert roman numbers to integers.
@@ -1909,9 +1985,10 @@ The TLS handshake establishes a secure channel between client and server by agre
 
 - Torna-System -> File-Manager
 - Invex -> Block-Chain Wallet
-- Faraswap -> User registration + Wallet
+- Faraswap -> User registration + Wallet (live-code)
 - Porsline -> Recommendation system based on user history and activity
 - Toman -> E-commerce CRUD endpoints
-- Torob -> Read, integrate and sort weather reports from a file
+- Torob -> Read, integrate and sort weather reports from a file (live-code)
+- Iran-SOS -> Fix endpoints different bugs [unapplied migration bug, N+1 query bug] (live-code)
 - Remote Synergy (Partnerz) -> Refactor a SMTP mailing service
-- Maktabkhoone -> Design signals based on the observer design pattern (signal register + triggering)
+- Maktabkhoone -> Design signals based on the observer design pattern (signal register + triggering) (live-code)
