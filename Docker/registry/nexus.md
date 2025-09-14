@@ -69,17 +69,24 @@ Move **Docker Bearer Token Realm** to the **Active** column.
 
 ### Push/Pull Images
 
+- How tags work:
+- `[registry-host]:[port]/[namespace]/[image-name]:[tag]`
+  - **registry-host:port** → your Nexus registry (e.g., 127.0.0.1:5000)
+  - **namespace** → logical grouping (like a _folder_)
+  - **image-name** → the actual project/app
+  - **tag** → version (e.g., 1.0.0, latest, dev)
+
 ```sh
 # tag an image for nexus repository
-docker tag <image>:<version> localhost:<repository-port>/<image>:<version>
+docker tag <image>:<version> <registry-host>:<repository-port>/<image>:<version>
 
 # login to nexus repository
-docker login localhost:<repository-port>
+docker login <registry-host>:<repository-port>
 # provide nexus username and password
 
 # push image to repository
-docker push localhost:<repository-port>/<image>:<version>
+docker push <registry-host>:<repository-port>/<image>:<version>
 
 # pull image from repository
-docker pull localhost:<repository-port>/<image>:<version>
+docker pull <registry-host>:<repository-port>/<image>:<version>
 ```
