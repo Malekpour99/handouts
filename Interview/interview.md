@@ -11,7 +11,8 @@
 
 ## Relevant Interview Question Files
 
-- [Programming \& Python](programming.md)
+- [Programming ](programming.md)
+- [Python](python.md)
 - [Backend](backend.md)
 - [Database](database.md)
 - [Docker](docker.md)
