@@ -14,6 +14,10 @@
     - [Isolation Levels](#isolation-levels)
     - [Primary Indexing Vs. Secondary Indexing](#primary-indexing-vs-secondary-indexing)
     - [Redis Vs. RabbitMQ Vs. Kafka](#redis-vs-rabbitmq-vs-kafka)
+    - [Is RabbitMQ a database?](#is-rabbitmq-a-database)
+    - [How to prevent multiple workers consume the same event in RabbitMQ](#how-to-prevent-multiple-workers-consume-the-same-event-in-rabbitmq)
+    - [What are different type of exchanges in RabbitMQ](#what-are-different-type-of-exchanges-in-rabbitmq)
+    - [How to handle failed or lost published events](#how-to-handle-failed-or-lost-published-events)
 
 ## Database
 
@@ -264,3 +268,101 @@ Concurrency Anomalies to Know:
 | **Use Case Fit**                   | Lightweight messaging, caching, leaderboards, chat apps                 | Background job processing, workflows, task distribution              | Event-driven systems, analytics pipelines, log aggregation, event sourcing                    |
 
 ---
+
+### Is RabbitMQ a database?
+
+NO, It’s a **message broker** (a type of middleware) that helps different services and applications communicate by passing messages between them.
+
+What RabbitMQ does:
+
+- Implements **AMQP** (Advanced Message Queuing Protocol).
+- Stores messages _temporarily_ in queues until a consumer receives them.
+- Ensures reliable delivery (at-least-once or exactly-once depending on setup).
+- Supports publish/subscribe, work queues, routing, priority queues, etc.
+- Used for decoupling services, asynchronous processing, and scaling workloads.
+
+### How to prevent multiple workers consume the same event in RabbitMQ
+
+1. Use a single queue per consumer group
+
+- If you want only one worker out of many to consume, put them on the same queue. RabbitMQ will distribute load.
+- Don’t bind multiple queues unless you want duplication.
+- `Exchange → Queue (single) → Consumers (many)`
+
+2. Enable manual acknowledgments
+
+- Use `ack` after successful processing.
+- This prevents RabbitMQ from redelivering unacked messages if your consumer is slow or crashes.
+
+3. Idempotent consumers
+
+- Since RabbitMQ only gives **at-least-once** delivery, you must make consumers _idempotent_ (safe to process the same message twice).
+- E.g., track processed message IDs in DB/Redis.
+
+4. Publisher confirms
+
+- Ensure producers don’t re-publish the same message due to connection retries.
+- Use publisher confirms (`confirm_select`) to avoid duplicates at the publishing side.
+
+5. Avoid multiple brokers with uncoordinated queues
+
+- If you have multiple RabbitMQ clusters/brokers without federation/shovel, each may get a copy of the message.
+- Use a single RabbitMQ cluster or federation for consistent delivery.
+
+### What are different type of exchanges in RabbitMQ
+
+1. **Direct exchange** – routes messages by exact routing key.
+
+- Example: routing key "`order.created`" → goes only to queues bound with that key.
+
+2. **Fanout exchange** – broadcasts message to **all** bound queues, ignoring routing key.
+
+- Example: sending notifications to all services.
+
+3. **Topic exchange** – routes messages using patterns (`\*, #`).
+
+- Example: `order.\*` → matches order.created, order.shipped.
+
+### How to handle failed or lost published events
+
+**Publisher Confirms / Acknowledgments**
+
+- In RabbitMQ, enable publisher confirms.
+- The **broker sends an ack** when it has safely stored the message.
+- If you don’t get an ack (e.g., timeout), you retry.
+- Guarantees the broker got the message, not just your client.
+
+**Transactional Publishing**
+
+Wrap **publishing in a transaction** (`RabbitMQ` and `Kafka` support this).
+Either all messages succeed or none are published.
+Slower, but good for critical cases (e.g., financial transactions).
+
+**Retry with Backoff**
+
+- On failure, retry sending the event after a delay.
+- Use **exponential backoff + jitter** to avoid overwhelming the broker.
+- Example: Retry after `2s → 4s → 8s → 16s …`.
+
+**Dead Letter Queues (DLQ)**
+
+- If a message fails to publish/consume after several attempts, send it to a DLQ.
+- Later, investigate/reprocess it manually or with a recovery service.
+
+**Idempotent Consumers**
+
+- Even if the publisher retries and a message is delivered twice, consumers should handle duplicates gracefully.
+- Add an event ID (UUID) and store processed IDs in a DB or cache (e.g., Redis SET).
+- This is also effective when trying to achieve **exactly once** delivery promise.
+
+**Outbox Pattern**
+
+- Store the event in your **local database** inside the same transaction as your business logic.
+- A background worker then reads from the “outbox table” and publishes to the broker.
+- Guarantees no lost events if the publisher crashes.
+- Very common with `Postgres + RabbitMQ/Kafka` setups.
+
+**Monitoring & Alerts**
+
+- Set up metrics for **dropped messages, unacked messages, DLQ size**.
+- Alerts help you detect when events go missing.
