@@ -31,6 +31,7 @@
 - Design tweeter from the ground up
 - Consider we have a project with 100,000 RPS and these requests data is written on files, design a system for reading and using that data
 - Consider we have two postgres databases and a partition happens between them; what happens now?
+- Design a shopping cart for purchasing products (handle race conditions for buying limited products, show an estimated number of remaining products for clients, manage different stages of payment for finalizing the purchase)
 
 ## Projects
 
