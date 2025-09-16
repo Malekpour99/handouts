@@ -13,11 +13,14 @@
     - [Choosing a Database](#choosing-a-database)
     - [Isolation Levels](#isolation-levels)
     - [Primary Indexing Vs. Secondary Indexing](#primary-indexing-vs-secondary-indexing)
+    - [Optimistic Locking Vs. Pessimistic Locking](#optimistic-locking-vs-pessimistic-locking)
+    - [Assume there is no database locking, how deploy this lock mechanism in application level](#assume-there-is-no-database-locking-how-deploy-this-lock-mechanism-in-application-level)
     - [Redis Vs. RabbitMQ Vs. Kafka](#redis-vs-rabbitmq-vs-kafka)
     - [Is RabbitMQ a database?](#is-rabbitmq-a-database)
     - [How to prevent multiple workers consume the same event in RabbitMQ](#how-to-prevent-multiple-workers-consume-the-same-event-in-rabbitmq)
     - [What are different type of exchanges in RabbitMQ](#what-are-different-type-of-exchanges-in-rabbitmq)
     - [How to handle failed or lost published events](#how-to-handle-failed-or-lost-published-events)
+    - [How Redis handles concurrency and race-condition when being used as distributed locking mechanism?](#how-redis-handles-concurrency-and-race-condition-when-being-used-as-distributed-locking-mechanism)
 
 ## Database
 
@@ -253,6 +256,116 @@ Concurrency Anomalies to Know:
 
 ---
 
+### Optimistic Locking Vs. Pessimistic Locking
+
+- **Pessimistic Locking**
+  - Idea: “Assume conflicts will happen, so block others until I’m done.”
+  - A transaction acquires **a lock on the row (or table) before reading or updating it**.
+  - Other transactions that try to access the same data must **wait until the lock is released**.
+  - Pros:
+    - Prevents **conflicts** and **race conditions** reliably.
+    - Safer for highly contended data.
+  - Cons:
+    - Reduced concurrency → other transactions may block a long time.
+    - Can lead to deadlocks if not managed carefully.
+
+```sql
+BEGIN;
+SELECT * FROM accounts WHERE id = 1 FOR UPDATE;
+-- Now row id=1 is locked until COMMIT/ROLLBACK
+UPDATE accounts SET balance = balance - 100 WHERE id = 1;
+COMMIT;
+```
+
+- **Optimistic Locking**
+
+  - Idea: “Conflicts are rare, so let everyone work, and check for conflicts at commit.”
+  - **Doesn’t block others while reading**.
+  - Each row has a **version number (or timestamp)**.
+  - When updating, the transaction checks if the version is still the same:
+    - If yes → update succeeds.
+    - If no → someone else changed it → `transaction fails` → `retry` needed.
+  - Pros:
+    - Higher **concurrency**, since no blocking.
+    - Good when conflicts are rare.
+  - Cons:
+    - Extra retries if conflicts are frequent.
+    - More application logic required.
+
+```sql
+-- Suppose accounts has a "version" column
+SELECT id, balance, version FROM accounts WHERE id = 1;
+
+-- Later, update only if version hasn’t changed
+UPDATE accounts
+SET balance = balance - 100, version = version + 1
+WHERE id = 1 AND version = 5;
+
+-- If no rows updated → conflict detected → retry needed
+```
+
+---
+
+### Assume there is no database locking, how deploy this lock mechanism in application level
+
+1. In-Memory Lock (Single Instance App)
+
+If your app runs on one server (no multiple processes/instances):
+Use a `sync.Mutex` or `sync.RWMutex` in Go.
+
+Ensures only one goroutine at a time accesses the critical section.
+
+```go
+var mu sync.Mutex
+var balance int = 100
+
+func withdraw(amount int) {
+    mu.Lock()
+    defer mu.Unlock()
+    balance -= amount
+}
+```
+
+2. Distributed Locks (Multi-Instance / Cluster)
+
+- If you have multiple app instances (microservices, replicas, etc.), you need a shared lock mechanism.
+
+- **Redis-based Locking (Redlock)**:
+  - Use Redis `SETNX` (set if not exists) + `expiration`.
+  - Libraries implement this (`redsync` for Go).
+
+```go
+// Pseudo-logic
+if redis.SETNX("lock:account:1", "user-uuid", expiry) {
+    // got lock, do work
+    // ...
+    redis.DEL("lock:account:1")
+} else {
+    // lock already held
+}
+```
+
+- **Database Advisory Locks**
+  - PostgreSQL supports `advisory locks` at the app level:
+    - Lock is tied to your connection, not a row.
+    - Use arbitrary numbers/keys (like a user ID).
+
+```sql
+-- Acquire a lock
+SELECT pg_advisory_lock(12345);
+
+-- Release lock
+SELECT pg_advisory_unlock(12345);
+```
+
+- **ZooKeeper / etcd Locks**
+
+  - Useful in distributed systems.
+  - Provide consensus-based locks.
+  - Heavier but reliable for large-scale apps.
+
+---
+
 ### Redis Vs. RabbitMQ Vs. Kafka
 
 | Feature                            | **Redis** (Pub/Sub / Streams)                                           | **RabbitMQ** (AMQP Broker)                                           | **Kafka** (Event Streaming)                                                                   |
@@ -366,3 +479,50 @@ Slower, but good for critical cases (e.g., financial transactions).
 
 - Set up metrics for **dropped messages, unacked messages, DLQ size**.
 - Alerts help you detect when events go missing.
+
+---
+
+### How Redis handles concurrency and race-condition when being used as distributed locking mechanism?
+
+1. **Atomic Lock Acquisition**
+
+- Use `SET key value NX PX <ttl>`:
+  - `NX` → only set if not exists.
+  - `PX <ttl>` → expiration (auto-release after timeout).
+- This ensures only one client acquires the lock at a time.
+
+```sh
+SET lock:resource client-uuid NX PX 10000
+```
+
+→ If successful, client has lock for 10 seconds.
+
+2. **Unique Identifier**
+
+- The value stored in the lock (like client-uuid) identifies the owner.
+- When releasing, client checks:
+
+```lua
+if redis.call("GET", KEYS[1]) == ARGV[1] then
+    return redis.call("DEL", KEYS[1])
+else
+    return 0
+end
+```
+
+Prevents a client from accidentally unlocking a lock it doesn’t own.
+
+3. **Expiration (Avoiding Deadlocks)**
+
+TTL ensures that if a client crashes or never releases, the lock eventually expires.
+This **prevents permanent deadlock**.
+
+4. **Redlock Algorithm (Distributed Safety)**
+
+- For true distributed systems (multiple Redis nodes):
+  - Acquire the lock on majority (`N/2 + 1`) of Redis nodes.
+  - Only consider _lock acquired if you succeed on majority_.
+  - Locks have the same TTL across nodes.
+  - This reduces the chance that a single-node failure causes multiple clients to think they hold the lock.
+
+---
