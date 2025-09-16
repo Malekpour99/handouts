@@ -5,6 +5,8 @@
 - [Interview Questions](#interview-questions)
   - [Table of Contents](#table-of-contents)
   - [Programming General Concepts](#programming-general-concepts)
+    - [Process Vs. Thread](#process-vs-thread)
+    - [Regular Thread Vs. Light Thread](#regular-thread-vs-light-thread)
     - [What is OOP?](#what-is-oop)
     - [Four Main Principles of OOP](#four-main-principles-of-oop)
       - [1. **Encapsulation**](#1-encapsulation)
@@ -26,6 +28,50 @@
     - [Explain Decorator Design Pattern](#explain-decorator-design-pattern)
 
 ## Programming General Concepts
+
+### Process Vs. Thread
+
+- **Process**
+
+  - A process is an **independent program in execution**.
+  - Each process has:
+    - Its **own memory space** (heap, stack, code).
+    - Its **own resources** (file descriptors, sockets, etc.).
+  - Communication between processes requires **IPC (Inter-Process Communication)** like pipes, sockets, shared memory.
+  - Isolation → one process crash won’t usually crash others.
+  - Heavier to create, switch, and communicate.
+
+- **Thread**
+  - A thread is a **lightweight execution unit inside a process**.
+  - Threads in the same process share:
+    - The **same memory space** (heap, global variables).
+    - **File descriptors** and **other resources**.
+  - Each thread has its _own stack and program counter_.
+  - Lightweight, faster context switch, easy to share data.
+  - Less isolation → one thread crash can crash the whole process.
+
+---
+
+### Regular Thread Vs. Light Thread
+
+- **Regular Thread (OS Thread)**
+
+  - Managed by the **operating system kernel**.
+  - Each thread has its own stack, registers, and is **scheduled by the OS scheduler**.
+  - True parallelism → if you have multiple CPU cores, OS threads can run simultaneously.
+  - Heavier: creating, destroying, and context switching threads has overhead.
+
+- **Lightweight Thread (Green Thread / User Thread)**
+  - Managed at the **user level**, not by the OS.
+  - **Scheduler runs inside the runtime/library** (not the kernel).
+  - Multiple lightweight threads are multiplexed onto fewer OS threads.
+  - Examples: `Goroutines` in Go.
+  - Very cheap to create (thousands to millions possible).
+  - Fast context switching (just saving a few registers).
+  - _Don’t get true parallelism_ unless the runtime maps them onto multiple OS threads.
+  - If one lightweight thread makes a blocking system call, it can block the entire runtime thread.
+
+---
 
 ### What is OOP?
 
