@@ -13,6 +13,7 @@
     - [Goroutine Leak](#goroutine-leak)
       - [Detecting Goroutine Leaks](#detecting-goroutine-leaks)
       - [Handling Goroutine Leaks](#handling-goroutine-leaks)
+    - [Goroutines (Go) Vs. Coroutines (Python)](#goroutines-go-vs-coroutines-python)
 
 ## Go
 
@@ -321,5 +322,27 @@ case <-time.After(time.Second):
 5. Worker Pools
 
 - Use a fixed number of workers and a task queue, so goroutines don’t grow unboundedly.
+
+---
+
+### Goroutines (Go) Vs. Coroutines (Python)
+
+- **Goroutines (Go)**
+
+  - Lightweight threads managed by the **Go runtime**.
+  - Scheduled using Go’s `M:N` scheduler:
+  - **Many goroutines (M) run on a smaller number of OS threads (N)**.
+  - **Runtime handles preemption** (goroutines can be paused/resumed by the runtime).
+  - Concurrency is achieved via `channels` and Go’s **CSP (Communicating Sequential Processes)** model.
+  - Goroutines can run in _true parallel_ on multiple CPU cores.
+
+- **Coroutines (Python)**
+
+  - Special **functions that can be paused and resumed** (`async def`, `await`).
+  - Cooperatively scheduled:
+    - A **coroutine must explicitly `await` to give up control**.
+    - If it never `awaits`, it will _block_ the event loop.
+  - Concurrency is achieved via `async/await` and the **event loop** (`asyncio`).
+  - No true parallelism in CPython (due to `GIL`); **only concurrency**.
 
 ---
