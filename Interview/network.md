@@ -11,6 +11,7 @@
     - [TLS Handshake](#tls-handshake)
     - [What happens when you type-in "www.google.com" in your browser?](#what-happens-when-you-type-in-wwwgooglecom-in-your-browser)
     - [HTTP Request Methods](#http-request-methods)
+    - [How to rate-limit/throttle network requests on Linux server?](#how-to-rate-limitthrottle-network-requests-on-linux-server)
 
 ## Network
 
@@ -233,5 +234,71 @@ The TLS handshake establishes a secure channel between client and server by agre
 - **CONNECT**
 
   - Establishes a tunnel to the server, often used for HTTPS via proxy.
+
+---
+
+### How to rate-limit/throttle network requests on Linux server?
+
+1. **Kernel-level (Linux networking stack)**
+
+Option A: **Using `iptables` with `hashlimit`**
+
+The `hashlimit` module lets you limit requests per IP or globally.
+
+```sh
+sudo iptables -A INPUT -p tcp --dport 80 -m hashlimit \
+  --hashlimit 10/sec --hashlimit-burst 20 \
+  --hashlimit-mode srcip --hashlimit-name http_limit \
+  -j ACCEPT
+
+# Drop the rest
+sudo iptables -A INPUT -p tcp --dport 80 -j DROP
+```
+
+- `--hashlimit 10/sec`: max 10 requests per second.
+- `--hashlimit-burst 20`: allow small bursts.
+- `--hashlimit-mode srcip`: per client IP.
+
+Option B: **Using `tc` (traffic control)**
+
+`tc` can shape and throttle traffic at the interface level.
+
+Example: limit to 100 requests/sec globally:
+
+```sh
+sudo tc qdisc add dev eth0 root handle 1: htb default 30
+sudo tc class add dev eth0 parent 1: classid 1:1 htb rate 100rps
+```
+
+- This is more advanced, used when you want bandwidth or packet rate limits.
+
+2. **Proxy-level**
+
+If you’re running your app behind `Nginx` or other proxy apps like `HAProxy`, you can configure rate limiting easily:
+
+```nginx
+http {
+    limit_req_zone $binary_remote_addr zone=one:10m rate=5r/s;
+
+    server {
+        listen 80;
+
+        location / {
+            limit_req zone=one burst=10 nodelay;
+            proxy_pass http://127.0.0.1:8000;
+        }
+    }
+}
+```
+
+- `rate=5r/s`: max 5 requests/sec per IP.
+- `burst=10`: allow short bursts.
+
+3. **Application-level**
+
+- `Token bucket / leaky bucket algorithm` (common in Go/Python apps). [Token Bucket vs. Leaky Bucket Algorithm](https://www.geeksforgeeks.org/system-design/token-bucket-vs-leaky-bucket-algorithm-system-design/)
+- `Middleware` (e.g., Django Rest Framework throttle, Go middleware).
+
+This gives the most flexibility (per user, per token, etc.), but costs CPU since requests already reach your app.
 
 ---
