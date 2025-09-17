@@ -634,7 +634,7 @@ docker swarm join-token <manager/worker>
 # Run the provided join command on the node your want to join this swarm cluster based on its role
 
 # joining swarm cluster
-docker swarm join --token <token>
+docker swarm join --token <token> (<advertised-addr>:2377)
 # based on the provided token, this node's role is specified (master/worker)
 ```
 
@@ -737,10 +737,10 @@ Even if a container of that service is running on only a single node, any node i
 docker node ls
 
 # promote a worker not to manager (only works on manager nodes!)
-docker node promote <note-hostname>
+docker node promote <note>
 
 # demote a manager to worker (only works on manager nodes!)
-docker node demote <note-hostname>
+docker node demote <note>
 
 # list current running services (tasks) on current node
 docker node ps
@@ -750,15 +750,15 @@ docker node inspect --pretty <node>
 # `--pretty`: prettifies the output
 
 # list current running services (tasks) on desired noe
-docker node ps <node-hostname>
+docker node ps <node>
 
-# deactivating (draining) a node
-docker node update --availability drain <node>
-# by draining a node, its tasks will be distributed among other active nodes
+# pausing a node
+docker node update --availability pause <node>
+# node will be paused, and no new task gets created on this mode from now on (useful for short maintenance)
 
 # activating a node
 docker node update --availability active <node>
-# node will be activated, but tasks won't be distributed again
+# node will be activated, but tasks won't be distributed again (you should do it manually)
 
 # adding label
 docker node update --label-add <key>=<value> <node>
@@ -766,6 +766,18 @@ docker node update --label-add <key>=<value> <node>
 
 # removing label
 docker node update --label-rm <key>=<value> <node>
+
+# deactivating (draining) a node
+docker node update --availability drain <node>
+# by draining a node, its tasks will be distributed among other active nodes and no new tasks get created on this node
+
+# removing a node from swarm
+docker node rm <node> (--force)
+# make sure to drain a node before removing it!
+# run above command on manager node
+
+docker swarm leave
+# run above command on worker node in order to be able to join swarm again!
 ```
 
 - you manage task assignment more by using **constraint** and **labeling**!
@@ -773,6 +785,9 @@ docker node update --label-rm <key>=<value> <node>
 #### Services
 
 ```sh
+# running a visualizer service for docker swarm nodes
+docker service create --name visual --publish=8080:8080/tcp --constraint=node.role==manager --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock dockersamples/visualizer
+
 # running a sample ping service in swarm cluster
 docker service create --name pingGoogle --replicas 4 alpine:latest ping 8.8.4.4
 # 'verify: service converged' --means--> deployment was successful!
