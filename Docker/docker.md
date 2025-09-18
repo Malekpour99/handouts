@@ -165,7 +165,7 @@ for handling containers, both their **name** and **ID** can be used!
 
 ## Network
 
-**Default Networks and drivers**
+- **Default Networks and drivers**
 
 | Network Name | Driver   | Description                                                                                                                                   |
 | ------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -556,7 +556,7 @@ docker compose -f <docker-compose-file> scale <service-1>=<n> <service2>=<m> ...
 
 ## Docker Swarm
 
-**Docker Swarm Vs. Kubernetes**
+- **Docker Swarm Vs. Kubernetes**
 
 | Aspect                          | **Docker Swarm**                                         | **Kubernetes**                                               |
 | ------------------------------- | -------------------------------------------------------- | ------------------------------------------------------------ |
@@ -699,23 +699,23 @@ Even if a container of that service is running on only a single node, any node i
 
 1. **Published Ports & IPVS**
 
-- When you run a service with a published port, Docker sets up a listener on that port on all nodes.
-- Docker uses IPVS (IP Virtual Server) inside the Linux kernel for load balancing incoming requests.
+   - When you run a service with a published port, Docker sets up a listener on that port on all nodes.
+   - Docker uses IPVS (IP Virtual Server) inside the Linux kernel for load balancing incoming requests.
 
 2. **Ingress Network (Overlay Network)**
 
-- Docker Swarm uses a special "ingress" overlay network.
-- This network allows incoming requests to be forwarded from any node to a node where the service task is running.
-- Nodes in the swarm use an **encrypted VXLAN tunnel for cross-node communication**.
+   - Docker Swarm uses a special "ingress" overlay network.
+   - This network allows incoming requests to be forwarded from any node to a node where the service task is running.
+   - Nodes in the swarm use an **encrypted VXLAN tunnel for cross-node communication**.
 
 3. **Connection Flow**
 
-- Here’s what happens when a request comes in:
-  - A client sends a request to a swarm node on a published port.
-  - The node checks if it has a local task (container) for that service.
-  - If Yes: It sends traffic to the container directly.
-  - If No: It routes the traffic over the ingress overlay network to a node that has a running task.
-  - **IPVS ensures even load distribution across tasks**.
+   - Here’s what happens when a request comes in:
+     - A client sends a request to a swarm node on a published port.
+     - The node checks if it has a local task (container) for that service.
+     - If Yes: It sends traffic to the container directly.
+     - If No: It routes the traffic over the ingress overlay network to a node that has a running task.
+     - **IPVS ensures even load distribution across tasks**.
 
 **When to Use or Avoid Routing Mesh**:
 
@@ -787,6 +787,11 @@ docker swarm leave
 ```sh
 # running a visualizer service for docker swarm nodes
 docker service create --name visual --publish=8080:8080/tcp --constraint=node.role==manager --mount=type=bind,src=/var/run/docker.sock,dst=/var/run/docker.sock dockersamples/visualizer
+# visualizer must run on manager nodes in order to work!
+
+# running a zipkin service for request tracing
+docker service create --name zipkin --replicas 3 --publish=9411:9411/tcp openzipkin/zipkin
+# then you can configure HAProxy for high-availability of your services on a master node!
 
 # running a sample ping service in swarm cluster
 docker service create --name pingGoogle --replicas 4 alpine:latest ping 8.8.4.4
@@ -830,25 +835,25 @@ docker service update --force <service>
 
 ### Rolling Update
 
-**Process Flow**
+- **Process Flow**
 
 1. You update the service definition (new image version, new env vars, etc.)
 
 2. Swarm orchestrator plans an update:
 
-- It checks the update configuration (parallelism, delay, failure action).
-- It determines which tasks need to be replaced.
+   - It checks the update configuration (parallelism, delay, failure action).
+   - It determines which tasks need to be replaced.
 
 3. Update happens in steps (batches):
 
-- Stops an existing task.
-- Starts a new task with the updated specification (new image, env vars, etc.).
-- Waits for the new task to become healthy.
-- Proceeds to update the next task(s).
+   - Stops an existing task.
+   - Starts a new task with the updated specification (new image, env vars, etc.).
+   - Waits for the new task to become healthy.
+   - Proceeds to update the next task(s).
 
 4. Monitors for failures:
 
-- If a task fails to update, Docker can pause, continue, or roll back the update based on your settings.
+   - If a task fails to update, Docker can pause, continue, or roll back the update based on your settings.
 
 #### Configuration & Commands
 
