@@ -9,6 +9,7 @@
     - [3-Way Handshake](#3-way-handshake)
     - [4-Way Handshake](#4-way-handshake)
     - [TLS Handshake](#tls-handshake)
+      - [Diffie-Hellman Key Exchange](#diffie-hellman-key-exchange)
     - [What happens when you type-in "www.google.com" in your browser?](#what-happens-when-you-type-in-wwwgooglecom-in-your-browser)
     - [HTTP Request Methods](#http-request-methods)
     - [How to rate-limit/throttle network requests on Linux server?](#how-to-rate-limitthrottle-network-requests-on-linux-server)
@@ -101,19 +102,20 @@ The TLS handshake establishes a secure channel between client and server by agre
 
    - ClientHello
 
-     - Client sends: supported TLS version, list of cipher suites, random nonce.
+     - Client sends: **supported TLS version**, **list of cipher suites**, **random nonce**.
+       - The `cipher suite` is a set of _algorithms_ that specifies details such as which _shared encryption keys_, or _session keys_, will be used for that particular session.
      - Says: “Here’s what I support.”
 
    - ServerHello
 
-     - Server responds with chosen TLS version, cipher suite, its random nonce, and its certificate (X.509 cert containing public key).
-     - The certificate is signed by a trusted Certificate Authority (CA).
+     - Server responds with **chosen TLS version, cipher suite, its random nonce, and its certificate (X.509 cert containing public key)**.
+     - The certificate is signed by a trusted **Certificate Authority (CA)**.
      - The client validates the cert (domain name match, CA chain, expiration).
 
    - Key Exchange
 
-     - If RSA: Client generates a random premaster secret, encrypts it with server’s public key, and sends it.
-     - If ECDHE (more common today): Client and server perform a Diffie-Hellman key exchange to generate a shared secret.
+     - If `RSA`: Client generates a random premaster secret, encrypts it with server’s public key, and sends it.
+     - If `ECDHE` (more common today): Client and server perform a `Diffie-Hellman` key exchange to generate a shared secret.
      - Both sides now derive a session key from this secret + nonces.
 
    - Finished Messages
@@ -129,6 +131,17 @@ The TLS handshake establishes a secure channel between client and server by agre
   - Always uses forward-secret key exchange (ECDHE) — no more static RSA.
   - Encrypts more of the handshake itself for privacy.
   - Supports 0-RTT resumption: if you’ve connected before, you can start sending encrypted data immediately.
+
+#### Diffie-Hellman Key Exchange
+
+- Further study link: [Diffie-Hellman](https://en.wikipedia.org/wiki/Diffie%E2%80%93Hellman_key_exchange)
+- `p` -> a prime number
+- `g` -> a primitive root of `p`
+- In modular arithmetic, a number `g` is a _primitive root modulo_ `n`, if every number `a` `coprime` to `n` is `congruent` to a power of `g` modulo `n`. for example 3 is a primitive root modulo of 7. [Primitive Root Modulo](https://en.wikipedia.org/wiki/Primitive_root_modulo_n)
+- In number theory, two integers `a` and `b` are `coprime`, `relatively prime` or `mutually prime` if the **only positive integer that is a divisor of both of them** is **`1`**. (`GCD - Greatest Common Divisor = 1`) [Coprime Integers](https://en.wikipedia.org/wiki/Coprime_integers)
+- In abstract algebra, a `congruence relation` (or simply `congruence`) is an equivalence relation on an algebraic structure (such as a group, ring, or vector space) that is compatible with the structure in the sense that algebraic operations done with equivalent elements will yield equivalent elements. (e.g. if `a > b` then `a * n > b * n` where `n > 0`) [Congruence Relation](https://en.wikipedia.org/wiki/Congruence_relation)
+
+![Diffie-Hellman Key Exchange](./images/Block-diagram-of-the-Diffie-Hellman-algorithm.png)
 
 ---
 
