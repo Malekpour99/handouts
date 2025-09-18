@@ -23,8 +23,8 @@ A repository is a **logical component where users interact** (upload/download) w
 
 Types:
 
-- **Hosted** → store your own artifacts (e.g., your company’s internal builds).
-- **Proxy** → cache artifacts from external registries (e.g., Maven Central, Docker Hub).
+- **Hosted** → store your own or official/external artifacts (e.g., your company’s internal builds).
+- **Proxy** → cache artifacts from external registries and persistent them in its storage (e.g., apt packages, Docker Hub).
 - **Group** → virtual view that combines multiple repositories under one URL.
 
 Each repository must be assigned to **one blob store** for its storage.
