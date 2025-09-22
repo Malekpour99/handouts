@@ -21,6 +21,9 @@
     - [What are different type of exchanges in RabbitMQ](#what-are-different-type-of-exchanges-in-rabbitmq)
     - [How to handle failed or lost published events](#how-to-handle-failed-or-lost-published-events)
     - [How Redis handles concurrency and race-condition when being used as distributed locking mechanism?](#how-redis-handles-concurrency-and-race-condition-when-being-used-as-distributed-locking-mechanism)
+    - [UNION Vs. UNION ALL](#union-vs-union-all)
+    - [From a `transactions` table (with `user_id`, `id`, `created_at`, etc.), get the second most recent transaction per user.](#from-a-transactions-table-with-user_id-id-created_at-etc-get-the-second-most-recent-transaction-per-user)
+    - [consider a table, for each `name`, You have two rows: one `put`, one `call` where each one is associated with a price; you want a single row with `price difference` = `call_price` − `put_price`.](#consider-a-table-for-each-name-you-have-two-rows-one-put-one-call-where-each-one-is-associated-with-a-price-you-want-a-single-row-with-price-difference--call_price--put_price)
 
 ## Database
 
@@ -524,5 +527,73 @@ This **prevents permanent deadlock**.
   - Only consider _lock acquired if you succeed on majority_.
   - Locks have the same TTL across nodes.
   - This reduces the chance that a single-node failure causes multiple clients to think they hold the lock.
+
+---
+
+### UNION Vs. UNION ALL
+
+- `UNION`
+
+  - **Combines results** and **removes duplicates**.
+  - The database has to perform a _deduplication_ step (similar to `SELECT DISTINCT`).
+  - **Slower** than `UNION ALL` because it requires sorting/compare operations.
+  - Useful when you need only **unique records**
+
+- `UNION ALL`
+  - **Combines results** and **keeps duplicates**.
+  - _No deduplication_, so it’s faster.
+  - Useful when **duplicates are meaningful** (e.g., counts, aggregations).
+
+---
+
+### From a `transactions` table (with `user_id`, `id`, `created_at`, etc.), get the second most recent transaction per user.
+
+```sql
+-- using OFFSET in a subquery (not efficient for big datasets!)
+SELECT t.*
+FROM transactions t
+WHERE t.id = (
+    SELECT id
+    FROM transactions
+    WHERE user_id = t.user_id
+    ORDER BY created_at DESC
+    LIMIT 1 OFFSET 1
+);
+
+-- using window function with RANK (ROW_NUMBER can also be used!)
+SELECT user_id, transaction_id, created_at
+FROM (
+    SELECT
+        t.*,
+        RANK() OVER (
+            PARTITION BY user_id
+            ORDER BY created_at DESC
+        ) AS rk
+    FROM transactions t
+) ranked
+WHERE rk = 2;
+-- If multiple transactions can share the same created_at, RANK() might be safer than ROW_NUMBER()
+```
+
+---
+
+### consider a table, for each `name`, You have two rows: one `put`, one `call` where each one is associated with a price; you want a single row with `price difference` = `call_price` − `put_price`.
+
+```sql
+-- conditional aggregation
+SELECT
+    name,
+    MAX(CASE WHEN type = 'call' THEN price END) -
+    MAX(CASE WHEN type = 'put'  THEN price END) AS price_diff
+FROM options
+GROUP BY name;
+
+-- self-join
+SELECT c.name, (c.price - p.price) AS price_diff
+FROM options p
+JOIN options c
+  ON c.name = p.name
+WHERE p.type = 'put' AND c.type = 'call';
+```
 
 ---
