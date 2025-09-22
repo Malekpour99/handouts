@@ -21,6 +21,7 @@
     - [What are different type of exchanges in RabbitMQ](#what-are-different-type-of-exchanges-in-rabbitmq)
     - [How to handle failed or lost published events](#how-to-handle-failed-or-lost-published-events)
     - [How Redis handles concurrency and race-condition when being used as distributed locking mechanism?](#how-redis-handles-concurrency-and-race-condition-when-being-used-as-distributed-locking-mechanism)
+    - [Order of Execution of SQL Queries](#order-of-execution-of-sql-queries)
     - [UNION Vs. UNION ALL](#union-vs-union-all)
     - [From a `transactions` table (with `user_id`, `id`, `created_at`, etc.), get the second most recent transaction per user.](#from-a-transactions-table-with-user_id-id-created_at-etc-get-the-second-most-recent-transaction-per-user)
     - [consider a table, for each `name`, You have two rows: one `put`, one `call` where each one is associated with a price; you want a single row with `price difference` = `call_price` − `put_price`.](#consider-a-table-for-each-name-you-have-two-rows-one-put-one-call-where-each-one-is-associated-with-a-price-you-want-a-single-row-with-price-difference--call_price--put_price)
@@ -527,6 +528,20 @@ This **prevents permanent deadlock**.
   - Only consider _lock acquired if you succeed on majority_.
   - Locks have the same TTL across nodes.
   - This reduces the chance that a single-node failure causes multiple clients to think they hold the lock.
+
+---
+
+### Order of Execution of SQL Queries
+
+1. **`FROM/JOIN`** -> Specifies the tables from which to retrieve data.
+2. **`WHERE`** -> Filters the rows that meet the condition before grouping.
+3. **`GROUP BY`** -> Groups rows that share a property.
+4. **`HAVING`** -> Filters groups based on conditions, applied after grouping.
+5. **`SELECT`** -> Specifies the columns to retrieve or calculate.
+6. **`DISTINCT`** -> Removes duplicate rows from the result set.
+7. **`ORDER BY`** -> Sorts the result set by specified columns.
+8. **`LIMIT`** -> Specifies the maximum number of rows to return.
+9. **`OFFSET`** -> Specifies how many rows to skip before starting to return rows.
 
 ---
 
