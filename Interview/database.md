@@ -575,19 +575,19 @@ WHERE t.id = (
     LIMIT 1 OFFSET 1
 );
 
--- using window function with RANK (ROW_NUMBER can also be used!)
+-- using window function with ROW_NUMBER (RANK can also be used!)
 SELECT user_id, transaction_id, created_at
 FROM (
     SELECT
         t.*,
-        RANK() OVER (
+        ROW_NUMBER() OVER (
             PARTITION BY user_id
             ORDER BY created_at DESC
-        ) AS rk
+        ) AS rn
     FROM transactions t
 ) ranked
-WHERE rk = 2;
--- If multiple transactions can share the same created_at, RANK() might be safer than ROW_NUMBER()
+WHERE rn = 2;
+-- If multiple transactions can share the same created_at, ROW_NUMBER() might be safer than RANK()
 ```
 
 ---
