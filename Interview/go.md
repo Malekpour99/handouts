@@ -15,6 +15,7 @@
       - [Handling Goroutine Leaks](#handling-goroutine-leaks)
     - [Goroutines (Go) Vs. Coroutines (Python)](#goroutines-go-vs-coroutines-python)
     - [Handling Race-Conditions](#handling-race-conditions)
+    - [Enforcing Multi-Processing in Go](#enforcing-multi-processing-in-go)
 
 ## Go
 
@@ -441,5 +442,33 @@ fmt.Println("Final counter:", counter)
 
 - You can also use `channels` for writing and reading data which prevents race-conditions.
 - Concurrent map access → `sync.Map` (built-in concurrent map)
+
+---
+
+### Enforcing Multi-Processing in Go
+
+Goroutines → **lightweight threads** managed by Go runtime.
+`GOMAXPROCS` → controls the maximum number of OS threads executing Go code simultaneously (defaults to number of CPU cores).
+Single process → multiple goroutines, possibly running in parallel threads, but still one process.
+
+```go
+package main
+
+import (
+  "fmt"
+  "os/exec"
+)
+
+func main() {
+  cmd := exec.Command("go", "run", "worker.go")
+  err := cmd.Start()
+  if err != nil {
+    panic(err)
+  }
+
+  fmt.Println("Worker process started with PID:", cmd.Process.Pid)
+  cmd.Wait() // Wait for process to finish
+}
+```
 
 ---
