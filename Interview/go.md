@@ -14,6 +14,7 @@
       - [Detecting Goroutine Leaks](#detecting-goroutine-leaks)
       - [Handling Goroutine Leaks](#handling-goroutine-leaks)
     - [Goroutines (Go) Vs. Coroutines (Python)](#goroutines-go-vs-coroutines-python)
+    - [Handling Race-Conditions](#handling-race-conditions)
 
 ## Go
 
@@ -344,5 +345,101 @@ case <-time.After(time.Second):
     - If it never `awaits`, it will _block_ the event loop.
   - Concurrency is achieved via `async/await` and the **event loop** (`asyncio`).
   - No true parallelism in CPython (due to `GIL`); **only concurrency**.
+
+---
+
+### Handling Race-Conditions
+
+- A `Mutex` (mutual exclusion) ensures **only one goroutine** enters a critical section at a time.
+
+```go
+package main
+
+import (
+  "fmt"
+  "sync"
+)
+
+var (
+  counter int
+  lock    sync.Mutex
+)
+
+func worker(wg *sync.WaitGroup) {
+  defer wg.Done()
+  for i := 0; i < 100000; i++ {
+    lock.Lock()
+    counter++
+    lock.Unlock()
+  }
+}
+
+func main() {
+  var wg sync.WaitGroup
+
+  for i := 0; i < 5; i++ {
+    wg.Add(1)
+    go worker(&wg)
+  }
+
+  wg.Wait()
+  fmt.Println("Final counter:", counter)
+}
+```
+
+- When you have **many readers but few writers**, `RWMutex` allows **multiple goroutines to read simultaneously but only one to write**.
+
+```go
+var rw sync.RWMutex
+var data = make(map[string]string)
+
+func read(key string) string {
+  rw.RLock()
+  defer rw.RUnlock()
+  return data[key]
+}
+
+func write(key, value string) {
+  rw.Lock()
+  defer rw.Unlock()
+  data[key] = value
+}
+```
+
+- For **counters**, Go has `sync/atomic` which is _faster_ than mutexes.
+
+```go
+package main
+
+import (
+  "fmt"
+  "sync"
+  "sync/atomic"
+)
+
+var counter int64
+
+func worker(wg *sync.WaitGroup) {
+  defer wg.Done()
+  for i := 0; i < 100000; i++ {
+    atomic.AddInt64(&counter, 1)
+  }
+}
+
+func main() {
+  var wg sync.WaitGroup
+
+  for i := 0; i < 5; i++ {
+    wg.Add(1)
+    go worker(&wg)
+  }
+
+wg.Wait()
+fmt.Println("Final counter:", counter)
+}
+```
+
+- You can also use `channels` for writing and reading data which prevents race-conditions.
+- Concurrent map access → `sync.Map` (built-in concurrent map)
 
 ---
