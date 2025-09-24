@@ -21,6 +21,7 @@
     - [Sequential Execution in Python](#sequential-execution-in-python)
     - [Async Execution in Python](#async-execution-in-python)
     - [Coroutine Vs. Regular function in Python](#coroutine-vs-regular-function-in-python)
+    - [Prevent Race-Conditions using Lock](#prevent-race-conditions-using-lock)
 
 ## Python
 
@@ -424,5 +425,100 @@ In Python, coroutines are defined using `async def` and are executed with `await
 | Executes with | Direct call            | `await`, `asyncio.run()`, etc. |
 | Blocking      | Yes                    | No (can pause on `await`)      |
 | Return type   | Returns value directly | Returns a coroutine object     |
+
+---
+
+### Prevent Race-Conditions using Lock
+
+- **Multi-Threading**
+
+```python
+import threading
+
+lock = threading.Lock()
+counter = 0
+
+def worker():
+    global counter
+    for _ in range(100000):
+        with lock:  # acquire + release
+            counter += 1
+
+threads = [threading.Thread(target=worker) for _ in range(5)]
+[t.start() for t in threads]
+[t.join() for t in threads]
+
+print("Final counter:", counter)
+```
+
+- **Asynchronous Execution**
+
+```python
+import asyncio
+
+lock = asyncio.Lock()
+counter = 0
+
+async def worker():
+    global counter
+    for _ in range(100000):
+        async with lock:  # async-safe lock
+            counter += 1
+
+async def main():
+    await asyncio.gather(worker(), worker(), worker())
+
+asyncio.run(main())
+print("Final counter:", counter)
+```
+
+- **Multi-Processing**
+
+```python
+import multiprocessing
+
+def worker(counter, lock):
+    for _ in range(100000):
+        with lock:  # Only one process at a time
+            counter.value += 1
+
+if __name__ == "__main__":
+    # Shared memory value
+    counter = multiprocessing.Value("i", 0)  # "i" = int
+    lock = multiprocessing.Lock()
+
+    processes = [multiprocessing.Process(target=worker, args=(counter, lock))
+                 for _ in range(4)]
+
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
+
+    print("Final counter:", counter.value)
+```
+
+```python
+from multiprocessing import Manager, Lock, Process
+
+def worker(shared_list, lock):
+    for i in range(5):
+        with lock:
+            shared_list.append(i)
+
+if __name__ == "__main__":
+    manager = Manager()
+    shared_list = manager.list()
+    lock = Lock()
+
+    processes = [Process(target=worker, args=(shared_list, lock)) for _ in range(3)]
+
+    for p in processes:
+        p.start()
+    for p in processes:
+        p.join()
+
+    print("Shared list:", list(shared_list))
+```
 
 ---
