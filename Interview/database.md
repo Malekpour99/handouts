@@ -20,6 +20,7 @@
     - [How to prevent multiple workers consume the same event in RabbitMQ](#how-to-prevent-multiple-workers-consume-the-same-event-in-rabbitmq)
     - [What are different type of exchanges in RabbitMQ](#what-are-different-type-of-exchanges-in-rabbitmq)
     - [How to handle failed or lost published events](#how-to-handle-failed-or-lost-published-events)
+    - [Eviction Policy (Redis)](#eviction-policy-redis)
     - [How Redis handles concurrency and race-condition when being used as distributed locking mechanism?](#how-redis-handles-concurrency-and-race-condition-when-being-used-as-distributed-locking-mechanism)
     - [Order of Execution of SQL Queries](#order-of-execution-of-sql-queries)
     - [UNION Vs. UNION ALL](#union-vs-union-all)
@@ -483,6 +484,49 @@ Slower, but good for critical cases (e.g., financial transactions).
 
 - Set up metrics for **dropped messages, unacked messages, DLQ size**.
 - Alerts help you detect when events go missing.
+
+---
+
+### Eviction Policy (Redis)
+
+In Redis, eviction policy determines what Redis does when it reaches its maximum memory limit (`maxmemory`) and a client tries to add more data.
+
+By default, Redis will just keep growing until the system (or Redis itself) runs out of memory. But if you set a memory cap (`maxmemory`), Redis needs a strategy (policy) to decide which keys to evict (remove).
+
+Redis supports these major eviction policies:
+
+1. **No eviction**
+
+   - `noeviction` (_default_) -> Writes fail with an error when memory is full. (Safe for **read-heavy workloads** where you don’t want to lose data.)
+
+2. **Volatile policies (only keys with expiration set are evicted)**
+
+   - `volatile-lru` → Evict least recently used (LRU) keys with TTL.
+   - `volatile-lfu` → Evict least frequently used (LFU) keys with TTL.
+   - `volatile-ttl` → Evict keys with the nearest expiration time first.
+   - `volatile-random` → Evict random keys with TTL.
+
+3. **All keys policies (any key can be evicted)**
+
+   - `allkeys-lru` → Evict least recently used keys (most common for cache).
+   - `allkeys-lfu` → Evict least frequently used keys.
+   - `allkeys-random` → Evict random keys regardless of TTL.
+
+```sh
+# check redis configuration
+redis-cli CONFIG GET maxmemory
+redis-cli CONFIG GET maxmemory-policy
+
+# set custom configuration
+redis-cli CONFIG SET maxmemory 512mb
+redis-cli CONFIG SET maxmemory-policy allkeys-lru
+```
+
+- **Best Practices**
+
+  - For **cache** use cases: `allkeys-lru` or `allkeys-lfu` (better for hot/cold data).
+  - For **session storage** with expirations: `volatile-lru` or `volatile-ttl`.
+  - For **critical data persistence**: Avoid eviction (`noeviction`) or ensure persistence (RDB/AOF).
 
 ---
 
