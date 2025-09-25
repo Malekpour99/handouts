@@ -29,6 +29,7 @@
 - **Linked List** -> Create a function which removes the third-to-last node from a singly-linked-list. (Solve in `O(n)` time complexity)
 - **List** -> Create a function which converts a multi-level nested-list to a flat list.
 - **List** -> Given a price-per-day list (like this `[7, 1, 5, 3, 4, 6, 2]`) find the best day to buy and to sell which gives you the highest profit (e.g. buy at `1` and sell at `6`). (Solve in `O(n)` time complexity).
+- **Graph** -> Given a list of answers for all of the students (e.g. `student_id, question_id, answer`), find the students whom their answers match more than 80%.
 
 ## Design Systems
 
