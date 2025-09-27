@@ -1,0 +1,9 @@
+server.host: 0.0.0.0
+server.shutdownTimeout: 5s
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+monitoring.ui.container.elasticsearch.enabled: true
+
+# Security settings
+elasticsearch.username: kibana_system
+elasticsearch.password: 6lzdzVvFRaQGZ7dd93H1
+xpack.encryptedSavedObjects.encryptionKey: a7a6311933d3503b89bc2dbc36572c33a6c10925682e591bffcab6911c06786d

@@ -1,0 +1,78 @@
+services:
+  elasticsearch:
+    image: elasticsearch:8.18.0
+    container_name: elasticsearch
+    environment:
+      - node.name=elasticsearch
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - cluster.name=docker-cluster
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      # Security
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=false
+      - xpack.security.transport.ssl.enabled=false
+      # Passwords
+      - ELASTIC_PASSWORD=${ELASTICSEARCH_PASSWORD}
+      - KIBANA_PASSWORD=${KIBANA_PASSWORD}
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - "elastic_data_1:/usr/share/elasticsearch/data"
+      - ./elasticsearch/elasticsearch.yml:/usr/share/elasticsearch/config/elasticsearch.yml:ro
+    ports:
+      - "9200:9200"
+    healthcheck:
+      test: "curl -s http://localhost:9200/ | grep 401 || exit 1" # when authentication is required
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 40s
+    networks:
+      logging:
+        aliases:
+          - "elasticsearch"
+
+  kibana:
+    image: kibana:8.18.0
+    container_name: kibana
+    environment:
+      - ELASTICSEARCH_HOSTS="http://elasticsearch:9200"
+      - ELASTICSEARCH_USERNAME=${KIBANA_USERNAME}
+      - ELASTICSEARCH_PASSWORD=${KIBANA_PASSWORD}
+      - XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY=a7a6311933d3503b89bc2dbc36572c33a6c10925682e591bffcab6911c06786d
+    ports:
+      - "5601:5601"
+    volumes:
+      - ./kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    networks:
+      logging:
+        aliases:
+          - "kibana"
+
+  logstash:
+    image: logstash:8.18.0
+    container_name: logstash
+    command: logstash -f /etc/logstash/conf.d/logstash.conf
+    volumes:
+      - "./logstash/pipeline:/etc/logstash/conf.d:Z"
+      - "./logstash/config/logstash.yml:/usr/share/logstash/config/logstash.yml:Z"
+      - ../logs:/usr/share/logstash/logs:ro
+    ports:
+      - "5044:5044"
+      - "9600:9600"
+    networks:
+      logging:
+        aliases:
+          - "logstash"
+
+volumes:
+  elastic_data_1:
+    driver: local
+
+networks:
+  logging:
+    driver: bridge
+    name: elk_logging
