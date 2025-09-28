@@ -22,14 +22,14 @@ echo -e "OS Info:\n`lsb_release -a`"
 echo -e "ssh port: $SSH_PORT"
 echo "------------------------------------------"
 
-# create directory backup ------------------------------------
+# Create Backup Directory ------------------------------------
 if [ -d $BAC_DIR ]; then
    echo "backup directory already exists"
 else
    mkdir -p $BAC_DIR
 fi   
 
-# Preparing os ----------------------------------------------------
+# Preparing OS ----------------------------------------------------
 # Update OS
 apt update && apt upgrade -y 
 
@@ -40,12 +40,12 @@ apt remove -y snapd && apt purge -y snapd
 apt install -y wget git vim nano bash-completion curl htop iftop jq ncdu unzip net-tools dnsutils \
                atop sudo ntp fail2ban software-properties-common apache2-utils tcpdump telnet axel
 
-# Host Configuration ------------------------------------------
-echo -e " \e[30;48;5;56m \e[1m \e[38;5;15mHostname Configuration \e[0m"
+# Host Configuration (Static Hostname) ------------------------------------------
+echo -e " \e[30;48;5;56m \e[1m \e[38;5;15mHostname Configuration  \e[0m"
 hostnamectl set-hostname $HostName
 
-# Timeout Config -----------------------------------------------
-echo -e " \e[30;48;5;56m \e[1m \e[38;5;15mTimeout Setting \e[0m"
+# Timeout Configuration -----------------------------------------------
+echo -e " \e[30;48;5;56m \e[1m \e[38;5;15mTimeout Configuration  \e[0m"
 echo -e '#!/bin/bash\n### 300 seconds == 5 minutes ##\nTMOUT=300\nreadonly TMOUT\nexport TMOUT' > /etc/profile.d/timout-settings.sh
 cat /etc/profile.d/timout-settings.sh
 
