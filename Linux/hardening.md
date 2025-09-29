@@ -18,6 +18,8 @@
       - [`IPv6` Disabling](#ipv6-disabling)
     - [Resource Limit Configuration](#resource-limit-configuration)
     - [Kernel Module Loading](#kernel-module-loading)
+    - [Reducing Unused Services](#reducing-unused-services)
+    - [Defining a Custom Banner](#defining-a-custom-banner)
 
 ## Core Concepts
 
@@ -308,3 +310,28 @@ modprobe br_netfilter
 - Loads the `br_netfilter` kernel module.
 - This makes bridged traffic visible to `iptables`/`netfilter`, which is critical for **Kubernetes**, **Docker**, and **virtual networking**.
 - Without it, firewall rules might not apply to packets forwarded across bridges.
+
+### Reducing Unused Services
+
+- `systemctl stop <service>` -> Immediately stops the service if it is running.
+- `systemctl disable <service>` -> Prevents the service from starting automatically at boot.
+- `systemctl mask <service>` -> Completely prevents the service from being started manually or automatically, even if another service tries to start it. (Essentially links the service unit to `/dev/null`.)
+
+- **`postfix`**
+
+  - Postfix is a mail server.
+  - Disabling it is common on servers that don’t need to send or receive mail (reduces attack surface).
+
+- **`firewalld`**
+
+  - Dynamic firewall daemon used on RHEL/CentOS systems.
+  - Disabled if you plan to use another firewall (like iptables rules directly) or don’t want the daemon managing rules.
+
+- **`ufw`**
+
+  - Uncomplicated Firewall, common on Ubuntu/Debian.
+  - Disabled for the same reason as `firewalld`.
+
+### Defining a Custom Banner
+
+- `/etc/issue.net` -> On most Linux systems, `/etc/issue.net` is **displayed by SSH before login** (if Banner `/etc/issue.net` is set in `/etc/ssh/sshd_config`).
