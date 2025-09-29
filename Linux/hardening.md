@@ -14,8 +14,8 @@
       - [File Descriptors \& Memory Maps](#file-descriptors--memory-maps)
       - [Network Options](#network-options)
       - [Kernel Hardening](#kernel-hardening)
-      - [IPv6 Disabling](#ipv6-disabling)
-      - [Restricting Process Tracing](#restricting-process-tracing)
+      - [Network Hardening (`IPv4`)](#network-hardening-ipv4)
+      - [`IPv6` Disabling](#ipv6-disabling)
 
 ## Core Concepts
 
@@ -192,21 +192,16 @@ kernel.sysrq = 0
   - `Alt+SysRq+K` → kill all processes on the current console
 
 ```sh
-net.ipv4.conf.all.log_martians = 1
+kernel.yama.ptrace_scope=1
 ```
 
-- Logs suspicious/malicious packets (**"martians"** = bad source/dest addresses).
+- Restricts `ptrace` debugging: _only a process’s children_ can be traced. Prevents privilege escalation via `ptrace`.
+- `ptrace` is a Linux system call that lets one process **observe and control another process**.
+- By default (_historically_), any process owned by the same user could `ptrace` another.
+  - This means: if you have two processes running under the same user, one can inject code into the other.
+  - If the target process has higher privileges (e.g., `setuid` binary that temporarily runs as root), this could lead to **privilege escalation**.
 
-```sh
-net.ipv6.conf.all.accept_redirects = 0
-net.ipv6.conf.default.accept_redirects = 0
-```
-
-- Disables `ICMPv6` redirect acceptance. Prevents **MITM (Man-in-the-Middle) attacks & routing-based attacks**.
-- **`ICMPv6` (Internet Control Message Protocol for IPv6)** is used by routers and hosts to exchange control messages. One feature is the **Redirect message**: You connect to a router → the router notices a shorter path → it sends you an ICMPv6 Redirect so your host updates its routing table.
-- Without this configuration, a malicious host can send **fake redirect messages**, tricking your machine into:
-  - Sending traffic through the attacker (Man-in-the-Middle attack)
-  - Dropping traffic (Denial of Service)
+#### Network Hardening (`IPv4`)
 
 ```sh
 net.ipv4.conf.all.forwarding = 1
@@ -228,11 +223,13 @@ net.ipv4.conf.default.accept_source_route = 0
 - Disables **IP redirects** and **source routing** by default. Hardens networking.
 
 ```sh
+net.ipv4.conf.all.log_martians = 1
 net.ipv4.conf.default.log_martians = 1
 net.ipv4.conf.all.accept_redirects = 0
 ```
 
-- Logs suspicious `IPv4` packets and disables redirects globally.
+- Logs suspicious/malicious `IPv4` packets (**"martians"** = bad source/dest addresses).
+- Disables `IPv4` packets redirects globally.
 
 ```sh
 net.ipv4.conf.all.rp_filter=1
@@ -241,7 +238,18 @@ net.ipv4.conf.all.rp_filter=1
 - Enables **reverse path filtering**. Drops packets with spoofed (fake) source addresses.
 - **Reverse Path Filtering (RPF)** checks whether the source address of a received packet is reachable via the interface it came in on. If not → the packet is likely spoofed → **drop it**.
 
-#### IPv6 Disabling
+#### `IPv6` Disabling
+
+```sh
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+```
+
+- Disables `ICMPv6` redirect acceptance. Prevents **MITM (Man-in-the-Middle) attacks & routing-based attacks**.
+- **`ICMPv6` (Internet Control Message Protocol for IPv6)** is used by routers and hosts to exchange control messages. One feature is the **Redirect message**: You connect to a router → the router notices a shorter path → it sends you an ICMPv6 Redirect so your host updates its routing table.
+- Without this configuration, a malicious host can send **fake redirect messages**, tricking your machine into:
+  - Sending traffic through the attacker (Man-in-the-Middle attack)
+  - Dropping traffic (Denial of Service)
 
 ```sh
 # Disable Ipv6
@@ -251,15 +259,3 @@ net.ipv6.conf.lo.disable_ipv6=1
 ```
 
 - Completely disables `IPv6` support (all interfaces including loopback). Useful if not needed (reduces attack surface).
-
-#### Restricting Process Tracing
-
-```sh
-kernel.yama.ptrace_scope=1
-```
-
-- Restricts `ptrace` debugging: _only a process’s children_ can be traced. Prevents privilege escalation via `ptrace`.
-- `ptrace` is a Linux system call that lets one process **observe and control another process**.
-- By default (_historically_), any process owned by the same user could `ptrace` another.
-  - This means: if you have two processes running under the same user, one can inject code into the other.
-  - If the target process has higher privileges (e.g., `setuid` binary that temporarily runs as root), this could lead to **privilege escalation**.

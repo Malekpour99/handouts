@@ -66,7 +66,7 @@ net.netfilter.nf_conntrack_tcp_timeout_established=3600
 # Maximum Number Of Open Files
 fs.file-max = 500000
 
-# 
+# Maximum Number of Memory Map Areas a Process May Have
 vm.max_map_count=262144
 
 net.ipv4.ip_nonlocal_bind = 1
@@ -74,30 +74,30 @@ net.bridge.bridge-nf-call-iptables = 1
 net.bridge.bridge-nf-call-ip6tables = 1
 net.ipv4.ip_forward = 1
 
-#Kernel Hardening
+# Kernel Hardening
 fs.suid_dumpable = 0
 kernel.core_uses_pid = 1
 kernel.dmesg_restrict = 1
 kernel.kptr_restrict = 2
 kernel.sysrq = 0 
-net.ipv4.conf.all.log_martians = 1
-net.ipv6.conf.all.accept_redirects = 0
-net.ipv6.conf.default.accept_redirects = 0
+kernel.yama.ptrace_scope=1
 
-#New Kernel Hardening
+# Network Hardening IPv4
 net.ipv4.conf.all.forwarding = 1
 net.ipv4.conf.all.send_redirects = 0
 net.ipv4.conf.default.accept_redirects = 0
 net.ipv4.conf.default.accept_source_route = 0
+net.ipv4.conf.all.log_martians = 1
 net.ipv4.conf.default.log_martians = 1
 net.ipv4.conf.all.accept_redirects = 0
+net.ipv4.conf.all.rp_filter=1
 
-# Disable Ipv6
+# Disable IPv6
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
 net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
 net.ipv6.conf.lo.disable_ipv6=1
-net.ipv4.conf.all.rp_filter=1
-kernel.yama.ptrace_scope=1
 EOT
 echo "root soft nofile 65535" >  /etc/security/limits.conf
 echo "root hard nofile 65535" >> /etc/security/limits.conf
