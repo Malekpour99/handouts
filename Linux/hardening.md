@@ -12,6 +12,10 @@
     - [Systemctl Configuration](#systemctl-configuration)
       - [TCP/Networking Performance](#tcpnetworking-performance)
       - [File Descriptors \& Memory Maps](#file-descriptors--memory-maps)
+      - [Network Options](#network-options)
+      - [Kernel Hardening](#kernel-hardening)
+      - [IPv6 Disabling](#ipv6-disabling)
+      - [Restricting Process Tracing](#restricting-process-tracing)
 
 ## Core Concepts
 
@@ -126,3 +130,136 @@ vm.max_map_count=262144
 ```
 
 - Sets the maximum number of memory map areas a process can have. Required by apps like `Elasticsearch`.
+
+#### Network Options
+
+```sh
+net.ipv4.ip_nonlocal_bind = 1
+```
+
+- Allows binding sockets to non-local IP addresses. Useful for **load balancers**, **HA setups**.
+
+```sh
+net.bridge.bridge-nf-call-iptables = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+```
+
+- Ensures bridged traffic goes through iptables/ip6tables for filtering. Needed for **Kubernetes/containers networking**.
+
+```sh
+net.ipv4.ip_forward = 1
+```
+
+- Enables IP forwarding (router behavior). Required for **NAT**, **VPNs**, **Docker/Kubernetes**.
+
+#### Kernel Hardening
+
+```sh
+fs.suid_dumpable = 0
+```
+
+- Prevents `setuid` programs from writing core dumps (avoids leaking sensitive data).
+- A **`setuid program`** is an executable file with the `setuid` bit set (e.g., `/usr/bin/passwd`). When run, it executes with the file owner’s privileges instead of the user’s. Typically, this means running with **root privileges** even if a normal user launched it.
+- A **`core dump`** is a file the kernel writes when a process crashes. It contains the process’s memory (`variables`, `stack`, `heap`, etc.) at the time of the crash — useful for debugging, but potentially very sensitive.
+
+```sh
+kernel.core_uses_pid = 1
+```
+
+- Appends `PID` to core dump filenames (avoids overwriting).
+
+```sh
+kernel.dmesg_restrict = 1
+```
+
+- Restricts access to kernel logs (`dmesg`) to **root** only. Prevents info leaks.
+
+```sh
+kernel.kptr_restrict = 2
+```
+
+- Restricts exposure of kernel addresses in `/proc` and logs. Mitigates kernel exploit attacks.
+
+```sh
+kernel.sysrq = 0
+```
+
+- Disables `SysRq key combos` (used for debugging/crash dumps). Prevents abuse.
+- The **`SysRq` (System Request) key** is a special key combo built into the Linux kernel. It lets you send **low-level commands** directly to the kernel using: `Alt + SysRq + <command key>`
+  - `Alt+SysRq+S` → sync disks (flush all data to disk)
+  - `Alt+SysRq+U` → remount all filesystems read-only
+  - `Alt+SysRq+B` → immediately reboot the machine (bypassing normal shutdown!)
+  - `Alt+SysRq+K` → kill all processes on the current console
+
+```sh
+net.ipv4.conf.all.log_martians = 1
+```
+
+- Logs suspicious/malicious packets (**"martians"** = bad source/dest addresses).
+
+```sh
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv6.conf.default.accept_redirects = 0
+```
+
+- Disables `ICMPv6` redirect acceptance. Prevents **MITM (Man-in-the-Middle) attacks & routing-based attacks**.
+- **`ICMPv6` (Internet Control Message Protocol for IPv6)** is used by routers and hosts to exchange control messages. One feature is the **Redirect message**: You connect to a router → the router notices a shorter path → it sends you an ICMPv6 Redirect so your host updates its routing table.
+- Without this configuration, a malicious host can send **fake redirect messages**, tricking your machine into:
+  - Sending traffic through the attacker (Man-in-the-Middle attack)
+  - Dropping traffic (Denial of Service)
+
+```sh
+net.ipv4.conf.all.forwarding = 1
+```
+
+- Same as `ip_forward`, enables forwarding globally.
+
+```sh
+net.ipv4.conf.all.send_redirects = 0
+```
+
+- Prevents sending `ICMP` redirects (protects from **routing manipulation**). This prevents your host from accidentally or maliciously influencing the routing decisions of other devices on the network.
+
+```sh
+net.ipv4.conf.default.accept_redirects = 0
+net.ipv4.conf.default.accept_source_route = 0
+```
+
+- Disables **IP redirects** and **source routing** by default. Hardens networking.
+
+```sh
+net.ipv4.conf.default.log_martians = 1
+net.ipv4.conf.all.accept_redirects = 0
+```
+
+- Logs suspicious `IPv4` packets and disables redirects globally.
+
+```sh
+net.ipv4.conf.all.rp_filter=1
+```
+
+- Enables **reverse path filtering**. Drops packets with spoofed (fake) source addresses.
+- **Reverse Path Filtering (RPF)** checks whether the source address of a received packet is reachable via the interface it came in on. If not → the packet is likely spoofed → **drop it**.
+
+#### IPv6 Disabling
+
+```sh
+# Disable Ipv6
+net.ipv6.conf.all.disable_ipv6=1
+net.ipv6.conf.default.disable_ipv6=1
+net.ipv6.conf.lo.disable_ipv6=1
+```
+
+- Completely disables `IPv6` support (all interfaces including loopback). Useful if not needed (reduces attack surface).
+
+#### Restricting Process Tracing
+
+```sh
+kernel.yama.ptrace_scope=1
+```
+
+- Restricts `ptrace` debugging: _only a process’s children_ can be traced. Prevents privilege escalation via `ptrace`.
+- `ptrace` is a Linux system call that lets one process **observe and control another process**.
+- By default (_historically_), any process owned by the same user could `ptrace` another.
+  - This means: if you have two processes running under the same user, one can inject code into the other.
+  - If the target process has higher privileges (e.g., `setuid` binary that temporarily runs as root), this could lead to **privilege escalation**.
