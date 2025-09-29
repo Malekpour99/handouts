@@ -16,6 +16,8 @@
       - [Kernel Hardening](#kernel-hardening)
       - [Network Hardening (`IPv4`)](#network-hardening-ipv4)
       - [`IPv6` Disabling](#ipv6-disabling)
+    - [Resource Limit Configuration](#resource-limit-configuration)
+    - [Kernel Module Loading](#kernel-module-loading)
 
 ## Core Concepts
 
@@ -259,3 +261,50 @@ net.ipv6.conf.lo.disable_ipv6=1
 ```
 
 - Completely disables `IPv6` support (all interfaces including loopback). Useful if not needed (reduces attack surface).
+
+### Resource Limit Configuration
+
+```sh
+echo "root soft nofile 65535" >  /etc/security/limits.conf
+echo "root hard nofile 65535" >> /etc/security/limits.conf
+```
+
+- `nofile` -> maximum number of **open file descriptors** (files, sockets) a process can hold.
+- **soft** -> default limit when a session starts (can be increased up to the hard limit).
+- **hard** -> absolute max limit, cannot be exceeded.
+- **Root** is allowed up to 65,535 open files/sockets, which is very high (useful for DBs, proxies, web servers).
+- `65535` -> It’s the **maximum value often allowed by the kernel** for file descriptors and processes per user in older Linux kernels.
+
+```sh
+echo "root soft nproc 65535" >> /etc/security/limits.conf
+echo "root hard nproc 65535" >> /etc/security/limits.conf
+```
+
+- `nproc` = maximum number of **processes/threads** a user can create.
+- **Root** can create up to 65,535 processes, preventing process exhaustion limits from breaking critical services.
+
+```sh
+echo "* soft nofile 2048" >  /etc/security/limits.conf
+echo "* hard nofile 2048" >> /etc/security/limits.conf
+```
+
+- For **all users**, limits the **number of open files** to 2,048.
+- Prevents normal users from hogging file descriptors and causing DoS.
+
+```sh
+echo "* soft nproc  2048" >> /etc/security/limits.conf
+echo "* hard nproc  2048" >> /etc/security/limits.conf
+```
+
+- For **all users**, limits the **number of processes** to 2,048.
+- Prevents fork-bomb attacks or accidental resource exhaustion.
+
+### Kernel Module Loading
+
+```sh
+modprobe br_netfilter
+```
+
+- Loads the `br_netfilter` kernel module.
+- This makes bridged traffic visible to `iptables`/`netfilter`, which is critical for **Kubernetes**, **Docker**, and **virtual networking**.
+- Without it, firewall rules might not apply to packets forwarded across bridges.

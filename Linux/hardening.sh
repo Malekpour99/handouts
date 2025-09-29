@@ -99,6 +99,8 @@ net.ipv6.conf.all.disable_ipv6=1
 net.ipv6.conf.default.disable_ipv6=1
 net.ipv6.conf.lo.disable_ipv6=1
 EOT
+
+# Resource Limits Configuration -----------------------------------------
 echo "root soft nofile 65535" >  /etc/security/limits.conf
 echo "root hard nofile 65535" >> /etc/security/limits.conf
 echo "root soft nproc 65535" >> /etc/security/limits.conf
@@ -108,9 +110,11 @@ echo "* soft nofile 2048" >  /etc/security/limits.conf
 echo "* hard nofile 2048" >> /etc/security/limits.conf
 echo "* soft nproc  2048" >> /etc/security/limits.conf
 echo "* hard nproc  2048" >> /etc/security/limits.conf
+
+# Kernel Module Loading
 modprobe br_netfilter
 
-# sysctl config apply 
+# Applying sysctl config
 sysctl -p
 
 #-------------------------------------------------------------
