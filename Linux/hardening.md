@@ -28,6 +28,7 @@
       - [Session / Terminal behavior](#session--terminal-behavior)
       - [Banner / Environment](#banner--environment)
       - [Access Restrictions](#access-restrictions)
+    - [fail2ban Configuration](#fail2ban-configuration)
 
 ## Core Concepts
 
@@ -403,3 +404,30 @@ modprobe br_netfilter
 `AllowGroups root` -> Only users in the root group may authenticate. Combined with AllowUsers root this is highly restrictive.
 
 <!-- todo: add documentation for commented commands -->
+
+### fail2ban Configuration
+
+```sh
+cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
+```
+
+- Copies the default `jail.conf` to `jail.local`; since `jail.local` is the recommended place to put overrides so package upgrades don’t overwrite your custom settings.
+
+```sh
+# ssh config
+sed -i '/^\[sshd\]/a enabled = true' /etc/fail2ban/jail.local
+
+# tries to replace an existing enabled line or insert it if missing
+sed -i '/^\[sshd\]/{:a;n;/^enabled[[:space:]]*=/!{i enabled = true; b}; s/^enabled[[:space:]]*=.*/enabled = true/}' /etc/fail2ban/jail.local
+```
+
+- Finds the line that starts a `[sshd]` jail section and inserts a new line `enabled = true` immediately after it.
+- Effect: enables the SSH jail so fail2ban will monitor SSH auth attempts.
+
+```sh
+sed -i 's/port    = ssh/port    = '$SSH_PORT'/g' /etc/fail2ban/jail.local
+sed -i 's/port     = ssh/port    = '$SSH_PORT'/g' /etc/fail2ban/jail.local
+
+sed -i -E "s/^[[:space:]]*port[[:space:]]*=[[:space:]]*ssh/port    = $SSH_PORT/" /etc/fail2ban/jail.local
+# try to catch spacing variants
+```

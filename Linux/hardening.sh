@@ -210,22 +210,23 @@ EOT
 # Test sshd Configuration
 sshd -t
 
-# SSH service: enable, restart and status
+# SSH service: enable, restart and status check
 {
 systemctl enable sshd.service 
 systemctl restart sshd.service 
 systemctl is-active --quiet sshd && echo -e "\e[1m \e[96m sshd service: \e[30;48;5;82m \e[5mRunning \e[0m" || echo -e "\e[1m \e[96m sshd service: \e[30;48;5;196m \e[5mNot Running \e[0m"
 }
 
-# fail2ban config -----------------------------------------
+# fail2ban Local Configuration -----------------------------------------
 cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local
-# ssh config 
+# fail2ban SSH Configuration
 sed -i '/^\[sshd\]/a enabled = true' /etc/fail2ban/jail.local
 sed -i 's/port    = ssh/port    = '$SSH_PORT'/g' /etc/fail2ban/jail.local
 sed -i 's/port     = ssh/port    = '$SSH_PORT'/g' /etc/fail2ban/jail.local
-# service restart and status service
+
+# fail2ban service: enable, restart and status check
 {
-systemctl enable fail2ban.service 
+systemctl enable fail2ban.service
 systemctl restart fail2ban.service
 systemctl is-active --quiet fail2ban && echo -e "\e[1m \e[96m fail2ban service: \e[30;48;5;82m \e[5mRunning \e[0m" || echo -e "\e[1m \e[96m fail2ban service: \e[30;48;5;196m \e[5mNot Running \e[0m"
 sleep 2
