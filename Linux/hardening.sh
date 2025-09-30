@@ -207,21 +207,15 @@ AllowUsers root
 AllowGroups root
 EOT
 
-#sshd config test
+# Test sshd Configuration
 sshd -t
 
-#ssh service: enable, restart and status
+# SSH service: enable, restart and status
 {
 systemctl enable sshd.service 
 systemctl restart sshd.service 
 systemctl is-active --quiet sshd && echo -e "\e[1m \e[96m sshd service: \e[30;48;5;82m \e[5mRunning \e[0m" || echo -e "\e[1m \e[96m sshd service: \e[30;48;5;196m \e[5mNot Running \e[0m"
 }
-
-#Copy Public Key -------------------------------------------
-#cat <<EOT >> /root/.ssh/authorized_keys
-# <your name>
-# ssh-rsa YOUR_SSH_PUBLIC_KEY
-#EOT
 
 # fail2ban config -----------------------------------------
 cp /etc/fail2ban/jail.conf /etc/fail2ban/jail.local

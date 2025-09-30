@@ -20,6 +20,14 @@
     - [Kernel Module Loading](#kernel-module-loading)
     - [Reducing Unused Services](#reducing-unused-services)
     - [Defining a Custom Banner](#defining-a-custom-banner)
+    - [SSH Configuration](#ssh-configuration)
+      - [Basic](#basic)
+      - [Logging](#logging)
+      - [Authentication / Login](#authentication--login)
+      - [Forwarding / Tunneling](#forwarding--tunneling)
+      - [Session / Terminal behavior](#session--terminal-behavior)
+      - [Banner / Environment](#banner--environment)
+      - [Access Restrictions](#access-restrictions)
 
 ## Core Concepts
 
@@ -27,6 +35,14 @@
 - SSH Authorized Keys Configuration path: `/home/<user>/.ssh/authorized_keys` or `/root/.ssh.authorized_keys` (for root user)
 
   - Add public keys to the end of `authorized_keys` file to provide access to server for users by SSH keys!
+
+```sh
+# Adding Public Key to authorized_key for PubKeyAuthentication
+cat <<EOT >> /root/.ssh/authorized_keys
+<user's name>
+<ssh-rsa USER_SSH_PUBLIC_KEY>
+EOT
+```
 
 - Finding all the available bash on system:`which -a bash`
 
@@ -335,3 +351,55 @@ modprobe br_netfilter
 ### Defining a Custom Banner
 
 - `/etc/issue.net` -> On most Linux systems, `/etc/issue.net` is **displayed by SSH before login** (if Banner `/etc/issue.net` is set in `/etc/ssh/sshd_config`).
+
+### SSH Configuration
+
+- Configuration file -> `/etc/ssh/sshd_config`
+- Test Configuration -> `sshd -t`
+
+#### Basic
+
+- `Port $SSH_PORT` -> Sets the TCP port sshd listens on. (default `22`)
+- `ListenAddress 0.0.0.0` -> Bind sshd to all IPv4 network interfaces.
+
+#### Logging
+
+- `LogLevel VERBOSE` -> Increase logging detail for SSH events (useful for auditing and troubleshooting, Produces more log output than the default)
+
+#### Authentication / Login
+
+- `PermitRootLogin yes` -> Allows the root account to log in directly over SSH. (Security risk) — often _disabled_ in hardened systems!
+- `MaxAuthTries 3` -> **Maximum number of authentication** attempts per connection before the server disconnects the client. Limits brute-force attempts.
+- `MaxSessions 2` -> **Maximum open sessions** permitted per network connection (useful to limit resource usage and abuse).
+- `PasswordAuthentication yes` -> Allow password-based authentication. (Security risk) — **public-key auth** is stronger and preferred!
+- `ChallengeResponseAuthentication no` -> Disables challenge/response auth (e.g., some OTP PAM modules). If you rely on PAM-based 2FA, this may need to be yes.
+- `GSSAPIAuthentication no` -> Disable **GSSAPI (Generic Security Services Application Program Interface - Kerberos)** authentication mechanisms. Good to disable if unused.
+- `UsePAM yes` -> Enables **Pluggable Authentication Modules (PAM)**. Allows use of system auth stacks (account, password, session modules).
+
+#### Forwarding / Tunneling
+
+- `AllowAgentForwarding no` -> Disables SSH agent forwarding (prevents leaking agent credentials to remote hosts).
+- `AllowTcpForwarding no` -> Disables port forwarding over SSH (prevents tunnel abuse).
+- `X11Forwarding no` -> Disables X11 forwarding (reduces attack surface if graphical forwarding is not needed).
+
+#### Session / Terminal behavior
+
+- `PrintMotd no` -> Do not print `/etc/motd` upon SSH login (avoids duplicate messages if PAM prints it).
+- `TCPKeepAlive no` -> Disable low-level TCP keepalives. (You rely on higher-level keepalives instead — see `ClientAlive\*` below.)
+- `ClientAliveInterval 10` -> Server sends a **keepalive (null packet)** to the client every `10` seconds to check the connection.
+- `ClientAliveCountMax 10` -> If the server sends `ClientAliveInterval` probes and receives no response `ClientAliveCountMax` times, it disconnects the session. With these values the server will drop an unresponsive client after `~100 seconds (10 × 10s)`.
+- `UseDNS no` -> Don’t perform DNS lookups on client IPs for reverse lookup before authentication (speeds up logins and prevents DNS-based delays/attacks).
+
+#### Banner / Environment
+
+`Banner /etc/issue.net` -> Display the pre-login banner from `/etc/issue.net` to connecting clients before authentication.
+
+`AcceptEnv LANG LC_*` -> Allow the client to **pass locale environment variables** (useful if you want remote processes to inherit locale). Can be restricted for security!
+
+#### Access Restrictions
+
+`AllowUsers root` -> Only the root user is allowed to login via SSH. This overrides more permissive access; if root is allowed this effectively restricts SSH to the root account only.
+
+`AllowGroups root` -> Only users in the root group may authenticate. Combined with AllowUsers root this is highly restrictive.
+
+<!-- todo: add documentation for commented commands -->
