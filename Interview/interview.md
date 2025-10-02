@@ -38,6 +38,7 @@
 - Maktabkhoone -> Consider we have two postgres databases and a partition happens between them; what happens now?
 - Melli-Gold -> Design a shopping cart for purchasing products (handle race conditions for buying limited products, show an estimated number of remaining products for clients, manage different stages of payment for finalizing the purchase)
 - Snapp -> Design an application for selling theater tickets (handle race-conditions and consider a very high-load from customers for buying tickets, manage different payment stages, prevent over-selling the same seats)
+- abrnoc -> Design a bicycle ride management system (handle different conditions and corner-cases + performance optimization)
 
 ## Projects
 
