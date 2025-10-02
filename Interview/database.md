@@ -11,6 +11,7 @@
     - [BASE](#base)
     - [ACID Vs. BASE](#acid-vs-base)
     - [Choosing a Database](#choosing-a-database)
+    - [Partitioning Vs. Sharding](#partitioning-vs-sharding)
     - [Isolation Levels](#isolation-levels)
     - [Primary Indexing Vs. Secondary Indexing](#primary-indexing-vs-secondary-indexing)
     - [Optimistic Locking Vs. Pessimistic Locking](#optimistic-locking-vs-pessimistic-locking)
@@ -185,6 +186,85 @@ Many NoSQL databases (Cassandra, DynamoDB, CouchDB, etc.) follow the BASE model 
   - Product catalog with flexible schema → MongoDB.
   - Analytics dashboard → ClickHouse or BigQuery.
   - Cache / Session store → Redis.
+
+---
+
+### Partitioning Vs. Sharding
+
+- **Database Partitioning**
+
+Partitioning means **splitting a single large table into smaller, more manageable parts (partitions)**.
+
+All partitions still belong to the **same database instance**, and the database engine manages them internally.
+
+- Types of Partitioning:
+
+  - **Horizontal partitioning (row-based)**
+
+    - Split rows into different partitions based on some rule.
+    - Example: `Users` table split by region (`Asia`, `Europe`, `US`).
+    - Each partition has a subset of rows.
+
+  - **Vertical partitioning (column-based)**
+
+    - Split columns into different tables.
+    - Example: `Users` basic info (`id`, `name`, `email`) in one table, sensitive info (`password`, `SSN`) in another.
+    - Helps reduce I/O if you don’t always need all columns.
+
+  - **Range / List / Hash partitioning**
+    - Range: Split by ranges of a column (e.g., `orders` by `order_date`).
+    - List: Split by specific values (e.g., country codes).
+    - Hash: Evenly distribute rows across partitions using a hash function.
+
+- When to use Partitioning:
+
+  - When you have **very large tables** (billions of rows) and queries are slow.
+  - To improve **query performance** (pruning: queries only scan relevant partitions).
+  - To manage **archival data** (old partitions can be compressed or dropped).
+  - To **optimize maintenance** (backup/restore, reindexing, vacuuming).
+
+⚠️ Partitioning is still inside one DB — so it doesn’t solve the problem of **database server load or storage limits**.
+
+- **Database Sharding**
+
+Sharding is a **horizontal partitioning technique across multiple database servers (not just within one)**.
+
+Each **shard** is an **independent database instance** with its own data subset. Example:
+
+- Imagine you have a `Users` table with 1 billion rows.
+- Instead of keeping all users in one DB, you could shard by `user_id`:
+
+  - Shard 1: Users `1–100M`
+  - Shard 2: Users `100M–200M`
+  - Shard 3: Users `200M–300M`
+  - Each shard runs on its own server.
+
+- Types of Sharding:
+
+  - **Range-based sharding**: Split based on **ranges** (like partitioning, but across servers).
+  - **Hash-based sharding**: Use a **hash function on a key** (like `user_id % N`) to distribute load evenly.
+  - **Directory-based sharding**: Use a **lookup service** to decide which shard holds which data.
+
+- When to use Sharding:
+
+  - When a single database server cannot **handle the scale** (storage, CPU, memory, connections).
+  - When you need to **scale horizontally** (add more servers instead of upgrading one).
+  - For **high availability** and **geographic distribution** (place shards closer to users).
+  - When **write throughput** is the bottleneck (not just reads).
+
+- ⚠️ Challenges of sharding:
+
+  - Increased application complexity (need to know which shard to query).
+  - Cross-shard queries are difficult (may require `scatter-gather queries`).
+  - Resharding is hard if a shard gets too big (need to rebalance).
+
+| Feature                   | Partitioning                                  | Sharding                                |
+| ------------------------- | --------------------------------------------- | --------------------------------------- |
+| **Location**              | Within one DB instance                        | Across multiple DB instances/servers    |
+| **Management**            | Managed by DB engine (Postgres, Oracle, etc.) | Managed by application / middleware     |
+| **Goal**                  | Optimize queries & manage big tables          | Scale database horizontally             |
+| **Cross-partition query** | Easy (same DB engine)                         | Hard (need distributed query logic)     |
+| **Use case**              | Performance, maintenance, storage management  | Scalability, high throughput, huge data |
 
 ---
 
