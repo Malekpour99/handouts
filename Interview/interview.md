@@ -46,6 +46,7 @@
 - Invex -> Block-Chain Wallet
 - Faraswap -> User registration + Wallet (live-code Python-Django)
 - Asan Pardakht -> Read from multiple text files and give a word count as final result (live-code GO)
+- Abrnoc -> Design a weather report system based on Open-Weather API (Go)
 - Porsline -> Recommendation system based on user history and activity
 - Mofid Securities -> Create a decorator which tracks the time of execution for any function
 - Toman -> E-commerce CRUD endpoints
