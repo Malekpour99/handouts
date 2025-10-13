@@ -284,7 +284,7 @@ COMMIT
 COMMIT
 EOT
 {
-# load config iptables
+# load iptables configuration
 iptables-restore /etc/iptables/rules.v4
 iptables -nL
 # restart fail2ban config
@@ -301,7 +301,7 @@ systemctl restart docker
 systemctl is-active --quiet docker && echo -e "\e[1m \e[96m docker service: \e[30;48;5;82m \e[5mRunning \e[0m" || echo -e "\e[1m \e[96m docker service: \e[30;48;5;196m \e[5mNot Running \e[0m"
 }
 
-# Configur Docker --------------------------------------------------------------------
+# Docker Configuration --------------------------------------------------------------------
 if [ -d $DOCKER_DEST ] ; then
    echo "file exist"
 else

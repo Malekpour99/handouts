@@ -29,6 +29,8 @@
       - [Banner / Environment](#banner--environment)
       - [Access Restrictions](#access-restrictions)
     - [fail2ban Configuration](#fail2ban-configuration)
+    - [iptables configuration](#iptables-configuration)
+      - [iptables](#iptables)
 
 ## Core Concepts
 
@@ -431,3 +433,136 @@ sed -i 's/port     = ssh/port    = '$SSH_PORT'/g' /etc/fail2ban/jail.local
 sed -i -E "s/^[[:space:]]*port[[:space:]]*=[[:space:]]*ssh/port    = $SSH_PORT/" /etc/fail2ban/jail.local
 # try to catch spacing variants
 ```
+
+### iptables configuration
+
+```sh
+DEBIAN_FRONTEND=noninteractive apt install -y iptables-persistent
+```
+
+- Installs `iptables-persistent`, which automatically **saves and restores firewall rules** across reboots.
+- The `DEBIAN_FRONTEND=noninteractive` flag avoids interactive prompts during install.
+
+#### iptables
+
+- iptables rules can be divided into tables (like `filter`, `mangle`, `nat`, etc.).
+- Each table contains chains (like `INPUT`, `OUTPUT`, `FORWARD`, etc.).
+- Each chain has rules that decide what to do with packets.
+
+```sh
+*mangle
+:PREROUTING ACCEPT [0:0]
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:POSTROUTING ACCEPT [0:0]
+```
+
+- `*mangle` — starts the mangle table section.
+- The `:` lines define chains and set their default policy to `ACCEPT`. (Meaning: if no rule matches, the packet passes through.)
+- These chains correspond to different stages in packet traversal:
+
+  - `PREROUTING` – before routing decisions (first stop for incoming packets)
+  - `INPUT` – packets destined for this host
+  - `FORWARD` – packets being routed through this host
+  - `OUTPUT` – packets created locally
+  - `POSTROUTING` – after routing decisions
+
+```sh
+# Drop packets with no TCP flags set (null scans).
+-A PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
+
+# Drop packets with both FIN and SYN set — invalid in normal TCP usage.
+-A PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
+
+# Drop packets with SYN and RST set — also invalid.
+-A PREROUTING -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
+
+# Drop packets that only have the FIN flag set with ACK present — often used in stealth scans.
+-A PREROUTING -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
+
+# Drop packets with only PSH flag — suspicious or malformed.
+-A PREROUTING -p tcp -m tcp --tcp-flags PSH,ACK PSH -j DROP
+
+# ...
+
+# Saves and finalizes the mangle table rules.
+COMMIT
+```
+
+- All of the above lines start with `-A PREROUTING`, meaning they append a rule to the `PREROUTING` chain in the mangle table.
+- The others are variations of invalid `TCP` flag combinations (`FIN+URG`, `FIN+PSH+URG`, etc.)
+  Essentially, all of these lines **protect your host from TCP flag abuse, stealth scans, and malformed packets**.
+- They **drop malformed TCP packets**, which are often used in **scans or DoS attacks**.
+- Each uses `--tcp-flags` to match suspicious flag combinations.
+
+```sh
+*filter
+:INPUT ACCEPT [0:0]
+:FORWARD ACCEPT [0:0]
+:OUTPUT ACCEPT [0:0]
+:CHECK_INPUT - [0:0]
+:CHECK_OUTPUT - [0:0]
+```
+
+- Starts the `filter` table.
+- Sets default policy for `INPUT`, `FORWARD`, and `OUTPUT` to `ACCEPT`.
+- Defines two custom chains: `CHECK_INPUT` and `CHECK_OUTPUT`.
+
+```sh
+-A INPUT -j CHECK_INPUT
+-A INPUT -j DROP
+
+-A OUTPUT -j CHECK_OUTPUT
+-A OUTPUT -j DROP
+```
+
+- Send all incoming packets to the `CHECK_INPUT` chain.
+- If they don’t match any rule in `CHECK_INPUT`, drop them.
+- Same logic for outgoing packets: only packets matching `CHECK_OUTPUT` rules are allowed.
+
+```sh
+# CHECK_INPUT RULES ----------------------------------------------
+
+# Allow responses to already established connections (e.g., replies from websites you contacted).
+-A CHECK_INPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Allow traffic on the loopback interface (localhost).
+-A CHECK_INPUT -i lo -j ACCEPT
+
+# Allow all traffic from Docker containers (bridge network).
+-A CHECK_INPUT -i docker0 -j ACCEPT
+
+# Allow SSH connections to your server.
+-A CHECK_INPUT -p tcp -m tcp --dport $SSH_PORT -j ACCEPT
+
+# Allow HTTPS and HTTP traffic.
+-A CHECK_INPUT -p tcp -m tcp --dport 443 -j ACCEPT
+-A CHECK_INPUT -p tcp -m tcp --dport 80 -j ACCEPT
+
+# Allow private local network ranges.
+-A CHECK_INPUT -s 192.168.0.0/16 -j ACCEPT
+-A CHECK_INPUT -s 172.17.0.0/16 -j ACCEPT
+
+# Allow traffic from the domain/IP DockerMe.ir. (In actual rules, iptables will resolve that domain to an IP address.)
+-A CHECK_INPUT -s DockerMe.ir -j ACCEPT -m comment --comment "The DockerMe Server Ip is Trusted"
+
+# CHECK_OUTPUT RULES ----------------------------------------------
+
+# Allow responses to existing outgoing connections.
+-A CHECK_OUTPUT -m state --state RELATED,ESTABLISHED -j ACCEPT
+
+# Allow all other outbound traffic.
+-A CHECK_OUTPUT -j ACCEPT
+
+# Finalizes the filter table rules.
+COMMIT
+```
+
+```sh
+iptables -nL
+```
+
+- Lists the currently active firewall rules.
+- The `-n` flag prevents DNS lookups (for faster output and fewer external lookups).
+- The second listing helps confirm that `fail2ban` successfully re-added its jail rules to the firewall.
