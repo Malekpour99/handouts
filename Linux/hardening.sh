@@ -295,6 +295,8 @@ iptables -nL
 # Install Docker --------------------------------------------------------------------
 echo -e " \e[30;48;5;56m \e[1m \e[38;5;15mDocker Installation\e[0m" 
 which docker || { curl -fsSL https://get.docker.com | bash; }
+
+# docker service: enable, restart and status check
 {
 systemctl enable docker
 systemctl restart docker
@@ -303,13 +305,13 @@ systemctl is-active --quiet docker && echo -e "\e[1m \e[96m docker service: \e[3
 
 # Docker Configuration --------------------------------------------------------------------
 if [ -d $DOCKER_DEST ] ; then
-   echo "file exist"
+   echo "docker configuration path exists!"
 else
-   mkdir -p /etc/systemd/system/docker.service.d/
-   touch /etc/systemd/system/docker.service.d/override.conf
+   mkdir -p "$DOCKER_DEST"
+   touch "${DOCKER_DEST}override.conf"
 fi   
 
-cat <<EOT > /etc/systemd/system/docker.service.d/override.conf
+cat <<EOT > "${DOCKER_DEST}override.conf"
 [Service]
 ExecStart=
 ExecStart=/usr/bin/dockerd --registry-mirror $MIRROR_REGISTRY --log-opt max-size=500m --log-opt max-file=5
@@ -321,13 +323,21 @@ systemctl restart docker
 systemctl is-active --quiet docker && echo -e "\e[1m \e[96m docker service: \e[30;48;5;82m \e[5mRunning \e[0m" || echo -e "\e[1m \e[96m docker service: \e[30;48;5;196m \e[5mNot Running \e[0m"
 }
 
-# Install docker-compose --------------------------------------------------------------------
-echo -e " \e[30;48;5;56m \e[1m \e[38;5;15mdocker-compose Installation\e[0m" 
-which docker-compose || { sudo curl -L "https://github.com/docker/compose/releases/download/1.29.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose; chmod +x /usr/local/bin/docker-compose; }
+# Install Docker Compose --------------------------------------------------------------------
+echo -e " \e[30;48;5;56m \e[1m \e[38;5;15mDocker Compose Installation\e[0m"
 
-{
-docker-compose --version
-}
+# Check if Docker Compose V2 (plugin) exists
+if docker compose version &>/dev/null; then
+    echo "Docker Compose V2 is already installed (via Docker plugin)."
+else
+    echo "Docker Compose plugin not found — installing manually..."
+    sudo curl -SL "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" \
+      -o /usr/local/lib/docker/cli-plugins/docker-compose
+    sudo chmod +x /usr/local/lib/docker/cli-plugins/docker-compose
+fi
+
+# Verify installation
+docker compose version || docker-compose --version
 
 # change DNS ------------------------------------------------------------------------
 cat /etc/resolv.conf

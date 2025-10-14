@@ -31,6 +31,7 @@
     - [fail2ban Configuration](#fail2ban-configuration)
     - [iptables configuration](#iptables-configuration)
       - [iptables](#iptables)
+    - [Docker \& Docker-Compose Configuration](#docker--docker-compose-configuration)
 
 ## Core Concepts
 
@@ -566,3 +567,47 @@ iptables -nL
 - Lists the currently active firewall rules.
 - The `-n` flag prevents DNS lookups (for faster output and fewer external lookups).
 - The second listing helps confirm that `fail2ban` successfully re-added its jail rules to the firewall.
+
+### Docker & Docker-Compose Configuration
+
+```sh
+which docker || { curl -fsSL https://get.docker.com | bash; }
+```
+
+- `which docker` -> This checks if the docker executable is available in your system’s PATH.
+- If Docker is installed, this command will return its location (e.g. `/usr/bin/docker`) and exit with status code `0` (success).
+- `||` (logical OR operator)
+- This runs the command on the right only if the command on the left fails (returns a non-zero exit code). “If which docker fails (meaning Docker is not installed), then run the next block.”
+- `{ curl -fsSL https://get.docker.com | bash; }` -> This block downloads and executes Docker’s official installation script.
+- The curl command options:
+  - `-f` → fail silently on HTTP errors
+  - `-s` → silent mode (no progress output)
+  - `-S` → show error message if it fails
+  - `-L` → follow redirects
+- The downloaded script is piped directly into `bash` for execution, which installs Docker automatically (including dependencies).
+
+```sh
+cat <<EOT > "${DOCKER_DEST}override.conf"
+[Service]
+ExecStart=
+ExecStart=/usr/bin/dockerd --registry-mirror $MIRROR_REGISTRY --log-opt max-size=500m --log-opt max-file=5
+EOT
+```
+
+- Using a drop-in file (`override.conf`) instead of editing `/lib/systemd/system/docker.service` directly is the correct and safe approach.
+- The `[Service]` block overrides the Docker daemon’s startup command.
+- The first `ExecStart=` line is intentionally blank — this clears the existing ExecStart from the main service file.
+- The second ExecStart line defines a new way to start `dockerd`:
+  - `--registry-mirror $MIRROR_REGISTRY`: sets a Docker registry mirror (useful for caching, faster pulls, or using a private registry).
+  - `--log-opt max-size=500m`: limits each container log file to 500 MB.
+  - `--log-opt max-file=5`: keeps 5 rotated logs before deleting old ones.
+- These logging options **prevent your server’s disk from filling up** due to endless container logs — a key hardening and stability measure.
+
+- `systemctl daemon-reload` → reloads systemd configuration so it recognizes the new override.
+- `systemctl restart docker` → restarts Docker with the new settings.
+
+- Docker Compose Version Check:
+  - `>` → redirects `stdout` (normal output)
+  - `2>` → redirects `stderr` (error messages)
+  - `&>` → shorthand that redirects both `stdout` and `stderr` together
+  - `/dev/null` → a special “black hole” file on Linux that discards anything written to it
