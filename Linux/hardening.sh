@@ -339,23 +339,22 @@ fi
 # Verify installation
 docker compose version || docker-compose --version
 
-# change DNS ------------------------------------------------------------------------
+# change DNS Configuration ------------------------------------------------------------------------
 cat /etc/resolv.conf
 echo "nameserver 8.8.8.8" > /etc/resolv.conf
 echo "nameserver 9.9.9.9" >> /etc/resolv.conf 
 cat /etc/resolv.conf
 
-# ------------------------------------------------------------------------------
-#Docker Services WARNING
+# Docker Services Warnings ------------------------------------------------------------------------------
 docker info | grep WARNING
 
-#how to fix "WARNING: No swap limit support"
+# Fixing Docker "WARNING: No swap limit support" --------------------------------------------------
 cat /etc/default/grub
 sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g' /etc/default/grub
 cat /etc/default/grub
 sudo update-grub
 
-# create and edit rc.local -------------------------------------------------
+# rc.local Configuration -------------------------------------------------
 echo '#!/bin/bash' >  /etc/rc.local
 echo "iptables-restore /etc/iptables/rules.v4" >>  /etc/rc.local
 echo "systemctl restart fail2ban.service" >>  /etc/rc.local
@@ -364,10 +363,45 @@ echo "exit 0" >>  /etc/rc.local
 chmod +x /etc/rc.local
 cat /etc/rc.local
 
-# Remove all unused packages -------------------------------------------------------
+# Check if rc-local service exists and is enabled ------------------------------------
+if systemctl list-unit-files | grep -q '^rc-local.service'; then
+    if systemctl is-enabled rc-local &>/dev/null; then
+        echo "✅ rc-local.service is already enabled."
+    else
+        echo "⚙️ Enabling rc-local.service..."
+        sudo systemctl enable rc-local
+        sudo systemctl start rc-local
+        echo "✅ rc-local.service enabled and started."
+    fi
+else
+    echo "⚠️ rc-local.service not found. Creating service file..."
+    cat <<EOF | sudo tee /etc/systemd/system/rc-local.service >/dev/null
+[Unit]
+Description=/etc/rc.local Compatibility
+ConditionFileIsExecutable=/etc/rc.local
+After=network.target
+
+[Service]
+Type=forking
+ExecStart=/etc/rc.local start
+TimeoutSec=0
+RemainAfterExit=yes
+GuessMainPID=no
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+    sudo systemctl daemon-reload
+    sudo systemctl enable rc-local
+    sudo systemctl start rc-local
+    echo "✅ rc-local.service created, enabled, and started."
+fi
+
+# Remove Unused Packages -------------------------------------------------------
 apt autoremove -y
 
-# timezone config ------------------------------------------------------------------
+# Timezone Configuration ------------------------------------------------------------------
 apt install -y ntp
 timedatectl set-timezone Asia/Tehran
 timedatectl | grep Time | cut -d ":" -f2 | cut -d " " -f2

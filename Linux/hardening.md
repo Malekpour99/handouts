@@ -32,6 +32,8 @@
     - [iptables configuration](#iptables-configuration)
       - [iptables](#iptables)
     - [Docker \& Docker-Compose Configuration](#docker--docker-compose-configuration)
+      - [Fixing Docker Warnings (No swap limit support)](#fixing-docker-warnings-no-swap-limit-support)
+    - [rc.local Configuration](#rclocal-configuration)
 
 ## Core Concepts
 
@@ -611,3 +613,34 @@ EOT
   - `2>` → redirects `stderr` (error messages)
   - `&>` → shorthand that redirects both `stdout` and `stderr` together
   - `/dev/null` → a special “black hole” file on Linux that discards anything written to it
+
+#### Fixing Docker Warnings (No swap limit support)
+
+```sh
+sed -i 's/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"/g' /etc/default/grub
+
+# This uses sed (stream editor) to replace the line:
+GRUB_CMDLINE_LINUX=""
+# With this line:
+GRUB_CMDLINE_LINUX="cgroup_enable=memory swapaccount=1"
+```
+
+- `cgroup_enable=memory` → enables Linux memory control groups (so Docker can track and limit container memory usage)
+- `swapaccount=1` → allows accounting of swap memory usage inside containers
+- Together, they let Docker and Kubernetes enforce memory limits per container.
+
+### rc.local Configuration
+
+```sh
+#!/bin/bash
+iptables-restore /etc/iptables/rules.v4
+systemctl restart fail2ban.service
+systemctl restart docker.service
+exit 0
+```
+
+- this sequence is creating a **custom boot-time script** (`/etc/rc.local`) to ensure your critical services and firewall rules are automatically restored on startup.
+- `iptables-restore /etc/iptables/rules.v4` -> Adds a command to restore iptables rules from your saved configuration file on boot. Without this, your firewall rules would be lost after reboot.
+- `systemctl restart fail2ban.service` ->Ensures the Fail2Ban service restarts automatically after the firewall is restored — important because Fail2Ban depends on iptables rules being active.
+- `systemctl restart docker.service` -> Restarts Docker on boot — useful if your iptables rules might affect Docker networking or if you want Docker to start after other security services are ready.
+- `exit 0` -> Ends the script successfully.
