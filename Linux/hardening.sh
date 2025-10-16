@@ -13,6 +13,12 @@ BAC_DIR=/opt/backup/files_$NOW
 # docker config destination
 DOCKER_DEST=/etc/systemd/system/docker.service.d/
 MIRROR_REGISTRY=<your docker registry mirror>
+# Timezone Configuration
+TIMEZONE="Asia/Tehran"
+# LYNIS Configurations
+LYNIS_DIR="/opt/lynis"
+LYNIS_TAR="/opt/lynis.tar.gz"
+LYNIS_URL="https://downloads.cisofy.com/lynis/lynis-3.1.5.tar.gz"
 #-------------------------------------------------------------
 
 echo "Info: ------------------------------------"
@@ -403,7 +409,7 @@ apt autoremove -y
 
 # Timezone Configuration ------------------------------------------------------------------
 apt install -y ntp
-timedatectl set-timezone Asia/Tehran
+timedatectl set-timezone "$TIMEZONE"
 timedatectl | grep Time | cut -d ":" -f2 | cut -d " " -f2
 
 # Network Time Protocol (NTP): enable, restart and status check
@@ -416,12 +422,16 @@ timedatectl | grep Time | cut -d ":" -f2 | cut -d " " -f2
 # .bashrc Configuration --------------------------------------------------------------
 curl https://store.dockerme.ir/Software/bashrc -o /root/.bashrc
 
-# lynis audit tools for Hardening check --------------------------------------------
-if [ ! -d  "/opt/lynis" ]
-then
-   curl https://downloads.cisofy.com/lynis/lynis-3.0.6.tar.gz -o /opt/lynis.tar.gz
-   cd /opt ; tar -xzf lynis.tar.gz ; rm -rf /opt/lynis.tar.gz
+# Lynis audit tools for Hardening check --------------------------------------------
+# Install Lynis if not already present
+if [ ! -d "$LYNIS_DIR" ]; then
+    echo "Downloading Lynis..."
+    curl -fsSL "$LYNIS_URL" -o "$LYNIS_TAR"
+    tar -xzf "$LYNIS_TAR" -C /opt
+    rm -f "$LYNIS_TAR"
 fi
-cd /opt/lynis
+
+# Run audit
+cd "$LYNIS_DIR"
 ./lynis audit system
 #-----------------------------------------------------------------------------------
