@@ -406,13 +406,14 @@ apt install -y ntp
 timedatectl set-timezone Asia/Tehran
 timedatectl | grep Time | cut -d ":" -f2 | cut -d " " -f2
 
+# Network Time Protocol (NTP): enable, restart and status check
 {
    systemctl enable ntp
    systemctl restart ntp
    systemctl is-active --quiet ntp && echo -e "\e[1m \e[96m ntp service: \e[30;48;5;82m \e[5mRunning \e[0m" || echo -e "\e[1m \e[96m ntp service: \e[30;48;5;196m \e[5mNot Running \e[0m"
 }
 
-# bashrc configuration --------------------------------------------------------------
+# .bashrc Configuration --------------------------------------------------------------
 curl https://store.dockerme.ir/Software/bashrc -o /root/.bashrc
 
 # lynis audit tools for Hardening check --------------------------------------------

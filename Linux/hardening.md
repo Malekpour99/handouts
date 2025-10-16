@@ -34,6 +34,9 @@
     - [Docker \& Docker-Compose Configuration](#docker--docker-compose-configuration)
       - [Fixing Docker Warnings (No swap limit support)](#fixing-docker-warnings-no-swap-limit-support)
     - [rc.local Configuration](#rclocal-configuration)
+    - [Timezone Configuration](#timezone-configuration)
+    - [`.bashrc` Configuration](#bashrc-configuration)
+      - [Differences](#differences)
 
 ## Core Concepts
 
@@ -644,3 +647,68 @@ exit 0
 - `systemctl restart fail2ban.service` ->Ensures the Fail2Ban service restarts automatically after the firewall is restored — important because Fail2Ban depends on iptables rules being active.
 - `systemctl restart docker.service` -> Restarts Docker on boot — useful if your iptables rules might affect Docker networking or if you want Docker to start after other security services are ready.
 - `exit 0` -> Ends the script successfully.
+
+### Timezone Configuration
+
+```sh
+# Installs the Network Time Protocol (NTP) service.
+apt install -y ntp
+
+# Uses timedatectl (from systemd) to set the server’s timezone to Iran's timezone
+timedatectl set-timezone Asia/Tehran
+# This adjusts how local time is displayed, but doesn’t affect UTC time internally.
+
+# quickly show the current local time in a simple format. (e.g. 19:35:20)
+timedatectl | grep Time | cut -d ":" -f2 | cut -d " " -f2
+# grep Time → keeps only the lines containing “Time”.
+# cut -d ":" -f2 → splits by : and takes the 2nd field.
+# cut -d " " -f2 → further trims to extract just the time value (e.g., 19:35:20).
+```
+
+### `.bashrc` Configuration
+
+```sh
+# replace existing bashrc with the downloaded bashrc configuration
+curl https://store.dockerme.ir/Software/bashrc -o /root/.bashrc
+```
+
+- Key contents
+  - Enables `histappend`, `checkwinsize`, and similar safe shell behaviors.
+  - Sets `HISTCONTROL=ignoreboth` to avoid duplicate commands in history.
+  - Defines a more readable colored shell prompt (`PS1`).
+  - Runs helpful scripts for aliases, functions, or Docker shortcuts if they exist.
+  - Optionally sources `/etc/bash_completion` for autocompletion.
+
+#### Differences
+
+```sh
+# Adds timestamps to every command in ~/.bash_history, useful for auditing.
+HISTTIMEFORMAT="%F %T "
+
+# Removed Default
+PS1='${debian_chroot:+($debian_chroot)}\u@\h:\w\$ '
+# Add Customized
+PS1='\[\033[01;31m\]\u@\h\[\033[00m\]:\[\033[01;34m\]\w\[\033[00m\]\$ '
+# Red username@hostname
+# Blue current directory
+# No chroot support or dynamic color detection
+
+# Removed Default
+case $- in
+    *i*) ;;
+      *) return;;
+esac
+# now .bashrc executes all commands even in non-interactive shells.
+
+# Add Customized
+[ -f /etc/bash_aliases ] && . /etc/bash_aliases
+# Ensures system-wide aliases (like docker, compose, etc.) are available automatically.
+
+# Removed Default
+if [ -x /usr/bin/tput ] && tput setaf 1 >&/dev/null; then
+    color_prompt=yes
+else
+    color_prompt=
+fi
+# now system skips all this logic and just sets the color directly.
+```
