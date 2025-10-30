@@ -1,8 +1,13 @@
 # Linux
 
 - [Linux](#linux)
+  - [Root File System Structure](#root-file-system-structure)
   - [General Useful Points](#general-useful-points)
     - [Using `sudo tee` instead of `>` \& `>>`](#using-sudo-tee-instead-of---)
+
+## Root File System Structure
+
+![Root File System Structure](images/linux-file-system-structure.png)
 
 ## General Useful Points
 
