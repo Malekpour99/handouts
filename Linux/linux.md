@@ -1,13 +1,21 @@
 # Linux
 
+## Table of Contents
+
 - [Linux](#linux)
+  - [Table of Contents](#table-of-contents)
   - [Root File System Structure](#root-file-system-structure)
+  - [Linux File Types](#linux-file-types)
   - [General Useful Points](#general-useful-points)
     - [Using `sudo tee` instead of `>` \& `>>`](#using-sudo-tee-instead-of---)
 
 ## Root File System Structure
 
 ![Root File System Structure](images/linux-file-system-structure.png)
+
+## Linux File Types
+
+![Linux File Types](images/file-types-in-linux.png)
 
 ## General Useful Points
 
