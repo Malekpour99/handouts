@@ -6,6 +6,7 @@
   - [Table of Contents](#table-of-contents)
   - [Installation \& Setup](#installation--setup)
   - [Runners](#runners)
+  - [CI/CD Overview](#cicd-overview)
 
 ## Installation & Setup
 
@@ -44,3 +45,22 @@
 - [Install GitLab Runner](https://docs.gitlab.com/runner/install/)
 - Yon can setup runners on the self-hosted GitLab server or other servers and add them to the GitLab; in order to do so just follow its official documentation.
 - For security and performance reasons, **install GitLab Runner on a machine separate from the machine that hosts your GitLab instance**.
+
+## CI/CD Overview
+
+- A **pipeline** is the entire process that runs when you push code or trigger automation. ([Pipelines](https://docs.gitlab.com/ci/pipelines/))
+- A **stage** is a group of related jobs that run at the same point in that process.
+- A **job** is a specific task that GitLab Runner executes (like running tests or building code).
+
+```yaml
+Pipeline
+ ├── Stage 1: build
+ │    ├── Job: compile_code
+ │    └── Job: install_dependencies
+ ├── Stage 2: test
+ │    ├── Job: run_unit_tests
+ │    └── Job: run_lint
+ └── Stage 3: deploy
+      ├── Job: deploy_staging
+      └── Job: deploy_production
+```
