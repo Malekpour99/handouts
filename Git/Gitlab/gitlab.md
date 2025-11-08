@@ -7,6 +7,9 @@
   - [Installation \& Setup](#installation--setup)
   - [Runners](#runners)
   - [CI/CD Overview](#cicd-overview)
+  - [Fixing Common Issues](#fixing-common-issues)
+    - [How to solve `ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information`?](#how-to-solve-error-job-failed-system-failure-prepare-environment-exit-status-1-check-httpsdocsgitlabcomrunnershellsindexhtmlshell-profile-loading-for-more-information)
+    - [How to solve `permission denied while trying to connect to Docker daemon socket at ... ERROR: Job failed: exit status 1.`?](#how-to-solve-permission-denied-while-trying-to-connect-to-docker-daemon-socket-at--error-job-failed-exit-status-1)
 
 ## Installation & Setup
 
@@ -64,3 +67,15 @@ Pipeline
       ├── Job: deploy_staging
       └── Job: deploy_production
 ```
+
+- For creating a pipeline in your project you must create `gitlab-ci.yml` file in your project base path and configure your pipeline in this file.
+
+## Fixing Common Issues
+
+### How to solve `ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information`?
+
+- Remove `.bash_logout` file: `sudo rm /home/gitlab-runner/.bash_logout` or comment all of its content.
+
+### How to solve `permission denied while trying to connect to Docker daemon socket at ... ERROR: Job failed: exit status 1.`?
+
+- Add `gitlab-runner` user to `docker` group: `usermod -aG docker gitlab-runner`
