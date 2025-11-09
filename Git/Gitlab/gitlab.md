@@ -71,6 +71,28 @@ Pipeline
       └── Job: deploy_production
 ```
 
+```yaml
+stages:
+  - build
+  - test
+  - deploy
+
+build_app: # jog
+  stage: build
+  script:
+    - echo "Building app..."
+
+run_tests: # job
+  stage: test
+  script:
+    - echo "Running tests..."
+
+deploy_app: # job
+  stage: deploy
+  script:
+    - echo "Deploying..."
+```
+
 - For creating a pipeline in your project you must create `gitlab-ci.yml` file in your project base path and configure your pipeline in this file.
 
 ## CI/DC Configurations
