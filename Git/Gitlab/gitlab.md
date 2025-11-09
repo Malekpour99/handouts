@@ -7,6 +7,9 @@
   - [Installation \& Setup](#installation--setup)
   - [Runners](#runners)
   - [CI/CD Overview](#cicd-overview)
+  - [CI/DC Configurations](#cidc-configurations)
+    - [Manual Trigger](#manual-trigger)
+    - [Tags](#tags)
   - [Fixing Common Issues](#fixing-common-issues)
     - [How to solve `ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information`?](#how-to-solve-error-job-failed-system-failure-prepare-environment-exit-status-1-check-httpsdocsgitlabcomrunnershellsindexhtmlshell-profile-loading-for-more-information)
     - [How to solve `permission denied while trying to connect to Docker daemon socket at ... ERROR: Job failed: exit status 1.`?](#how-to-solve-permission-denied-while-trying-to-connect-to-docker-daemon-socket-at--error-job-failed-exit-status-1)
@@ -69,6 +72,71 @@ Pipeline
 ```
 
 - For creating a pipeline in your project you must create `gitlab-ci.yml` file in your project base path and configure your pipeline in this file.
+
+## CI/DC Configurations
+
+### Manual Trigger
+
+Adding a manual trigger for a stage (or job) in GitLab CI/CD is a very common and useful technique — especially for things like production deployments, approvals, or controlled rollouts.
+
+```yaml
+when: manual
+```
+
+- GitLab won’t start that job automatically.
+- Instead, it will show a “Play” button in the UI so a developer or maintainer can trigger it manually.
+
+By default, a **manual job does not block the next stages**.
+If you want it to pause the pipeline until you trigger it, you can add:
+
+```yaml
+allow_failure: false
+```
+
+```yaml
+# This will pause the pipeline and wait for your manual confirmation.
+deploy_staging:
+  stage: deploy
+  script: ./deploy_staging.sh
+  when: manual
+  allow_failure: false
+
+# This job is optional — the pipeline continues without waiting if you skip it.
+deploy_preview:
+  stage: deploy
+  script: ./deploy_preview.sh
+  when: manual
+  allow_failure: true
+```
+
+### Tags
+
+You assign tags to a job to tell GitLab which runners are allowed to pick it up.
+
+Best Practices:
+
+- **Use tags to separate environments**: Example: `staging`, `production`, `aws`, `gcp`
+- **Use tags to define runtime types**: Example: `docker`, `shell`, `kubernetes`, `windows`
+- **Avoid too many tags per runner**: Only use relevant tags — they act like filters, not categories.
+- **Match all tags**: A job’s runner must have **all listed tags** (not just one).
+- **Fallback for untagged jobs**: By default, only **shared runners** can pick up **untagged jobs**.
+
+```yaml
+build_backend:
+  stage: build
+  tags:
+    - shell
+    - staging
+  script:
+    - echo "Building backend..."
+```
+
+- This job will **only run on runners that have both tags**: `shell` and `staging`.
+- You can allow a runner to run untagged jobs by setting (in Runner Configuration):
+
+```toml
+run_untagged = true
+```
 
 ## Fixing Common Issues
 
