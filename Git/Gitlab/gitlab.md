@@ -10,6 +10,8 @@
   - [CI/DC Configurations](#cidc-configurations)
     - [Manual Trigger](#manual-trigger)
     - [Tags](#tags)
+    - [Environments](#environments)
+    - [Variables](#variables)
   - [Fixing Common Issues](#fixing-common-issues)
     - [How to solve `ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information`?](#how-to-solve-error-job-failed-system-failure-prepare-environment-exit-status-1-check-httpsdocsgitlabcomrunnershellsindexhtmlshell-profile-loading-for-more-information)
     - [How to solve `permission denied while trying to connect to Docker daemon socket at ... ERROR: Job failed: exit status 1.`?](#how-to-solve-permission-denied-while-trying-to-connect-to-docker-daemon-socket-at--error-job-failed-exit-status-1)
@@ -159,6 +161,79 @@ build_backend:
 ```toml
 run_untagged = true
 ```
+
+### Environments
+
+- A GitLab Environment represents a **deployment target** — a real-world place where your application is running or can be deployed.
+- Environments provide **visibility and control** over deployments.
+- GitLab automatically **tracks deployments**, **records history**, and **visualizes** environments in your project
+- You can protect environments (like `production`) so that only specific users or roles can deploy to them.
+
+```yaml
+deploy_staging:
+  stage: deploy
+  script:
+    - echo "Deploying app to staging server..."
+  environment:
+    name: staging
+    url: https://staging.example.com
+```
+
+- GitLab creates an environment named staging (if it doesn’t exist).
+- Links the deployment to that environment.
+- Shows it in the GitLab Environments tab with:
+  - Name (staging)
+  - URL (https://staging.example.com)
+  - Deployed commit info
+
+Real-world sample
+
+| Environment     | Purpose                | Typical Setup             | Trigger                     |
+| --------------- | ---------------------- | ------------------------- | --------------------------- |
+| **Development** | Developer sandbox      | Local/test server         | Auto on each push           |
+| **Staging**     | Pre-production testing | QA environment            | Auto on `main` or `develop` |
+| **Production**  | Live system for users  | Public or customer server | Manual or approval required |
+
+### Variables
+
+- [Predefined CI/CD Variables](https://docs.gitlab.com/ci/variables/predefined_variables/)
+- Custom Variables
+
+  - Global variables in `.gitlab-ci.yml`
+    ```yaml
+    variables:
+      DOCKER_IMAGE: myapp
+      DOCKER_TAG: latest
+      APP_ENV: production
+    ```
+    - These are global — available to all jobs in the pipeline.
+  - Job specific variables
+    ```yaml
+    deploy_staging:
+      stage: deploy
+      variables:
+        APP_ENV: staging
+      script:
+        - echo "Deploying $APP_ENV"
+    ```
+  - GitLab UI variables (Best Practice)
+    - `Project → Settings → CI/CD → Variables → Add Variable`
+    - These are **secure**, **encrypted**, and injected into the CI job runtime automatically.
+
+- Using environment substitution inside `docker-compose.yml`
+
+```yaml
+services:
+  web:
+    image: "${DOCKER_IMAGE}:${DOCKER_TAG}"
+    environment:
+      - APP_ENV=${APP_ENV}
+      - DATABASE_URL=${DATABASE_URL}
+    ports:
+      - "${WEB_PORT}:80"
+```
+
+- GitLab CI/CD variables are injected into the environment, and docker compose replaces them at runtime.
 
 ## Fixing Common Issues
 
