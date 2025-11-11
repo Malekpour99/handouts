@@ -12,6 +12,8 @@
     - [Tags](#tags)
     - [Environments](#environments)
     - [Variables](#variables)
+    - [Cache \& Artifacts](#cache--artifacts)
+    - [Parallel](#parallel)
   - [Fixing Common Issues](#fixing-common-issues)
     - [How to solve `ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information`?](#how-to-solve-error-job-failed-system-failure-prepare-environment-exit-status-1-check-httpsdocsgitlabcomrunnershellsindexhtmlshell-profile-loading-for-more-information)
     - [How to solve `permission denied while trying to connect to Docker daemon socket at ... ERROR: Job failed: exit status 1.`?](#how-to-solve-permission-denied-while-trying-to-connect-to-docker-daemon-socket-at--error-job-failed-exit-status-1)
@@ -234,6 +236,25 @@ services:
 ```
 
 - GitLab CI/CD variables are injected into the environment, and docker compose replaces them at runtime.
+
+### Cache & Artifacts
+
+- [Caching in CI/CD](https://docs.gitlab.com/ci/caching/)
+
+| Feature       | Purpose                                                                                       | Lifetime                                  | Scope                  |
+| ------------- | --------------------------------------------------------------------------------------------- | ----------------------------------------- | ---------------------- |
+| **Cache**     | Speed up builds by reusing dependencies between jobs or pipelines                             | Temporary; can be reused in next pipeline | Shared (if configured) |
+| **Artifacts** | Store build results (e.g., compiled app, test reports) to pass between jobs or download later | Stored permanently (until expiration)     | Per pipeline / per job |
+
+### Parallel
+
+- [Parallel Job Execution](https://docs.gitlab.com/ci/jobs/job_control/#parallelize-large-jobs)
+- The `parallel` keyword lets GitLab **create multiple copies of a job** that can run **simultaneously**.
+- Each job runs in its own environment (runner instance) — this helps you:
+  - Split workloads into smaller chunks
+  - Reduce total pipeline execution time
+  - Run tests or builds for different configurations or data sets
+- GitLab also supports `matrix-style parallelism` — multiple jobs generated from combinations of variables.
 
 ## Fixing Common Issues
 
