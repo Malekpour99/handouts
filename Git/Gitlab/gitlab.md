@@ -13,6 +13,7 @@
     - [Tags](#tags)
     - [Environments](#environments)
     - [Variables](#variables)
+    - [Rules](#rules)
     - [Cache \& Artifacts](#cache--artifacts)
     - [Parallel](#parallel)
   - [Fixing Common Issues](#fixing-common-issues)
@@ -104,8 +105,8 @@ deploy_app: # job
 
 ### Executors
 
-- An executor is the **environment type** that a GitLab Runner uses to **run your CI/CD jobs**.
 - [Executors](https://docs.gitlab.com/runner/executors/)
+- An executor is the **environment type** that a GitLab Runner uses to **run your CI/CD jobs**.
 
 | Executor           | Description                                                       | Typical Use Case                                         |
 | ------------------ | ----------------------------------------------------------------- | -------------------------------------------------------- |
@@ -144,7 +145,7 @@ deploy_staging:
   when: manual
   allow_failure: false
 
-# This job is optional — the pipeline continues without waiting if you skip it.
+# This job is optional — the pipeline continues without waiting for manual trigger.
 deploy_preview:
   stage: deploy
   script: ./deploy_preview.sh
@@ -253,6 +254,36 @@ services:
 ```
 
 - GitLab CI/CD variables are injected into the environment, and docker compose replaces them at runtime.
+
+### Rules
+
+- [Pipeline job rules](https://docs.gitlab.com/ci/jobs/job_rules/)
+- define **conditions** that decide whether a job should run, be skipped, or run manually. Think of them as **if/else logic** for jobs.
+- They replaced the older `only:` and `except:` keywords, offering much finer control.
+- Each rule has three main parts:
+  | Field | Description |
+  | ---------------- | ------------------------------------------------------------- |
+  | `if:` | A condition (uses GitLab predefined variables or custom ones) |
+  | `when:` | Action to take if condition matches (`on_success` - default) |
+  | `allow_failure:` | Whether failure of this job is allowed (`false` - default) |
+
+```yaml
+# Run this job if the branch is main. Otherwise, do not run (`when: never`)
+job_name:
+  script: echo "Hello"
+  rules:
+    - if: '$CI_COMMIT_BRANCH == "main"'
+      when: always
+    - when: never
+
+# Runs only for tag pipelines (e.g., version releases).
+publish:
+  stage: deploy
+  script: echo "Publishing release..."
+  rules:
+    - if: "$CI_COMMIT_TAG"
+      when: on_success
+```
 
 ### Cache & Artifacts
 
