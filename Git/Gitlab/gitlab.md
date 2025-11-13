@@ -14,6 +14,7 @@
     - [Environments](#environments)
     - [Variables](#variables)
     - [Rules](#rules)
+    - [Releases](#releases)
     - [Cache \& Artifacts](#cache--artifacts)
     - [Parallel](#parallel)
   - [Fixing Common Issues](#fixing-common-issues)
@@ -259,7 +260,7 @@ services:
 
 - [Pipeline job rules](https://docs.gitlab.com/ci/jobs/job_rules/)
 - define **conditions** that decide whether a job should run, be skipped, or run manually. Think of them as **if/else logic** for jobs.
-- They replaced the older `only:` and `except:` keywords, offering much finer control.
+- Rules replaced the older `only:` and `except:` keywords, offering much finer control.
 - Each rule has three main parts:
   | Field | Description |
   | ---------------- | ------------------------------------------------------------- |
@@ -283,7 +284,61 @@ publish:
   rules:
     - if: "$CI_COMMIT_TAG"
       when: on_success
+
+# Deprecated - run this job only for merge requests
+test:
+  stage: test
+  script: echo "Testing merge request"
+  only:
+    - merge_requests
+
+# Deprecated - skip this job for tags
+build:
+  stage: build
+  script: echo "Building..."
+  except:
+    - tags
 ```
+
+### Releases
+
+- [Release CI/CD](https://docs.gitlab.com/user/project/releases/)
+- A GitLab Release is **a snapshot of your project at a specific point in time**, typically linked to a Git tag. (Think of it like GitHub Releases — a “tag + extra info” combo.)
+- `GitLab Release CLI` tool was deprecated in GitLab 18.0 and is planned for removal in 20.0. Use the [`GitLab CLI`](https://docs.gitlab.com/editor_extensions/gitlab_cli/) instead; in order to manage releases and access other gitlab features as well.
+
+```yaml
+stages:
+  - build
+  - release
+
+build:
+  stage: build
+  script:
+    - echo "Building project..."
+    - mkdir dist
+    - echo "Hello Release" > dist/app.txt
+  artifacts:
+    paths:
+      - dist/
+
+release_job:
+  stage: release
+  script:
+    - echo "Creating release $CI_COMMIT_TAG"
+  release:
+    tag_name: $CI_COMMIT_TAG
+    name: "Release $CI_COMMIT_TAG"
+    description: "Automatic release for $CI_COMMIT_TAG"
+  only:
+    - tags
+```
+
+- When you push a tag (e.g., `v1.0.0`), the pipeline runs.
+- GitLab automatically creates a Release page under “`Deployments → Releases`”.
+- The page shows:
+  - Tag (`v1.0.0`)
+  - Description
+  - Artifacts (from the `build` job)
 
 ### Cache & Artifacts
 
