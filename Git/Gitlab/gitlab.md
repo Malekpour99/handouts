@@ -8,6 +8,7 @@
   - [Runners](#runners)
   - [CI/CD Overview](#cicd-overview)
   - [CI/DC Configurations](#cidc-configurations)
+    - [Executors](#executors)
     - [Manual Trigger](#manual-trigger)
     - [Tags](#tags)
     - [Environments](#environments)
@@ -97,9 +98,25 @@ deploy_app: # job
     - echo "Deploying..."
 ```
 
-- For creating a pipeline in your project you must create `gitlab-ci.yml` file in your project base path and configure your pipeline in this file.
+- For creating a pipeline in your project you must create `.gitlab-ci.yml` file in your project base path and configure your pipeline in this file.
 
 ## CI/DC Configurations
+
+### Executors
+
+- An executor is the **environment type** that a GitLab Runner uses to **run your CI/CD jobs**.
+- [Executors](https://docs.gitlab.com/runner/executors/)
+
+| Executor           | Description                                                       | Typical Use Case                                         |
+| ------------------ | ----------------------------------------------------------------- | -------------------------------------------------------- |
+| **shell**          | Runs directly on the host’s shell (Bash, PowerShell, etc.)        | Simple builds, quick testing, local runners              |
+| **docker**         | Runs each job inside a Docker container                           | Isolated builds, easy cleanup, reproducible environments |
+| **docker+machine** | Dynamically creates Docker Machine instances (e.g., on cloud VMs) | Autoscaling CI infrastructure                            |
+| **kubernetes**     | Runs each job in a Kubernetes pod                                 | Scalable CI/CD clusters                                  |
+| **virtualbox**     | Runs jobs inside VirtualBox VMs                                   | Strong isolation (rarely used today)                     |
+| **custom**         | Lets you define your own execution logic                          | Highly specialized setups                                |
+| **ssh**            | Runs jobs remotely over SSH                                       | Deployments or remote build servers                      |
+| **parallels**      | Runs jobs inside Parallels VMs                                    | macOS builds (e.g., for iOS apps)                        |
 
 ### Manual Trigger
 
