@@ -17,7 +17,8 @@
     - [Releases](#releases)
     - [Cache \& Artifacts](#cache--artifacts)
     - [Parallel](#parallel)
-  - [Fixing Common Issues](#fixing-common-issues)
+  - [Best Practices](#best-practices)
+  - [Troubleshooting](#troubleshooting)
     - [How to solve `ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information`?](#how-to-solve-error-job-failed-system-failure-prepare-environment-exit-status-1-check-httpsdocsgitlabcomrunnershellsindexhtmlshell-profile-loading-for-more-information)
     - [How to solve `permission denied while trying to connect to Docker daemon socket at ... ERROR: Job failed: exit status 1.`?](#how-to-solve-permission-denied-while-trying-to-connect-to-docker-daemon-socket-at--error-job-failed-exit-status-1)
 
@@ -362,7 +363,21 @@ release_job:
   - Run tests or builds for different configurations or data sets
 - GitLab also supports `matrix-style parallelism` — multiple jobs generated from combinations of variables.
 
-## Fixing Common Issues
+## Best Practices
+
+- [CI/CD Best Practices](https://about.gitlab.com/blog/how-to-keep-up-with-ci-cd-best-practices/)
+- **Only build once**: Don't create a new build for each stage because you risk introducing inconsistencies.
+- **Streamline the tests**: Strike a balance between test coverage and performance. if it takes too long for test results users will try to circumvent the process.
+- **Clean pre-production environments** between each deployment.
+- **Know the steps**: Make sure the release and rollback plans are well documented and understandable for the entire team.
+- **Less is more**: The best pipelines are done with minimal tools - keep it minimal and simple - continue to pare down, fewer tools mean fewer handoffs and steps.
+
+## Troubleshooting
+
+- [Debugging CI/CD Pipelines](https://docs.gitlab.com/ci/debugging/)
+- [Troubleshooting CI/CD Variables](https://docs.gitlab.com/ci/variables/variables_troubleshooting/)
+- [Troubleshooting Jobs](https://docs.gitlab.com/ci/jobs/job_troubleshooting/)
+- [Troubleshooting GitLab Runner](https://docs.gitlab.com/runner/faq/)
 
 ### How to solve `ERROR: Job failed (system failure): prepare environment: exit status 1. Check https://docs.gitlab.com/runner/shells/index.html#shell-profile-loading for more information`?
 
