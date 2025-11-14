@@ -6,9 +6,9 @@
   - [Table of Contents](#table-of-contents)
   - [Installation \& Setup](#installation--setup)
   - [Runners](#runners)
+  - [Executors](#executors)
   - [CI/CD Overview](#cicd-overview)
   - [CI/DC Configurations](#cidc-configurations)
-    - [Executors](#executors)
     - [Manual Trigger](#manual-trigger)
     - [Tags](#tags)
     - [Environments](#environments)
@@ -59,6 +59,22 @@
 - Yon can setup runners on the self-hosted GitLab server or other servers and add them to the GitLab; in order to do so just follow its official documentation.
 - For security and performance reasons, **install GitLab Runner on a machine separate from the machine that hosts your GitLab instance**.
 
+## Executors
+
+- [Executors](https://docs.gitlab.com/runner/executors/)
+- An executor is the **environment type** that a GitLab Runner uses to **run your CI/CD jobs**.
+
+| Executor           | Description                                                       | Typical Use Case                                         |
+| ------------------ | ----------------------------------------------------------------- | -------------------------------------------------------- |
+| **shell**          | Runs directly on the host’s shell (Bash, PowerShell, etc.)        | Simple builds, quick testing, local runners              |
+| **docker**         | Runs each job inside a Docker container                           | Isolated builds, easy cleanup, reproducible environments |
+| **docker+machine** | Dynamically creates Docker Machine instances (e.g., on cloud VMs) | Autoscaling CI infrastructure                            |
+| **kubernetes**     | Runs each job in a Kubernetes pod                                 | Scalable CI/CD clusters                                  |
+| **virtualbox**     | Runs jobs inside VirtualBox VMs                                   | Strong isolation (rarely used today)                     |
+| **custom**         | Lets you define your own execution logic                          | Highly specialized setups                                |
+| **ssh**            | Runs jobs remotely over SSH                                       | Deployments or remote build servers                      |
+| **parallels**      | Runs jobs inside Parallels VMs                                    | macOS builds (e.g., for iOS apps)                        |
+
 ## CI/CD Overview
 
 - A **pipeline** is the entire process that runs when you push code or trigger automation. ([Pipelines](https://docs.gitlab.com/ci/pipelines/))
@@ -101,28 +117,14 @@ deploy_app: # job
 ```
 
 - For creating a pipeline in your project you must create `.gitlab-ci.yml` file in your project base path and configure your pipeline in this file.
+- [CI/CD YAML syntax](https://docs.gitlab.com/ci/yaml/)
 
 ## CI/DC Configurations
 
-### Executors
-
-- [Executors](https://docs.gitlab.com/runner/executors/)
-- An executor is the **environment type** that a GitLab Runner uses to **run your CI/CD jobs**.
-
-| Executor           | Description                                                       | Typical Use Case                                         |
-| ------------------ | ----------------------------------------------------------------- | -------------------------------------------------------- |
-| **shell**          | Runs directly on the host’s shell (Bash, PowerShell, etc.)        | Simple builds, quick testing, local runners              |
-| **docker**         | Runs each job inside a Docker container                           | Isolated builds, easy cleanup, reproducible environments |
-| **docker+machine** | Dynamically creates Docker Machine instances (e.g., on cloud VMs) | Autoscaling CI infrastructure                            |
-| **kubernetes**     | Runs each job in a Kubernetes pod                                 | Scalable CI/CD clusters                                  |
-| **virtualbox**     | Runs jobs inside VirtualBox VMs                                   | Strong isolation (rarely used today)                     |
-| **custom**         | Lets you define your own execution logic                          | Highly specialized setups                                |
-| **ssh**            | Runs jobs remotely over SSH                                       | Deployments or remote build servers                      |
-| **parallels**      | Runs jobs inside Parallels VMs                                    | macOS builds (e.g., for iOS apps)                        |
-
 ### Manual Trigger
 
-Adding a manual trigger for a stage (or job) in GitLab CI/CD is a very common and useful technique — especially for things like production deployments, approvals, or controlled rollouts.
+- [Control how jobs run](https://docs.gitlab.com/ci/jobs/job_control/)
+- Adding a manual trigger for a stage (or job) in GitLab CI/CD is a very common and useful technique — especially for things like production deployments, approvals, or controlled rollouts.
 
 ```yaml
 when: manual
@@ -156,7 +158,8 @@ deploy_preview:
 
 ### Tags
 
-You assign tags to a job to tell GitLab which runners are allowed to pick it up.
+- [Runner Tags](https://docs.gitlab.com/ci/yaml/#tags)
+- You assign tags to a job to tell GitLab **which runners are allowed to pick it up**.
 
 Best Practices:
 
