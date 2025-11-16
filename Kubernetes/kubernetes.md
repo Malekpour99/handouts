@@ -8,6 +8,7 @@
   - [Components](#components)
     - [Control Plane (Master)](#control-plane-master)
     - [Data Plane (Worker)](#data-plane-worker)
+    - [Objects (The Things You Deploy)](#objects-the-things-you-deploy)
 
 ## Introduction
 
@@ -89,9 +90,22 @@ Kubernetes is a **container orchestration platform**. Its only job is to:
 
 - **Kube-Proxy**
 
-  - **Manages networking rules**.
+  - **Manages networking rules** - received from the API server.
   - It ensures:
     - Services get virtual IPs
     - Load balancing to pods works
     - Cluster networking rules are correct
   - If this breaks → traffic routing breaks internally.
+
+### Objects (The Things You Deploy)
+
+- **Pod**: The smallest unit. Generally 1 container, sometimes more.
+- **ReplicaSet**: Keeps a number of pods running.
+- **Deployment**: Manages ReplicaSets + rolling updates.
+- **StatefulSet**: Manages ordered, persistent workloads (databases).
+- **DaemonSet**: Runs one pod per node (logging agents, node exporters).
+- **Job / CronJob**: One-time or scheduled workloads.
+- **Service**: Network abstraction for pods.
+- **Ingress**: Routing from outside → inside cluster (HTTP/HTTPS).
+- **ConfigMap / Secret**: Configuration and sensitive data.
+- **PersistentVolume / PersistentVolumeClaim**: Storage.
