@@ -43,6 +43,19 @@
     skip_if_unavailable=False
     ```
 
+- Add Proxy to Docker:
+  - `mkdir /etc/systemd/system/docker.service.d`
+  - `cd /etc/systemd/system/docker.service.d`
+  - `vim http-proxy.conf`
+
+  - ```
+    [Service]
+    Environment="HTTPS_PROXY=localhost:10808"
+    ```
+
+  - `sudo systemctl daemon-reload`
+  - `sudo systemctl restart docker`
+
 - Add Proxy to `wget` tool
   - `vim /etc/wgetrc`
 
@@ -56,3 +69,4 @@
 
 - `curl google.com -v` (You should see `Connected to <Proxy Address>`)
 - `wget google.com -v` (You should see `Connecting to <Proxy Address>... Connected`)
+- `systemctl show docker --property Environment` (You should see `Environment="HTTPS_PROXY=localhost:10808"`)
