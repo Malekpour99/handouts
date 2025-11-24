@@ -26,6 +26,12 @@
     - [Explain Factory Design Pattern](#explain-factory-design-pattern)
     - [Factory Vs. Abstract Factory Design Patterns](#factory-vs-abstract-factory-design-patterns)
     - [Explain Decorator Design Pattern](#explain-decorator-design-pattern)
+  - [Operating System](#operating-system)
+    - [What is `systemd` in Linux?](#what-is-systemd-in-linux)
+    - [How would you find misbehaving processes in Linux and terminate them?](#how-would-you-find-misbehaving-processes-in-linux-and-terminate-them)
+    - [What is a Zombie Process and how would you find it?](#what-is-a-zombie-process-and-how-would-you-find-it)
+    - [How would you print all of the contents in a directory which includes nested directories?](#how-would-you-print-all-of-the-contents-in-a-directory-which-includes-nested-directories)
+    - [How would you check your system distro?](#how-would-you-check-your-system-distro)
 
 ## Programming General Concepts
 
@@ -617,6 +623,160 @@ say_hello()
 # Calling say_hello
 # Hello!
 # say_hello Finished
+```
+
+---
+
+## Operating System
+
+### What is `systemd` in Linux?
+
+**systemd** is the **init system** and **service manager**; It is the first process that runs after the kernel boots (**PID 1**) and is responsible for starting and managing the entire user space.
+
+It is the backbone of **service and process management** on modern Linux systems.
+
+- What systemd Actually Does?
+
+1. **Boots the system**
+
+   - Initializes the OS after the kernel loads.
+   - Starts essential services in the correct order.
+
+2. **Manages services**
+
+   - Start, stop, restart, enable, disable services.
+   - Provides parallel service startup → faster boot time.
+
+   Commands:
+
+   ```bash
+   systemctl start service
+   systemctl stop service
+   systemctl status service
+   systemctl enable service
+   ```
+
+3. **Handles logging**
+
+   - Uses `journald` for system-wide structured logging.
+
+4. **Manages system resources**
+
+   - timers (replacement for cron)
+   - socket activation
+   - device events
+   - mount points
+   - network configuration (via systemd-networkd)
+   - user sessions
+
+5. **Provides supervision**
+
+   - Automatically restarts failed services.
+   - Tracks dependencies between services.
+   - Can sandbox services (security)
+
+---
+
+### How would you find misbehaving processes in Linux and terminate them?
+
+1. Identify High Resource Usage
+
+   ```bash
+   # CPU hogs
+   top
+   htop
+
+   # Memory hogs
+   top
+   free -h
+
+   # I/O hogs
+   iotop
+
+   # Failed Services
+   systemctl --failed
+
+   # Port Usage
+   sudo ss -tulpn
+   sudo lsof -i :<port>
+   ```
+
+   - High **%CPU**
+   - High **%MEM**
+   - Zombie processes
+   - Processes stuck in uninterruptible sleep (`D` state)
+
+2. Terminate problematic processes
+
+   ```bash
+   # Trace process
+   strace -p <pid>
+   # This tells you if it’s stuck on a file, network call, or kernel wait.
+
+   # Graceful Kill
+   kill <pid>
+
+   # Force Kill
+   kill -9 <pid>
+
+   # Kill by Name
+   pkill <process_name>
+
+   # Kill Multiple
+   killall <process_name>
+   ```
+
+---
+
+### What is a Zombie Process and how would you find it?
+
+A **zombie** is a process that has **finished execution** but still has an entry in the process table because its **parent hasn’t called `wait()`** to collect its exit status.
+
+It uses **0 CPU, 0 memory**, but indicates a **bug in the parent process**.
+
+```bash
+# Finding Zombie processes
+ps aux | grep 'Z'
+ps -el | grep Z
+```
+
+You cannot kill a zombie (it’s already dead). You can kill its parent or restart its relevant service.
+
+```bash
+# Find and kill zombie parent process
+ps -o ppid= -p <zombie_pid>
+kill <ppid>
+
+# if parent was a service -> restart it
+systemctl restart <service_name>
+```
+
+---
+
+### How would you print all of the contents in a directory which includes nested directories?
+
+```bash
+# built-in tools
+ls -R
+find .
+
+# external tools
+# sudo apt install tree
+tree
+```
+
+---
+
+### How would you check your system distro?
+
+```bash
+cat /etc/os-release
+
+# sudo apt install lsb-release
+lsb_release -a
+
+# Kernel info + distro (quick & dirty)
+uname -a
 ```
 
 ---
