@@ -48,9 +48,10 @@
 - Asan Pardakht -> Read from multiple text files and give a word count as final result (live-code GO)
 - Abrnoc -> Design a weather report system based on Open-Weather API (Go)
 - Porsline -> Recommendation system based on user history and activity
-- Mofid Securities -> Create a decorator which tracks the time of execution for any function
+- Mofid Securities -> Create a decorator which tracks the time of execution for any function (live-code Python)
 - Toman -> E-commerce CRUD endpoints
 - Torob -> Read, integrate and sort weather reports from a file (live-code)
 - Iran-SOS -> Fix endpoints different bugs [unapplied migration bug, N+1 query bug] (live-code Python-Django)
 - Remote Synergy (Partnerz) -> Refactor a SMTP mailing service
 - Maktabkhoone -> Design signals based on the observer design pattern (signal register + triggering) (live-code Python)
+- \* -> Create a priority-queue using a list as queue (live-code Python)
