@@ -13,6 +13,7 @@
     - [What happens when you type-in "www.google.com" in your browser?](#what-happens-when-you-type-in-wwwgooglecom-in-your-browser)
     - [HTTP Request Methods](#http-request-methods)
     - [How to rate-limit/throttle network requests on Linux server?](#how-to-rate-limitthrottle-network-requests-on-linux-server)
+    - [You are suddenly informed that our website is down; how would you resolve this issue?](#you-are-suddenly-informed-that-our-website-is-down-how-would-you-resolve-this-issue)
 
 ## Network
 
@@ -313,5 +314,20 @@ http {
 - `Middleware` (e.g., Django Rest Framework throttle, Go middleware).
 
 This gives the most flexibility (per user, per token, etc.), but costs CPU since requests already reach your app.
+
+---
+
+### You are suddenly informed that our website is down; how would you resolve this issue?
+
+My main and first goal is to find the source of this solution and reduce my area of investigation to that source. Then after resolving the issue, my main goal is to make sure this incident won't happen again; I can do so by creating new tests or taking other required preventing actions.
+
+- First I check the traffic to make sure I can reach my website services (by using commands like `dig`, `curl` and `ping`)
+- Check for the health and status of my servers (nodes), databases, engines and applications.
+- Check for unusual resource or storage usage.
+- Check from inside my services to make sure they can see other services and their connection is not lost.
+- Check my application logs (`critical`, `error` levels)
+- After finding the source of failure, I rollback its relevant changes ASAP.
+- Then I make sure our services are stable.
+- Now I create tests and take action to fix the service and make sure this won't happen again.
 
 ---
