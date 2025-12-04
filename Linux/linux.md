@@ -6,6 +6,8 @@
   - [Table of Contents](#table-of-contents)
   - [Root File System Structure](#root-file-system-structure)
   - [Linux File Types](#linux-file-types)
+  - [Commands](#commands)
+    - [Common Commands](#common-commands)
   - [General Useful Points](#general-useful-points)
     - [Using `sudo tee` instead of `>` \& `>>`](#using-sudo-tee-instead-of---)
 
@@ -59,6 +61,117 @@ srw-rw---- 1 root docker 0 Nov  1 09:00 /var/run/docker.sock
 ```
 
 ![Linux File Types](images/file-types-in-linux.png)
+
+## Commands
+
+### Common Commands
+
+```sh
+# print working directory
+pwd
+
+# list files (long format, hidden files)
+ls -la
+
+# change directory
+cd /path/to/dir
+
+# create a directory
+mkdir new_folder
+
+# remove a directory recursively
+rm -r folder_name
+
+# remove a file
+rm file
+
+# copy file or directory (-r for directory)
+cp <source> <dest>
+cp -r dir1 dir2
+
+# move or rename
+mv old_name new_name
+mv <source> <dest>
+
+# show file contents
+cat file.txt
+
+# view file page-by-page
+less file.txt
+
+# find files by name
+find /path -name "*.log"
+
+# search inside files
+grep "pattern" file.txt
+grep -R "pattern" .
+
+# show current processes
+ps aux
+
+# real-time process monitor
+top
+htop        # if installed
+
+# kill a process
+kill PID
+kill -9 PID   # force, use only when necessary
+
+# show network info
+ifconfig     # deprecated but still common
+ip a         # preferred
+
+# check active listening ports
+ss -tulpn
+
+# check disk usage
+df -h        # filesystem usage
+du -sh *     # size of each file/dir in current folder
+
+# show command history
+history
+
+# print environment variables
+env
+
+# change file permissions
+chmod 755 file
+chmod +x script.sh
+
+# change file ownership
+sudo chown user:group file
+
+# show system journal logs
+journalctl -xe
+
+# follow log file
+tail -f /var/log/syslog
+
+# download a file (Wget)
+wget URL
+
+# download a file (cURL)
+curl -LO URL
+
+# update and upgrade packages (Debian/Ubuntu)
+sudo apt update
+sudo apt upgrade
+
+# search packages (Debian/Ubuntu)
+apt search package
+
+# install package
+sudo apt install package
+
+# show service status
+sudo systemctl status service
+sudo systemctl restart service
+sudo systemctl enable service
+
+# check OS info
+lsb_release -a
+uname -a
+```
 
 ## General Useful Points
 
