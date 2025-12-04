@@ -1102,6 +1102,10 @@ networks:
 ```
 
 ```sh
+# Install htpasswd
+sudo apt install apache2-utils
+
+# Create username and password for basic authentication
 mkdir auth
 htpasswd -Bc auth/htpasswd <username>
 # `-B`: Use bcrypt encryption (recommended).
