@@ -1065,6 +1065,7 @@ services:
       - "5000:5000"
     volumes:
       - registry_data:/var/lib/registry
+      # mount authentication credentials folder to :/auth
     environment:
       REGISTRY_AUTH: htpasswd
       REGISTRY_AUTH_HTPASSWD_REALM: "Registry Realm"
@@ -1134,3 +1135,55 @@ docker pull localhost:5000/<image>
 - you can also configure nginx with above compose file and stack deploy your local registry on Docker Swarm and use labeling constraints to only deploy it on manager nodes!
 - When you are using exposed services it's best practice to generate **SSL certificate** for secure connection between your registry and other nodes!
 - you can also host a local registry using **Nexus** which unlike Docker's official registry, can also be used for managing multi artifacts like Maven, npm, PyPI, etc.
+
+```sh
+# Generating TLS certificates for HTTPS
+openssl req -newkey rsa:4096 -nodes -sha256 -keyout certs/domain.key -x509 -days 365 -out certs/domain.crt
+
+# You will be prompted for supplementary data: (mostly Optional)
+# Country -> IR
+# State or Province -> Tehran
+# Locality Name -> Tehran
+# Organization -> <organization-name>
+# Unit -> Tech
+# Common Name (Server) -> <domain.com> # for this one make sure to enter the exact domain you want!
+# Email -> <email>
+
+# Register your domain (e.g. <domain.com>)
+vim /etc/hosts
+
+# 127.0.0.1 <domain.com>
+
+# Test your domain
+ping <domain.com>
+
+# TLS configuration for docker
+mkdir /etc/docker/certs.d
+mkdir /etc/docker/certs.d/<domain.com>
+
+# Copy your domain certificate to docker configuration folder
+cp ./certs/domain.crt /etc/docker/certs.d/<domain.com>/ca.crt
+
+systemctl restart docker.service
+
+# Connecting to insecure registries
+vim /etc/docker/daemon.json
+
+# Add this
+# "insecure-registries": ["domain.com:5000"],
+```
+
+```yaml
+# Mount certification folder inside registry container!
+# Then add these environments for TLS configuration of docker registry
+REGISTRY_HTTP_TLS_CERTIFICATE: /certs/domain.crt
+REGISTRY_HTTP_TLS_KEY: /certs/domain.key
+REGISTRY_HTTP_ADDR: 0.0.0.0:443
+
+# remove this environment
+REGISTRY_HTTP_ADDR: 0.0.0.0:5000
+
+# Change port binding (Remove port 5000)
+ports:
+  - "443:443"
+```
