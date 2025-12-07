@@ -9,10 +9,11 @@
     - [Control Plane (Master)](#control-plane-master)
     - [Data Plane (Worker)](#data-plane-worker)
     - [Objects (The Things You Deploy)](#objects-the-things-you-deploy)
+  - [Learning Environments](#learning-environments)
 
 ## Introduction
 
-Kubernetes is a **container orchestration platform**. Its only job is to:
+[Kubernetes](https://kubernetes.io/docs/setup/) is a **container orchestration platform**. Its only job is to:
 
 - Keep your containers running.
 - Restart them when they fail.
@@ -29,7 +30,7 @@ Kubernetes is a **container orchestration platform**. Its only job is to:
 - **API Server**
 
   - The **entry point**.
-  - Everything — `kubectl`, `controllers`, `nodes` — talks to the API server.
+  - Everything — `kubectl`, `controllers`, `nodes` — talks to the API server. (`kubectl` converts your commands to REST HTTP requests04 for interacting with API Server!)
   - You don’t talk to anything else.
   - If this is down, you won’t “feel” the cluster immediately die, but you cannot manage it.
 
@@ -109,3 +110,9 @@ Kubernetes is a **container orchestration platform**. Its only job is to:
 - **Ingress**: Routing from outside → inside cluster (HTTP/HTTPS).
 - **ConfigMap / Secret**: Configuration and sensitive data.
 - **PersistentVolume / PersistentVolumeClaim**: Storage.
+
+## Learning Environments
+
+- [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
+- [Minikube](https://minikube.sigs.k8s.io/docs/start/)
+- [Kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
