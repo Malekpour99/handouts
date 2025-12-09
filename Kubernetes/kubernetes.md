@@ -10,6 +10,8 @@
     - [Data Plane (Worker)](#data-plane-worker)
     - [Objects (The Things You Deploy)](#objects-the-things-you-deploy)
   - [Learning Environments](#learning-environments)
+  - [Configurations](#configurations)
+    - [Context Management](#context-management)
 
 ## Introduction
 
@@ -30,7 +32,7 @@
 - **API Server**
 
   - The **entry point**.
-  - Everything — `kubectl`, `controllers`, `nodes` — talks to the API server. (`kubectl` converts your commands to REST HTTP requests04 for interacting with API Server!)
+  - Everything — `kubectl`, `controllers`, `nodes` — talks to the API server. (`kubectl` converts your commands to REST HTTP requests for interacting with API Server!)
   - You don’t talk to anything else.
   - If this is down, you won’t “feel” the cluster immediately die, but you cannot manage it.
 
@@ -116,3 +118,46 @@
 - [Kind](https://kind.sigs.k8s.io/docs/user/quick-start/)
 - [Minikube](https://minikube.sigs.k8s.io/docs/start/)
 - [Kubeadm](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/)
+
+## Configurations
+
+### Context Management
+
+- Kubectl configuration file: **`~/.kube/config`** or **`/root/.kube/config`**
+
+```yaml
+apiVersion: v1 # using version 1 of APIs for interacting with API Server
+clusters: # List of current configured clusters and each ones name
+  - cluster: # cluster configuration info
+      certificate-authority: /home/malekpour/.minikube/ca.crt # This key is used for connecting to cluster using TLS
+      extensions:
+        - extension:
+            last-update: Tue, 09 Dec 2025 20:16:34 +0330
+            provider: minikube.sigs.k8s.io
+            version: v1.37.0
+          name: cluster_info
+      server: https://192.168.49.2:8443 # Cluster's server address
+    name: minikube # cluster's name
+contexts: # context informs kubectl how to connect to a cluster (in which namespace and by using which user)
+  - context:
+      cluster: minikube
+      extensions:
+        - extension:
+            last-update: Tue, 09 Dec 2025 20:16:34 +0330
+            provider: minikube.sigs.k8s.io
+            version: v1.37.0
+          name: context_info
+      namespace: default
+      user: minikube
+    name: minikube # context's name
+current-context: minikube # Current active context of kubectl (by changing this to another context, you can update the default context of kubectl!)
+kind: Config
+preferences: {}
+users:
+  - name: minikube
+    user:
+      client-certificate: /home/malekpour/.minikube/profiles/minikube/client.crt
+      client-key: /home/malekpour/.minikube/profiles/minikube/client.key
+```
+
+- If you have other clusters in other servers, you can add their configuration (IP & Port, public key - certificate) and define a context for connecting to them in your configured namespace and by using the valid user
