@@ -12,6 +12,7 @@
   - [Learning Environments](#learning-environments)
   - [Configurations](#configurations)
     - [Context Management](#context-management)
+    - [Cluster Setup (Production Environment)](#cluster-setup-production-environment)
 
 ## Introduction
 
@@ -161,3 +162,96 @@ users: # List of users
 ```
 
 - If you have other clusters in other servers, you can add their configuration (IP & Port, public key - certificate) and define a context for connecting to them in your configured namespace and by using the valid user
+
+### Cluster Setup (Production Environment)
+
+- `kubelet`: the component that runs on all of the machines in your cluster and does things like starting pods and containers.
+- `kubeadm`: the command to bootstrap the cluster. (You need [`kubeadm`](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) on both master and worker nodes for setting up your cluster.)
+- `kubectl`: the command line util to talk to your cluster. (You only need `kubectl` on your master nodes.)
+- Choose your `kubeadm`, `kubectl` and `kubelet` based on your `kubernetes` version!
+
+- Now you can update your nodes' name using `hostnamectl set-hostname <desired-name>` command.
+- Then your should define corresponding DNS records for your nodes in order to let them communicate with each other
+- You can setup a DNS service like `bind` and connect it to your kubernetes or you can directly define your DNS records in each node:
+
+```sh
+vim /etc/hosts
+
+# defined your desired node IP and host name
+<node-IP-address> <node-hostname>
+```
+
+- Install required kernel headers (Since kubernetes does not use `iptables`, instead it uses Linux `IP-route` directly and adds some rules to the `iptables`)
+
+```sh
+# Debian kernel
+sudo apt install kernel-devel-$(uname -r)
+
+# Red-Hat kernel
+sudo dnf install kernel-devel-$(uname -r)
+```
+
+- Now load kubernetes required kernel modules at runtime, like `bridge` and `port-forwarding` tools which are used mostly by `kube-proxy`
+
+```sh
+# Enable netfilter (iptables/nftables) on Linux bridge traffic.
+sudo modprobe br_netfilter
+
+# Enable IP Virtual Server (IPVS): Kernel-level Layer-4 load balancing, Faster and more scalable than iptables
+sudo modprobe ip_vs
+
+# Add Round-Robin scheduling to IPVS.
+sudo modprobe ip_vs_rr
+
+# Add Weighted Round-Robin scheduling.
+sudo modprobe ip_vs_wrr
+
+# Add Source Hashing (Same client IP → same backend pod): sticky sessions (session affinity)
+sudo modprobe ip_vs_sh
+
+# Enable OverlayFS, a union filesystem. (Container runtimes use OverlayFS to: Mount image layers efficiently, Avoid copying entire filesystems per container, Reduce disk usage and startup time)
+sudo modprobe overlay
+```
+
+- Persist loaded kernel modules in kubernetes configuration
+
+```sh
+cat > /etc/modules-load.d/kubernetes.conf << EOF
+br_netfilter
+ip_vs
+ip_vs_rr
+ip_vs_wrr
+ip_vs_sh
+overlay
+EOF
+```
+
+- Enable IP-forwarding in kubernetes configuration
+
+```sh
+cat > /etc/sysctl.d/kubernetes.conf << EOF
+net.ipv4.ip_forward = 1
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+EOF
+```
+
+- Now Refresh your configurations in order to apply them
+
+```sh
+sysctl --system
+```
+
+- Disable `swap-memory` (it can cause unexpected behavior and errors while using kubernetes)
+
+```sh
+# Disable swap-memory
+sudo swapoff -a
+
+# Comment out all swap entries in /etc/fstab, effectively disabling swap on system boot
+sed -e '/swap/s/^/#/g' -i /etc/fstab
+
+# check swap memory status
+free -h
+# swap-memory dedicated storage should be 0 now!
+```
