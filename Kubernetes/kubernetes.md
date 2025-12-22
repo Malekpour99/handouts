@@ -13,6 +13,7 @@
   - [Configurations](#configurations)
     - [Context Management](#context-management)
     - [Cluster Setup (Production Environment)](#cluster-setup-production-environment)
+    - [Installing `containerd` Container Runtime](#installing-containerd-container-runtime)
 
 ## Introduction
 
@@ -165,8 +166,8 @@ users: # List of users
 
 ### Cluster Setup (Production Environment)
 
-- `kubelet`: the component that runs on all of the machines in your cluster and does things like starting pods and containers.
 - `kubeadm`: the command to bootstrap the cluster. (You need [`kubeadm`](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) on both master and worker nodes for setting up your cluster.)
+- `kubelet`: the component that runs on all of the machines in your cluster and does things like starting pods and containers. (You need `kubelet` on both master and worker nodes)
 - `kubectl`: the command line util to talk to your cluster. (You only need `kubectl` on your master nodes.)
 - Choose your `kubeadm`, `kubectl` and `kubelet` based on your `kubernetes` version!
 
@@ -181,6 +182,7 @@ vim /etc/hosts
 <node-IP-address> <node-hostname>
 ```
 
+- below commands are required to be run on both master and worker nodes!
 - Install required kernel headers (Since kubernetes does not use `iptables`, instead it uses Linux `IP-route` directly and adds some rules to the `iptables`)
 
 ```sh
@@ -254,4 +256,111 @@ sed -e '/swap/s/^/#/g' -i /etc/fstab
 # check swap memory status
 free -h
 # swap-memory dedicated storage should be 0 now!
+```
+
+### Installing `containerd` Container Runtime
+
+- Container Runtime is responsible for pushing/pulling images, managing repository, network and storage.
+- `containerd` [releases](https://containerd.io/releases/), choose a stable and compatible version based on your kubernetes version
+- Add docker repository to your OS package manager:
+
+```sh
+# Red-Hat - Docker
+vim /etc/yum.repos.d/yum-docker.repo
+
+# yum-docker.repo
+[docker-ce]
+name=centos $releasever - Docker-CE
+baseurl=http://<repository-IP>:<repository-port>/repository/yum-docker/
+gpgcheck=0
+enabled=1
+# local repository is a proxy for https://download.docker.com/linux/centos/9/x86_64/stable
+
+# Debian
+vim /etc/apt/sources.list.d/docker-ce.list
+
+# docker-ce.list
+deb [trusted=yes] http://<repository-IP>:<repository-port>/repository/apt-docker/ /
+# updated this local repository according to your debian-based OS
+
+# ------------------------------------------------------------------------------------------
+
+# Red-Hat - Kubernetes
+vim /etc/yum.repos.d/kubernetes.repo
+
+# kubernetes.repo (Directly connected to internet)
+[kubernetes]
+name=kubernetes
+baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
+enabled=1
+gpgcheck=1
+gpgkey=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/repodata/repomd.xml.key
+exclude=kubelet kubeadm kubectl cri-tools kubernetes-cni
+# update kubernetes version based on your installed kubernetes
+
+# kubernetes.repo (Connected to local repository)
+[kubernetes]
+name=centos $releasever - Docker-CE
+baseurl=http://<repository-IP>:<repository-port>/repository/yum-kubernetes/
+gpgcheck=0
+enabled=1
+# local repository is a proxy for https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
+
+# ------------------------------------------------------------------------------------------
+
+# Red-Hat - Packages
+vim /etc/yum.repos.d/yum-repo.repo
+
+# Configure it same as other repos proxying required CentOS package providers
+```
+
+- Now install `containerd`
+
+```sh
+# Red-Hat
+yum install containerd.io
+
+# Check Installation
+crictl
+# outputs available commands for interacting with containerd
+```
+
+- Default `containerd` configuration file: `/etc/containerd/config.toml`
+- Advanced configuration of containerd: `sudo sh -c "containerd config default > /etc/containerd/config.toml"`
+- Now update this advanced configuration for using local registry and interacting with kubernetes:
+
+```sh
+vim /etc/containerd/config.toml
+```
+
+```toml
+<!-- Enable runc SystemCgroup -->
+[Plugins."io.containerd.grpc.v1.cri".containerd.runtimes.runc.options]
+  ...
+  SystemdCgroup = true
+
+<!-- Update Registry Mirrors -->
+[Plugins."io.containerd.grpc.v1.cri".registry.mirrors]
+  [Plugins."io.containerd.grpc.v1.cri".registry.mirrors."quay.io"]
+    endpoint = ["http://<repository-IP>:<repository-port>"]
+  [Plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.io"]
+    endpoint = ["http://<repository-IP>:<repository-port>"]
+  [Plugins."io.containerd.grpc.v1.cri".registry.mirrors."k8s.gcr.io"]
+    endpoint = ["http://<repository-IP>:<repository-port>"]
+  [Plugins."io.containerd.grpc.v1.cri".registry.mirrors."*"]
+    endpoint = ["http://<repository-IP>:<repository-port>"]
+  [Plugins."io.containerd.grpc.v1.cri".registry.mirrors."gcr.io"]
+    endpoint = ["http://<repository-IP>:<repository-port>"]
+  [Plugins."io.containerd.grpc.v1.cri".registry.mirrors."docker.elastic.io"]
+    endpoint = ["http://<repository-IP>:<repository-port>"]
+
+<!-- You should define a proxy repository for each one of these registries and them include them inside a group repository -->
+```
+
+```sh
+# restart containerd for applying changes
+systemctl restart containerd.service
+
+# if containerd default service was not created, you should enable it
+systemctl enable --now containerd.service
 ```
