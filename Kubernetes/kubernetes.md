@@ -12,8 +12,10 @@
   - [Learning Environments](#learning-environments)
   - [Configurations](#configurations)
     - [Context Management](#context-management)
-    - [Cluster Setup (Production Environment)](#cluster-setup-production-environment)
+    - [Cluster Setup Requirements (Production Environment)](#cluster-setup-requirements-production-environment)
     - [Installing `containerd` Container Runtime](#installing-containerd-container-runtime)
+    - [Firewall Configuration](#firewall-configuration)
+    - [Cluster Setup (Production)](#cluster-setup-production)
 
 ## Introduction
 
@@ -164,7 +166,7 @@ users: # List of users
 
 - If you have other clusters in other servers, you can add their configuration (IP & Port, public key - certificate) and define a context for connecting to them in your configured namespace and by using the valid user
 
-### Cluster Setup (Production Environment)
+### Cluster Setup Requirements (Production Environment)
 
 - `kubeadm`: the command to bootstrap the cluster. (You need [`kubeadm`](https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/) on both master and worker nodes for setting up your cluster.)
 - `kubelet`: the component that runs on all of the machines in your cluster and does things like starting pods and containers. (You need `kubelet` on both master and worker nodes)
@@ -288,7 +290,7 @@ deb [trusted=yes] http://<repository-IP>:<repository-port>/repository/apt-docker
 # Red-Hat - Kubernetes
 vim /etc/yum.repos.d/kubernetes.repo
 
-# kubernetes.repo (Directly connected to internet)
+# kubernetes.repo (Directly connected to internet) -> kubernetes.repo.old for disabling repo, add a suffix to its name like .old or .backup
 [kubernetes]
 name=kubernetes
 baseurl=https://pkgs.k8s.io/core:/stable:/v1.32/rpm/
@@ -311,7 +313,22 @@ enabled=1
 # Red-Hat - Packages
 vim /etc/yum.repos.d/yum-repo.repo
 
-# Configure it same as other repos proxying required CentOS package providers
+[appstream]
+name=centos $releasever - AppStream
+baseurl=http://<repository-IP>:<repository-port>/repository/yum-repo/AppStream/x86_64/os/
+gpgcheck=0
+enabled=1
+# local repository is a proxy for https://mirror.stream.centos.org/9-stream/
+
+[baseOs]
+name=centos $releasever - BaseOs
+baseurl=http://<repository-IP>:<repository-port>/repository/yum-repo/BaseOs/x86_64/os/
+gpgcheck=0
+
+[ha]
+name=centos $releasever - HA
+baseurl=http://<repository-IP>:<repository-port>/repository/yum-repo/HighAvailability/x86_64/os/
+gpgcheck=0
 ```
 
 - Now install `containerd`
@@ -364,3 +381,75 @@ systemctl restart containerd.service
 # if containerd default service was not created, you should enable it
 systemctl enable --now containerd.service
 ```
+
+### Firewall Configuration
+
+```sh
+# Checking firewall status
+systemctl status firewalld.service
+
+# Stop & Disable your firewall - Not Recommended!
+systemctl stop firewalld.service
+systemctl disable firewalld.service
+
+# Instead of stopping & disabling your firewall manage kubernetes required ports!
+```
+
+- `Kubernetes` required ports:
+  - `6443` -> Kubernetes API Server: Open to control-plane nodes and admins / CI. DO NOT EXPOSE PUBLICLY!
+  - `2379` -> client traffic (API server → `etcd`)
+  - `2380` -> peer traffic (`etcd` ↔ `etcd`)
+  - `10250` -> `kubelet`
+  - `10251` -> `kube-scheduler`
+  - `10252` -> `kube-controller-manager`
+  - `10255` -> `kubelet` read-only port
+  - `5473`
+
+### Cluster Setup (Production)
+
+```sh
+# Enable kubelet service
+systemctl enable --now kubelet.service
+
+# Check kubelet status
+systemctl status kubelet.service
+
+# if kubelet was experiencing FAILURE you can check its logs using
+journalctl -r
+# ignore not found error related to /var/lib/kubelet/config.yaml
+# above file will be created after kubernetes installation
+```
+
+- Now install kubernetes
+
+```sh
+# List of required images for setting up kubernetes
+kubeadm config images list
+
+# Download kubernetes required images
+kubeadm config images pull
+# stored these images in your local repository for kubernetes setup in no-internet environments
+
+# First, run this command on your master node
+kubeadm init --pod-network-cidr=10.244.0.0/16
+# --pod-network-cidr -> configuration of pods internal network
+# -v6 -> by adding this flag you can run your kubernetes setup in debug mode to fix its errors
+
+# Run after installation of kubernetes (prompted in logs!)
+mkdir -p $HOME/.kube
+sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+# you will also be prompted with the command for joining worker nodes!
+
+# Check your nodes
+kubectl get nodes
+```
+
+- Now you need to manage kubernetes internal network by using a `CNI - Container Network Interface`
+- `CNI` is a tool for container network and security management
+- You can use different tools for fulfilling this purpose like:
+  - [`Calico`](https://www.tigera.io/project-calico/)
+  - `Flannel`
+  - `Canal`
+  - `Cilium`
