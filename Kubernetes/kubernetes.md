@@ -16,6 +16,7 @@
     - [Installing `containerd` Container Runtime](#installing-containerd-container-runtime)
     - [Firewall Configuration](#firewall-configuration)
     - [Cluster Setup (Production)](#cluster-setup-production)
+    - [Useful Tricks](#useful-tricks)
 
 ## Introduction
 
@@ -106,6 +107,7 @@
 
 ### Objects (The Things You Deploy)
 
+- **Resource**: Anything that you can manage/control using `kubectl`, e.g. Pod, Service, etc.
 - **Pod**: The smallest unit. Generally 1 container, sometimes more.
 - **ReplicaSet**: Keeps a number of pods running.
 - **Deployment**: Manages ReplicaSets + rolling updates.
@@ -449,7 +451,97 @@ kubectl get nodes
 - Now you need to manage kubernetes internal network by using a `CNI - Container Network Interface`
 - `CNI` is a tool for container network and security management
 - You can use different tools for fulfilling this purpose like:
+
   - [`Calico`](https://www.tigera.io/project-calico/)
   - `Flannel`
   - `Canal`
   - `Cilium`
+
+- `Calico` [quickstart installation](https://docs.tigera.io/calico/latest/getting-started/kubernetes/quickstart)
+- If your server is not connected to internet, you can save `tigera-operator.yaml` and `custom-resources.yaml` in your server.
+- If you have multiple network interfaces - `NIC`, you must determine which one of them should be used for internal network under `Calico`:
+
+```yaml
+calicoNetwork:
+  # ...
+  nodeAddressAutodetectionV4:
+    interface: <NIC-name(e.g. ens33)>
+```
+
+- update `cidr` address in `custom-resources.yaml` file based on the address you provided when using `kubeadm` init command (e.g. `10.244.0.0/16`) and the follow below instructions ([How to customize `Calico`](https://docs.tigera.io/calico/latest/getting-started/kubernetes/self-managed-onprem/config-options#how-to)):
+
+```sh
+kubectl create -f tigera-operator.yaml
+kubectl create -f custom-resources.yaml
+```
+
+- Checking kubernetes pods:
+
+```sh
+# get pods in all namespaces
+kubectl get pod -A
+# After successful setup all of the pods should have 'Running' STATUS and '1/1` READY!
+```
+
+- Now your single-master kubernetes cluster is ready! (you can also setup a multi-master kubernetes cluster with a little bit more configuration!)
+- Let's run some pods to test our cluster:
+
+```sh
+# Creating an nginx pod without any manifest
+kubectl run nginx-pod --image=nginx --restart=Never --port=80 -n default
+
+# check nginx status
+kubectl get po
+kubectl get pod
+
+# check cluster services
+kubectl get svc
+kubectl get service
+# you can find your cluster IP here!
+
+# Exposing nginx-pod by creating nginx service
+kubectl expose pod nginx-pod --type=NodePort --port=80 --name=nginx-service
+# Now you can access your nginx service by using your public-IP on port 80!
+
+# deleting nginx pod
+kubectl delete po nginx-pod
+
+# deleting nginx service
+kubectl delete svc nginx-service
+```
+
+- Now let's create a manifest for nginx, called `nginx.yaml`:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels:
+    app: nginx
+spec:
+  containers:
+    - name: nginx-container
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+```
+
+```sh
+# creating nginx pod by its manifest
+kubectl create -f nginx.yaml
+
+# deleting manifest's pod
+kubectl delete -f nginx.yaml
+```
+
+### Useful Tricks
+
+- For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
+
+```sh
+alias k='kubectl'
+
+source <(kubectl completion bash)
+complete -F __start_kubectl k
+```
