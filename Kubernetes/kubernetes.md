@@ -108,7 +108,14 @@
 ### Objects (The Things You Deploy)
 
 - **Resource**: Anything that you can manage/control using `kubectl`, e.g. Pod, Service, etc.
-- **Pod**: The smallest unit. Generally 1 container, sometimes more.
+- **Pod**:
+  - An **isolated wrapper** around containers which enables kubernetes to manage them.
+  - The smallest unit of resources in kubernetes.
+  - Generally consists of `1` container, sometimes more:
+    - in case your containers need to interact with each other **isolated from outside** of the pod.
+    - in case your containers need to **start/stop** together
+    - in case your containers need to **scale** together
+  - Each pod has a `VI - Virtual Interface` for connecting/interacting with other pods.
 - **ReplicaSet**: Keeps a number of pods running.
 - **Deployment**: Manages ReplicaSets + rolling updates.
 - **StatefulSet**: Manages ordered, persistent workloads (databases).
