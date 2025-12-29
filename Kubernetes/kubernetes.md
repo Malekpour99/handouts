@@ -8,7 +8,7 @@
   - [Components](#components)
     - [Control Plane (Master)](#control-plane-master)
     - [Data Plane (Worker)](#data-plane-worker)
-    - [Objects (The Things You Deploy)](#objects-the-things-you-deploy)
+    - [Kubernetes Terms](#kubernetes-terms)
   - [Learning Environments](#learning-environments)
   - [Configurations](#configurations)
     - [Context Management](#context-management)
@@ -17,6 +17,7 @@
     - [Firewall Configuration](#firewall-configuration)
     - [Cluster Setup (Production)](#cluster-setup-production)
     - [Useful Tricks](#useful-tricks)
+    - [Namespaces](#namespaces)
 
 ## Introduction
 
@@ -105,7 +106,7 @@
     - Cluster networking rules are correct
   - If this breaks → traffic routing breaks internally.
 
-### Objects (The Things You Deploy)
+### Kubernetes Terms
 
 - **Resource**: Anything that you can manage/control using `kubectl`, e.g. Pod, Service, etc.
 - **Pod**:
@@ -551,4 +552,29 @@ alias k='kubectl'
 
 source <(kubectl completion bash)
 complete -F __start_kubectl k
+```
+
+### Namespaces
+
+- `Namespace`: is a high level wrapper for isolating different resources in kubernetes (similar to Linux namespaces)
+
+```sh
+# list available namespaces
+kubectl get namespace
+kubectl get ns
+# kubernetes considers 'default' namespace when you are getting different resources
+
+# Create namespace
+kubectl create ns <namespace>
+
+# Getting pods by using namespace filtering
+kubectl get po --namespace <namespace>
+kubectl get po -n <namespace>
+
+# Getting all of the available pods in every namespace
+kubectl get po -A
+
+# Get a specific pod manifest (in different formats)
+kubectl get po <pod> -n <namespace> -o yaml
+kubectl get po <pod> -n <namespace> -o json
 ```
