@@ -16,8 +16,9 @@
     - [Installing `containerd` Container Runtime](#installing-containerd-container-runtime)
     - [Firewall Configuration](#firewall-configuration)
     - [Cluster Setup (Production)](#cluster-setup-production)
-    - [Useful Tricks](#useful-tricks)
     - [Namespaces](#namespaces)
+    - [Logs \& Port-Forwarding](#logs--port-forwarding)
+    - [Useful Tricks](#useful-tricks)
 
 ## Introduction
 
@@ -543,17 +544,6 @@ kubectl create -f nginx.yaml
 kubectl delete -f nginx.yaml
 ```
 
-### Useful Tricks
-
-- For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
-
-```sh
-alias k='kubectl'
-
-source <(kubectl completion bash)
-complete -F __start_kubectl k
-```
-
 ### Namespaces
 
 - `Namespace`: is a high level wrapper for isolating different resources in kubernetes (similar to Linux namespaces)
@@ -577,4 +567,37 @@ kubectl get po -A
 # Get a specific pod manifest (in different formats)
 kubectl get po <pod> -n <namespace> -o yaml
 kubectl get po <pod> -n <namespace> -o json
+```
+
+### Logs & Port-Forwarding
+
+```sh
+# Check pod logs
+kubectl logs -n <namespace> <pod>
+
+# Editing pod
+kubectl po -n <namespace> <pod>
+# Some properties are immutable and you can not edit them (e.g. container-name)
+# After saving your changes, this pod will be restarted and your changes will apply!
+
+# Check a container's logs in a specific pod
+kubectl logs -n <namespace> <pod> -c <container>
+# -f -> follow flag in order to follow generated logs
+
+# Exposing your pod by port-forwarding
+kubectl port-forward -n <namespace> <pod> <server-port>:<pod-port>
+# Now your pod's internal port is accessible through server's port (from inside your server!)
+# You can quickly test your pod by port-forwarding and curl command
+# [C-c] will End your port-forwarding!
+```
+
+### Useful Tricks
+
+- For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
+
+```sh
+alias k='kubectl'
+
+source <(kubectl completion bash)
+complete -F __start_kubectl k
 ```
