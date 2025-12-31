@@ -18,6 +18,7 @@
     - [Cluster Setup (Production)](#cluster-setup-production)
     - [Namespaces](#namespaces)
     - [Logs \& Port-Forwarding](#logs--port-forwarding)
+    - [Labels](#labels)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -589,6 +590,67 @@ kubectl port-forward -n <namespace> <pod> <server-port>:<pod-port>
 # Now your pod's internal port is accessible through server's port (from inside your server!)
 # You can quickly test your pod by port-forwarding and curl command
 # [C-c] will End your port-forwarding!
+```
+
+### Labels
+
+- `Label` is a key-value pair used for **categorizing** your resources(e.g. pods, nodes) in the same namespace!
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+  labels: # define labels here (key: value)
+    app: nginx
+    rel: beta
+spec:
+  nodeSelector: # Filter for node selection on deployment
+    disk: ssd # label-key: label-value for filtering
+  containers:
+    - name: nginx-container
+      imagePullPolicy: Always
+      image: nginx:latest
+      ports:
+        - containerPort: 80
+          protocol: TCP
+```
+
+```sh
+# Apply your changes
+kubectl apply -f nginx.yaml
+
+# List pods + labels
+kubectl get po -n <namespace> --show-labels
+
+# List pods + nodes (and complementary data)
+kubectl get po -n <namespace> -o wide
+
+# List pods + showing specific label(s) value
+kubectl get po -n <namespace> -L <label-key>
+kubectl get po -n <namespace> -L <label-key>,<label-key2>
+
+# Filtering pods based on labels
+kubectl get po -n <namespace> -l <label-key>
+# pods without specified label will be excluded
+
+kubectl get po -n <namespace> -l '!<label-key>'
+# pods with specified label will be excluded
+
+# Filtering pods/nodes based on label and its value
+kubectl get po -n <namespace> -l <label-key>=<label-value>
+kubectl get nodes -l <label-key>=<label-value>
+
+# Filtering pods with combined label filters
+kubectl get po -n <namespace> -l '!<label-key>',<label-key>=<label-value>
+
+# Add label to pod
+kubectl label po -n <namespace> <pod> key=value --overwrite
+# If your label already exists you must use --overwrite flag (Caution: your previous label(s) will be overwritten!)
+# If you label is new, you don't need overwrite flag
+
+# Add label to node
+kubectl label nodes <node> key=value
 ```
 
 ### Useful Tricks
