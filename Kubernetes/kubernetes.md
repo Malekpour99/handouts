@@ -19,6 +19,7 @@
     - [Namespaces](#namespaces)
     - [Logs \& Port-Forwarding](#logs--port-forwarding)
     - [Labels](#labels)
+    - [Annotation](#annotation)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -558,6 +559,16 @@ kubectl get ns
 # Create namespace
 kubectl create ns <namespace>
 
+# Delete namespace
+kubectl delete ns <namespace>
+# Every corresponding resource of the desired namespace will be deleted!
+
+# Delete all pods inside a namespace
+kubectl delete po -n <namespace> --all
+
+# Delete all resources inside a namespace (almost all resource)
+kubectl delete all --all -n <namespace>
+
 # Getting pods by using namespace filtering
 kubectl get po --namespace <namespace>
 kubectl get po -n <namespace>
@@ -606,7 +617,7 @@ metadata:
     rel: beta
 spec:
   nodeSelector: # Filter for node selection on deployment
-    disk: ssd # label-key: label-value for filtering
+    disk: ssd # label-key: label-value for filtering nodes
   containers:
     - name: nginx-container
       imagePullPolicy: Always
@@ -651,6 +662,25 @@ kubectl label po -n <namespace> <pod> key=value --overwrite
 
 # Add label to node
 kubectl label nodes <node> key=value
+
+# Delete pods based on labels
+kubectl delete po -n <namespace>  -l <label-key>=<label-value>
+```
+
+### Annotation
+
+- `Annotation` is similar to label, but annotations are used for long-content key-value pairs.
+- Used for:
+  - Documenting project authors
+  - Using `Beta` release features based on annotations
+
+```sh
+# Add annotation to pod
+kubectl annotate po -n <namespace> key=value
+
+# Get detailed information about pod
+kubectl describe po -n <namespace> <pod>
+# 'Events' section is very useful for debugging pods when using describe command
 ```
 
 ### Useful Tricks
