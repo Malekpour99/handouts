@@ -20,6 +20,7 @@
     - [Logs \& Port-Forwarding](#logs--port-forwarding)
     - [Labels](#labels)
     - [Annotation](#annotation)
+    - [Liveness](#liveness)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -681,6 +682,54 @@ kubectl annotate po -n <namespace> key=value
 # Get detailed information about pod
 kubectl describe po -n <namespace> <pod>
 # 'Events' section is very useful for debugging pods when using describe command
+```
+
+### Liveness
+
+- Liveness is controlled by defining a health-check for your pod
+- Consider defining liveness criteria based on the rule of thumb that a restart can resolve your liveness issue
+- Types of liveness-probe:
+  - HTTP: Sending a GET request to an endpoint and check its response
+  - TCP: Establish a TCP connection to an address and check its connection
+  - Exe-C: Check Exit status of a command after execution
+- Best practices of health-check:
+  - Keep health-check process light, do not include heavy processing for health-checks
+  - Make health-check endpoint public, do not require authentication for health-check
+  - Do not rely on external components and infra-structures for health-check (restarting your pod won't resolve external components failure)
+  - Include some delay before restarting your pod
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-pod
+    app: nginx
+spec:
+  containers:
+    - name: nginx-container
+      imagePullPolicy: Always
+      image: nginx:latest
+      livenessProbe: # Defining liveness probe (immutable)
+        httpGet: # liveness probe type
+          path: / # where to call for health-check
+          port: 80
+        initialDelaySeconds: 15 # delay before restarting pod after liveness check failure
+      ports:
+        - containerPort: 80
+          protocol: TCP
+```
+
+```sh
+# watch for pods status change
+watch kubectl get po
+kubectl get po -w
+# -w: is the watch flag to follow status changes
+
+# check container events and health-check status
+kubectl describe po <pod>
+
+# when your pod restarts a new container is created; in order to check previous container logs, run
+kubectl logs <pod> --previous
 ```
 
 ### Useful Tricks
