@@ -21,6 +21,7 @@
     - [Labels](#labels)
     - [Annotation](#annotation)
     - [Liveness](#liveness)
+    - [Replication Management](#replication-management)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -730,6 +731,55 @@ kubectl describe po <pod>
 
 # when your pod restarts a new container is created; in order to check previous container logs, run
 kubectl logs <pod> --previous
+```
+
+### Replication Management
+
+- `Replica-Controller`: Manages pod fail-overs for high-availability by making sure there always a specified number of replicas are ready
+- A `Replica-Controller` consists of:
+
+  - `Pod Selector`: criteria for selecting certain pods to be managed by this replica-controller
+  - `Replicas`: Holds the number of replicas
+  - `Pod Template`: A sample template for replication of pods, holding pod's specifications
+
+- Now let's create a manifest for nginx replica controller, called `nginx-rc.yaml`:
+
+```yaml
+apiVersion: v1
+kind: ReplicationController
+metadata:
+  name: nginx-rc
+    app: nginx
+spec:
+  replicas: 2 # number of replicas
+  selector:
+    app: item # label criteria for selecting pods
+  template: # signature for replicating pods
+    metadata: # name will be created by replica-controller
+      labels:
+        app: item # must match the selector criteria
+      spec:
+        containers:
+        - name: nginx
+          image: nginx
+          ports:
+          - containerPort: 80
+```
+
+```sh
+# Create replica controller
+kubectl apply -f nginx-rc.yaml
+
+# List replica-controllers
+kubectl get rc
+# if you change a pod labels, replica controller won't notice until a restart happens!
+
+# Force deleting a pod
+kubectl delete po <pod> --force
+# This can be a bad-practice since it prevents graceful shutdown and resources might not get freed!
+
+# Delete replica controller
+kubectl delete rc <replica-controller>
 ```
 
 ### Useful Tricks
