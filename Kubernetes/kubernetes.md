@@ -735,8 +735,8 @@ kubectl logs <pod> --previous
 
 ### Replication Management
 
-- `Replica-Controller`: Manages pod fail-overs for high-availability by making sure there always a specified number of replicas are ready
-- A `Replica-Controller` consists of:
+- `Replica Controller`: Manages pod fail-overs for high-availability by making sure there always a specified number of replicas are ready
+- A `Replica Controller` consists of:
 
   - `Pod Selector`: criteria for selecting certain pods to be managed by this replica-controller
   - `Replicas`: Holds the number of replicas
@@ -780,6 +780,41 @@ kubectl delete po <pod> --force
 
 # Delete replica controller
 kubectl delete rc <replica-controller>
+```
+
+- `Replica Set` is a more modern replication controller which provides more options for replication management, like:
+  - Defining multiple labels for pod selection
+  - Defining expressions which provide more advanced filtering for pod selection
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+    app: nginx
+spec:
+  replicas: 2 # number of replicas
+  selector:
+    matchLabels: # you can define multiple labels
+      app: item
+  # ...
+```
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+    app: nginx
+spec:
+  replicas: 2 # number of replicas
+  selector:
+    matchExpressions: # Expressions provides more control on your selector criteria
+    - key: app
+      operator: In # you can use other operators like not-in, exist, etc.
+      values:
+        - item
+  # ...
 ```
 
 ### Useful Tricks
