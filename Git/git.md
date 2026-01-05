@@ -21,6 +21,7 @@
   - [Signing Commits and Tags](#signing-commits-and-tags)
   - [Blaming](#blaming)
   - [Bisect](#bisect)
+  - [Submodules](#submodules)
   - [Help](#help)
   - [Others](#others)
 
@@ -550,6 +551,60 @@ git bisect reset
 
 # Run a script to automate bisecting
 git bisect run <script>
+```
+
+## Submodules
+
+- A Git submodule refers to a Git repository that exists **within** another Git repository.
+- `.gitmodules` file is used to keep record of current directory submodules.
+- Git submodules provide a structured way of including external repositories in a project while retaining the benefits of having a repository maintained separately.
+
+```sh
+# Adding a submodule to current repository
+git submodule add <repo-url> [<path>]
+# path is optional, if you skip it, adding submodule is like cloning a repository in current directory
+# Do not use 'git clone' for adding submodules since clones of the outer repository (main repository) won't contain contents of embedded repository (submodule)!
+
+# Show submodule config
+cat .gitmodules
+
+# Cloning a repo with its submodules
+git clone --recurse-submodules <repo-url>
+
+# Initialize submodules in an existing repo
+git submodule init
+
+# Update and clone all submodules
+git submodule update
+
+# Do both init and update
+git submodule update --init
+
+# Recursively update (init/update nested too)
+git submodule update --init --recursive
+
+# Remove a submodule
+git submodule deinit <path-to-submodule>
+git rm <path-to-submodule>
+rm -rf .git/modules/<path-to-submodule>
+# Remove any remaining entries from '.gitmodules' & '.git/config' manually
+
+# Show status of submodules
+git submodule status
+
+# Show diff for submodules
+git diff --submodule
+
+# Sync submodules after changing URLs
+git submodule sync
+
+# Pull changes in a submodule
+cd <submodule>
+git pull
+
+# Change branch for a submodule 
+cd <submodule-dir>
+git checkout <branch>
 ```
 
 ## Help
