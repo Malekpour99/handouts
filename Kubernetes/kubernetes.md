@@ -735,7 +735,7 @@ kubectl logs <pod> --previous
 
 ### Replication Management
 
-- `Replica Controller`: Manages pod fail-overs for high-availability by making sure there always a specified number of replicas are ready
+- `Replica Controller`: Manages pod replication for high-availability by making sure there always a specified number of replicas are running simultaneously in cluster
 - A `Replica Controller` consists of:
 
   - `Pod Selector`: criteria for selecting certain pods to be managed by this replica-controller
@@ -782,9 +782,10 @@ kubectl delete po <pod> --force
 kubectl delete rc <replica-controller>
 ```
 
-- `Replica Set` is a more modern replication controller which provides more options for replication management, like:
+- `ReplicaSet` is a more modern replication controller which provides more options for replication management, like:
   - Defining multiple labels for pod selection
   - Defining expressions which provide more advanced filtering for pod selection
+- ReplicaSets focus on maintaining a defined number of pod replicas across the cluster. Their primary goal is to enhance availability and load balancing by ensuring multiple instances of an application run simultaneously.
 
 ```yaml
 apiVersion: apps/v1
@@ -817,6 +818,31 @@ spec:
   # ...
 ```
 
+- `DaemonSet` ensures that **one instance** of a specific pod runs on **all or selected nodes** in a cluster. This is ideal for tasks like logging, monitoring, or other node-specific services.
+- With DaemonSets, you can guarantee that critical services operate consistently across your entire infrastructure.
+
+```yaml
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nginx-ds
+    app: nginx
+spec:
+  selector:
+    matchLabels: # you can define multiple labels
+      app: item
+  template:
+    metadata:
+      labels:
+        app: item # must match the selector criteria
+      spec:
+        nodeSelector: # label criteria for selecting deployment nodes (if not mentioned all of the nodes are considered)
+          disk: ssd
+        containers:
+        - name: nginx
+          image: nginx
+```
+
 ### Useful Tricks
 
 - For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
@@ -826,4 +852,19 @@ alias k='kubectl'
 
 source <(kubectl completion bash)
 complete -F __start_kubectl k
+```
+
+- When debugging your `NOT READY` nodes:
+- First check for `kubelet` and `containerd` status:
+
+```sh
+# Check status
+systemctl status containerd.service
+systemctl status kubelet.service
+
+# If services were in inactive(dead)/FAILURE status, restart them
+systemctl restart containerd.service
+systemctl restart kubelet.service
+
+# Make sure to enable and activate your containerd and kubelet services to always keep them running!
 ```
