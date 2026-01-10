@@ -881,6 +881,43 @@ kubectl get po
 # Successful jobs have 'Completed' status!
 ```
 
+- `CronJob` creates a job at a specific time in order to fullfil a cron-job and then updates job-pod's status to Completed (freeing occupied resources)
+
+```yaml
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: hello
+spec:
+  # Minute(0-59) Hour(0-23) Day-of-the-month(1-31) Month(1-12) Day-of-the-week(0-6 / Sunday-Saturday / sun-sat)
+  schedule: "0 3 * * 1" # Runs every Monday at 3:00 A.M.
+  jobTemplate: # Template for creating a job
+    spec:
+      template: # Template for job's pod
+        spec:
+          containers:
+            - name: hello
+              image: busybox:1.28
+              imagePullPolicy: IfNotPresent
+              command:
+                - /bin/sh
+                - -c
+                - date; echo Hello from the kubernetes cluster
+          restartPolicy: OnFailure # to prevent jobs from restarting on completion do not use Always policy for restart!
+```
+
+```sh
+# Create replica controller
+kubectl apply -f cron-job.yaml
+
+# List running jobs
+kubectl get cronjobs.batch
+
+# Checking cron-job's pod status
+kubectl get po
+# Successful jobs have 'Completed' status!
+```
+
 ### Useful Tricks
 
 - For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
