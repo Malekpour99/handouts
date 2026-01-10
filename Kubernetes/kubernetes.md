@@ -843,6 +843,44 @@ spec:
           image: nginx
 ```
 
+- `Job` runs a specific pod in order to fullfil a job and then updates its status to Completed (freeing occupied resources)
+
+```yaml
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: hello
+spec:
+  completions: 5 # Total number of pods for running this job
+  parallelism: 2 # Total number of concurrent running pods for job execution
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: hello
+            image: busybox:1.28
+            imagePullPolicy: IfNotPresent
+            command:
+              - /bin/sh
+              - -c
+              - date; echo Hello from the kubernetes cluster
+        restartPolicy: OnFailure # to prevent jobs from restarting on completion do not use Always policy for restart!
+```
+
+```sh
+# Create replica controller
+kubectl apply -f job.yaml
+
+# List running jobs
+kubectl get jobs.batch
+
+# Checking job's pod status
+kubectl get po
+# Successful jobs have 'Completed' status!
+```
+
 ### Useful Tricks
 
 - For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
