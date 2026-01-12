@@ -22,7 +22,13 @@
     - [Annotation](#annotation)
     - [Liveness](#liveness)
     - [Replication Management](#replication-management)
+      - [Replication Controller](#replication-controller)
+      - [ReplicaSet](#replicaset)
+      - [DaemonSet](#daemonset)
+      - [Job](#job)
+      - [CronJob](#cronjob)
     - [Services](#services)
+      - [Attaching Services \& Endpoints](#attaching-services--endpoints)
     - [DNS Service](#dns-service)
     - [Useful Tricks](#useful-tricks)
 
@@ -737,6 +743,8 @@ kubectl logs <pod> --previous
 
 ### Replication Management
 
+#### Replication Controller
+
 - `Replica Controller`: Manages pod replication for high-availability by making sure there always a specified number of replicas are running simultaneously in cluster
 - A `Replica Controller` consists of:
 
@@ -784,6 +792,8 @@ kubectl delete po <pod> --force
 kubectl delete rc <replica-controller>
 ```
 
+#### ReplicaSet
+
 - `ReplicaSet` is a more modern replication controller which provides more options for replication management, like:
   - Defining multiple labels for pod selection
   - Defining expressions which provide more advanced filtering for pod selection
@@ -820,6 +830,8 @@ spec:
   # ...
 ```
 
+#### DaemonSet
+
 - `DaemonSet` ensures that **one instance** of a specific pod runs on **all or selected nodes** in a cluster. This is ideal for tasks like logging, monitoring, or other node-specific services.
 - With DaemonSets, you can guarantee that critical services operate consistently across your entire infrastructure.
 
@@ -844,6 +856,8 @@ spec:
         - name: nginx
           image: nginx
 ```
+
+#### Job
 
 - `Job` runs a specific pod in order to fullfil a job and then updates its status to Completed (freeing occupied resources)
 
@@ -882,6 +896,8 @@ kubectl get jobs.batch
 kubectl get po
 # Successful jobs have 'Completed' status!
 ```
+
+#### CronJob
 
 - `CronJob` creates a job at a specific time in order to fullfil a cron-job and then updates job-pod's status to Completed (freeing occupied resources)
 
@@ -1029,6 +1045,8 @@ kubectl exec -it <pod> -- curl <service-name>.<service-namespace>:<service-port>
 kubectl delete -f nginx-test.yaml (--force)
 # You might need to use --force flag since this pod's command never finishes for graceful shutdown!
 ```
+
+#### Attaching Services & Endpoints
 
 - You can also check for available endpoints in your desired namespace:
 
