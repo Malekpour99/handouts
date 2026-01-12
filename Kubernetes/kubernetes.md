@@ -949,6 +949,9 @@ spec:
             image: nginx
             ports:
               - containerPort: 80
+                name: http # defining named-port
+              - containerPort: 443
+                name: https
 ```
 
 ```yaml
@@ -960,9 +963,13 @@ metadata:
 spec:
   # Session Affinity enables routing each client requests to the same pod every-time! (Default: None)
   sessionAffinity: ClientIP # Using client-IP for sticky session
-  ports: # You can define multiple ports, but then you must define 'name' property for each port as well!
+  ports:
     - port: 8080 # Service's port for client to interact with service
       targetPort: 80 # Pod's port which will be used by service for interacting with them
+      name: http8080
+    - port: 8085
+      targetPort: https # Pod's named-port which will be used by service for interacting with them (best practice)
+      name: https8085
   selector: # defining label criteria for pod discovery
     app: item
 ```
@@ -1007,6 +1014,7 @@ kubectl apply -f nginx-test.yaml
 kubectl exec -it -n <namespace> <pod> -- sh
 kubectl exec -it -n <namespace> <pod> -- /bin/sh
 # curl <service-IP/name>:<service-port>
+# You can check for available service names which will be resolved by kubernetes-DNS in '/etc/resolv.conf'!
 
 # call your service directly from pod's shell
 kubectl exec -it -n <namespace> <pod> -- curl <service-IP>:<service-port> -v
@@ -1014,7 +1022,7 @@ kubectl exec -it -n <namespace> <pod> -- curl <service-name>:<service-port>
 
 # if your test/debug pod was not in the same namespace, you can still call your desired service like this
 kubectl exec -it <pod> -- curl <service-name>.<service-namespace>:<service-port>
-# only works if access to your desired namespace is not limited! 
+# only works if access to your desired namespace is not limited!
 
 # removing test/debug pod
 kubectl delete -f nginx-test.yaml (--force)
