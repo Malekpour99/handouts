@@ -23,6 +23,7 @@
     - [Liveness](#liveness)
     - [Replication Management](#replication-management)
     - [Services](#services)
+    - [DNS Service](#dns-service)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1024,11 +1025,54 @@ kubectl exec -it -n <namespace> <pod> -- curl <service-name>:<service-port>
 kubectl exec -it <pod> -- curl <service-name>.<service-namespace>:<service-port>
 # only works if access to your desired namespace is not limited!
 
-# removing test/debug pod
+# Removing test/debug pod
 kubectl delete -f nginx-test.yaml (--force)
 # You might need to use --force flag since this pod's command never finishes for graceful shutdown!
 ```
 
+- You can also check for available endpoints in your desired namespace:
+
+```sh
+# List endpoint resources
+kubectl get endpoints -n <namespace>
+```
+
+- You can also create a service and connect it to external endpoints:
+
+```yaml
+# external-service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: external-service # service's name must match endpoint's name to be attached to it!
+  namespace: external
+spec:
+  type: ExternalName # Defining a name record for this service attached endpoints (optional)
+  externalName: api.company.org
+  ports:
+    - port: 80
+```
+
+```yaml
+# external-endpoints.yaml
+apiVersion: v1
+kind: Endpoints # endpoint's name must match service's name to be attached to it!
+metadata:
+  name: external-service
+  namespace: external
+subsets:
+  - addressees:
+      - ip: 192.168.230.129
+      - ip: 192.168.230.132
+    ports:
+      - port: 80
+```
+
+```sh
+# Creating attached service and endpoint
+kubectl create -f external-endpoints.yaml
+kubectl create -f external-service.yaml
+```
 ### Useful Tricks
 
 - For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
