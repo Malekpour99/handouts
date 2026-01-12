@@ -1073,6 +1073,22 @@ subsets:
 kubectl create -f external-endpoints.yaml
 kubectl create -f external-service.yaml
 ```
+
+### DNS Service
+
+```sh
+# List all available service
+kubectl get svc -A
+# 'kube-dns' service in 'kube-system' namespace is your kubernetes DNS server for resolving names and addresses!
+
+# If you have multiple networks or DNS servers where your kubernetes cluster is deployed, you must register them in its DNS service:
+kubectl get cm -n kube-system
+# Register other networks and DNS services in 'coredns' config!
+
+# Check coredns manifest
+kubectl get cm -n kube-system coredns -o yaml
+```
+
 ### Useful Tricks
 
 - For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
