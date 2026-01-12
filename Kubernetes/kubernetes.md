@@ -22,6 +22,7 @@
     - [Annotation](#annotation)
     - [Liveness](#liveness)
     - [Replication Management](#replication-management)
+    - [Services](#services)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -916,6 +917,108 @@ kubectl get cronjobs.batch
 # Checking cron-job's pod status
 kubectl get po
 # Successful jobs have 'Completed' status!
+```
+
+### Services
+
+- `Service` resource is a wrapper around pods which can act like reverse-proxy and load-balancer
+- Service enables clients from outside the kubernetes OS host and network to interact with pods
+- Now lets connect replicas to a service:
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 3
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            ports:
+              - containerPort: 80
+```
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-srv
+  namespace: nginx-ns # must match with the pods' namespace
+spec:
+  # Session Affinity enables routing each client requests to the same pod every-time! (Default: None)
+  sessionAffinity: ClientIP # Using client-IP for sticky session
+  ports: # You can define multiple ports, but then you must define 'name' property for each port as well!
+    - port: 8080 # Service's port for client to interact with service
+      targetPort: 80 # Pod's port which will be used by service for interacting with them
+  selector: # defining label criteria for pod discovery
+    app: item
+```
+
+```sh
+# Order of applying replication and services manifest does not matter!
+kubectl apply -f nginx-rs.yaml
+kubectl apply -f nginx-srv.yaml
+
+# Check for pod's IP
+kubectl describe po <pod> -n <namespace>
+kubectl get po -n <namespace> -o wide
+
+# list services
+kubectl get svc -n <namespace>
+
+# Check service details
+kubectl describe svc -n <namespace> <service>
+# If you do not expose/proxy your service, you can call it internally from its OS for debugging!
+```
+
+- Debug services internally (you can use images like `curlimages/curl`):
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+  namespace: nginx-ns
+spec:
+  containers:
+    - name: test
+      image: curlimages/curl
+      command: "/bin/sh", "ec", "while :; do echo '.'; sleep 5 ; done" # entrypoint command to keep the pod running
+```
+
+```sh
+# run test/debug pod
+kubectl apply -f nginx-test.yaml
+
+# connect to pod for calling/testing services interactively
+kubectl exec -it -n <namespace> <pod> -- sh
+kubectl exec -it -n <namespace> <pod> -- /bin/sh
+# curl <service-IP/name>:<service-port>
+
+# call your service directly from pod's shell
+kubectl exec -it -n <namespace> <pod> -- curl <service-IP>:<service-port> -v
+kubectl exec -it -n <namespace> <pod> -- curl <service-name>:<service-port>
+
+# if your test/debug pod was not in the same namespace, you can still call your desired service like this
+kubectl exec -it <pod> -- curl <service-name>.<service-namespace>:<service-port>
+# only works if access to your desired namespace is not limited! 
+
+# removing test/debug pod
+kubectl delete -f nginx-test.yaml (--force)
+# You might need to use --force flag since this pod's command never finishes for graceful shutdown!
 ```
 
 ### Useful Tricks
