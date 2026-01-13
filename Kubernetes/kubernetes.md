@@ -29,6 +29,10 @@
       - [CronJob](#cronjob)
     - [Services](#services)
       - [Attaching Services \& Endpoints](#attaching-services--endpoints)
+      - [Exposing Services](#exposing-services)
+        - [NodePort Services](#nodeport-services)
+        - [LoadBalancer Services](#loadbalancer-services)
+        - [Ingress Services](#ingress-services)
     - [DNS Service](#dns-service)
     - [Useful Tricks](#useful-tricks)
 
@@ -1091,6 +1095,87 @@ subsets:
 kubectl create -f external-endpoints.yaml
 kubectl create -f external-service.yaml
 ```
+
+#### Exposing Services
+
+- Services which are exposed has 3 types:
+  - `NodePort` Services
+  - `LoadBalancer` Services
+  - `Ingress` Services
+
+##### NodePort Services
+
+- `NodePort` services are the most used and useful type for exposing services
+- The best practice would be to place a **load-balancer** before requests can reach the exposed NodePort service, and received requests are load-balanced to the available nodes which are exposed by the NodePort service!
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-np
+  namespace: nginx-ns
+spec:
+  type: NodePort
+  ports:
+    - port: 8000
+      targetPort: http
+  selector:
+    app: item
+```
+
+```sh
+# Create NodePort service
+kubectl create -f nginx-svc-np.yaml
+
+# List namespace services
+kubectl get svc -n <namespace>
+# NodePort Service's port is bound to an external port which can be accessed from outside!
+# Now all of the requests are routed to the desired service whether received by worker nodes or mater nodes!
+```
+
+##### LoadBalancer Services
+
+- `LoadBalancer` service acts as a load-balancer for received requests (if you use a good load-balancer, you won't really need this type of services!)
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-lb
+  namespace: nginx-ns
+spec:
+  type: LoadBalancer
+  ports:
+    - port: 8000
+      targetPort: http
+  selector:
+    app: item
+```
+
+```sh
+# Create LoadBalancer service
+kubectl create -f nginx-svc-np.yaml
+
+# List namespace services
+kubectl get svc -n <namespace>
+# LoadBalancer service is now PENDING, cause it requires an external-IP in order to be accessed!
+# LoadBalancer services have a NodePort service in their underlying layers which is used for routing their traffic to exposed nodes!
+
+# Some load-balancers (e.g. Metal-LB) are compatible with kubernetes internal network to be exposed but
+# they are not very useful, since they are not production ready or stable!
+
+# Metal-LB only works with BGP configuration which is another overhead for network configuration of your nodes, so
+# it really doesn't worth the headache to use these type of services for production/deployment!
+# Now if BGP is not configured, all of the received requests are routed to a single node and then they will
+# load-balance between your nodes which creates a bottle-neck in your network and considered a bad-practice!
+```
+
+##### Ingress Services
+
+- `Ingress` is like a gateway which provides options like security (e.g. `TLS`) and routing to desired services' pods (based on the `URL` path).
+- Ingress services are the least useful type for exposing services (but widely used in Iran)
+- Ingress is not very useful since in its underlying layer it has a load-balancer where are the traffic are routed there and then load-balanced between nodes which creates a bottle-neck and considered as a bad-practice!
+- Ingress will probably gets deprecated and replaced by the `Gateway` resource which is already available in kubernetes (`Gateway` is not yet fully stable, but if you want to use it, it's better to use service-meshes like `XTO` or `LinkerD`)
 
 ### DNS Service
 
