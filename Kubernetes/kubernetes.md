@@ -1177,6 +1177,47 @@ kubectl get svc -n <namespace>
 - Ingress is not very useful since in its underlying layer it has a load-balancer where are the traffic are routed there and then load-balanced between nodes which creates a bottle-neck and considered as a bad-practice!
 - Ingress will probably gets deprecated and replaced by the `Gateway` resource which is already available in kubernetes (`Gateway` is not yet fully stable, but if you want to use it, it's better to use service-meshes like `XTO` or `LinkerD`)
 
+```yaml
+# minimal-ingress.yaml
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: minimal-ingress
+  namespace: nginx-ns
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  ingressClassName: nginx-example # Connects ingress service to its corresponding ingress-controller (e.g. nginx, HA-proxy, etc.)
+  rules:
+    - http:
+        paths:
+          - path: /test
+            pathType: Prefix # This path requests must start with 'test' prefix
+            backend:
+              service:
+                name: nginx-np # nginx NodePort service
+                port:
+                  number: 8000
+```
+
+```sh
+# Run ingress service
+kubectl apply -f minimal-ingress.yaml
+
+# List ingress services
+kubectl get ingress -n <namespace>
+# Now you can not call your ingress service since it is not bound to any address!
+# In order to access your ingress service, install an ingress-controller like: Nginx Ingress Controller (HINT: use install with manifest)
+
+# List ingress controllers
+kubectl get ingressClasses.networking.k8s.io
+# Now you need to update ingressClassName in your ingress service manifest based on your running ingress controller
+# It's recommended to create your ingress controller before your ingress service in order to prevent editing and configuration overheads!!
+
+# For further study you can check ingress-controller 'cafe' project example.
+# Again since your ingress doesn't have an 'External-IP'; it can not be called from outside the client; you require some services like AWS, Azure or MetalLB in order to dedicate an external-IP to your ingress service!
+```
+
 ### DNS Service
 
 ```sh
