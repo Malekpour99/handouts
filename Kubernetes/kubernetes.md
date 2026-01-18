@@ -34,6 +34,7 @@
         - [NodePort Services](#nodeport-services)
         - [LoadBalancer Services](#loadbalancer-services)
         - [Ingress Services](#ingress-services)
+      - [Headless Services](#headless-services)
     - [DNS Service](#dns-service)
     - [Useful Tricks](#useful-tricks)
 
@@ -1140,7 +1141,7 @@ kubectl create -f external-service.yaml
 ##### NodePort Services
 
 - `NodePort` services are the most used and useful type for exposing services
-- The best practice would be to place a **load-balancer** before requests can reach the exposed NodePort service, and received requests are load-balanced to the available nodes which are exposed by the NodePort service!
+- The best practice would be to place an external **load-balancer** (e.g. `HA-Proxy`, `Nginx` or `F5` for large companies) before requests can reach the exposed NodePort service, and received requests are load-balanced to the available nodes which are exposed by the NodePort service!
 
 ```yaml
 apiVersion: v1
@@ -1250,6 +1251,40 @@ kubectl get ingressClasses.networking.k8s.io
 
 # For further study you can check ingress-controller 'cafe' project example.
 # Again since your ingress doesn't have an 'External-IP'; it can not be called from outside the client; you require some services like AWS, Azure or MetalLB in order to dedicate an external-IP to your ingress service!
+```
+
+#### Headless Services
+
+- In order to route your traffic to all of your available pods you should use a `headless` service which doesn't get an IP address which means your service is not bound to any specific node and connects to all of available endpoints corresponding to your nodes and namespace.
+- By using a `headless` service, incoming requests are **directly** load-balanced between your nodes, instead of passing through a intermediatory `service proxy` first.
+- By default, a headless service uses `round-robin` pattern for load-balancing incoming requests.
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-headless
+  namespace: nginx-ns
+spec:
+  clusterIP: None # Makes your service headless
+  ports:
+    - port: 8000
+      targetPort: http
+  selector:
+    app: item
+```
+
+```sh
+# Creating a headless service
+kubectl apply -f nginx-headless.yaml
+
+# Running a DNS utility pod without a manifest (with a infinite loop command)
+kubectl run dnsutils -n <namespace> --image=tutum/dnsutils --command -- sleep infinity
+# Now you can use this pod to run DNS lookup commands
+
+# Running a DNS lookup command on your headless service
+kubectl exec dnsutils -n <namespace> -- nslookup nginx-headless
+# As a result you should see all of the available pods based on your service selector criteria!
 ```
 
 ### DNS Service
