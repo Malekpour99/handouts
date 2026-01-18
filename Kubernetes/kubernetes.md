@@ -21,6 +21,7 @@
     - [Labels](#labels)
     - [Annotation](#annotation)
     - [Liveness](#liveness)
+    - [Readiness](#readiness)
     - [Replication Management](#replication-management)
       - [Replication Controller](#replication-controller)
       - [ReplicaSet](#replicaset)
@@ -745,6 +746,11 @@ kubectl describe po <pod>
 kubectl logs <pod> --previous
 ```
 
+### Readiness
+
+- In production environments, a running service should only add a pod to its selected pods when its ready; for this matter readiness is used in order to determine a pod is ready to be used or not (since application startup might take some time).
+- Best practice: define both `liveness` and `readiness` for your pods.
+
 ### Replication Management
 
 #### Replication Controller
@@ -814,7 +820,24 @@ spec:
   selector:
     matchLabels: # you can define multiple labels
       app: item
-  # ...
+  template: # signature for replicating pods
+    metadata: # name will be created by ReplicaSet
+      labels:
+        app: item # must match the selector criteria
+      spec:
+        containers:
+        - name: nginx
+          image: nginx
+          readinessProbe: # Defining readiness probe
+            exec: # readiness probe type
+              command:  # commands to be executed for checking readiness
+              - ls
+              - /var/ready # you can manually create this folder in your pods to make them ready!
+          ports:
+          - containerPort: 80
+            name: http
+          - containerPort: 443
+            name: https
 ```
 
 ```yaml
@@ -832,6 +855,17 @@ spec:
       values:
         - item
   # ...
+```
+
+```sh
+# Creating ReplicaSet
+kubectl apply -f nginx-rs.yaml
+
+# Creating readiness sample directory for pods in order to make them ready
+kubectl exec -it -n <namespace> <pod> -- touch /var/ready
+
+# Check your pods' status
+kubectl get po -n <namespace>
 ```
 
 #### DaemonSet
