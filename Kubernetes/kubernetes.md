@@ -36,6 +36,10 @@
         - [Ingress Services](#ingress-services)
       - [Headless Services](#headless-services)
     - [DNS Service](#dns-service)
+    - [Volume](#volume)
+      - [`EmptyDir` Volume](#emptydir-volume)
+      - [`HostPath` Volume](#hostpath-volume)
+      - [`NFS` Volume](#nfs-volume)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1301,6 +1305,76 @@ kubectl get cm -n kube-system
 # Check coredns manifest
 kubectl get cm -n kube-system coredns -o yaml
 ```
+
+### Volume
+
+- `Volumes` are used for persisting pod's data <!-- todo: add official link to kubernetes volumes documentation -->
+- Different types of volumes are available, which one to chose is dependent on your requirements
+- Volumes can be shared between pods.
+- Similar to ingress controllers you can also use external tools like `CEPH` which acts as a storage provisioning tool and manages your volumes. (Recommended for large scale companies)
+
+#### `EmptyDir` Volume
+
+- A simple temporary directory for storing pod's data which is transient and it's status depends on pod's lifecycle and ends with it.
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            volumeMounts: # Mounting a volume to a defined path
+              - name: html
+                mountPath: /usr/share/nginx/html
+                readOnly: true
+            ports:
+              - containerPort: 80
+                name: http
+              - containerPort: 443
+                name: https
+        volumes: # defining an empty-directory volume
+          - name: html
+            emptyDir: {}
+            # emptyDir: # Storing empty directory data on pod's memory instead of disk!
+            #   medium: Memory
+```
+
+```sh
+# Creating ReplicaSet with mounted volume
+kubectl apply -f nginx-rs.yaml
+
+# Checking mounted volumes
+kubectl describe <pod> -n <namespace>
+# you should see something like '/usr/share/nginx/html from html (ro)' in Mounts section!
+# Mount structure: <mount path> from <volume> (mode -e.g. read-only)
+
+# Attaching to a specific container's shell in your pod replica-set
+kubectl exec -it -n <namespace> <pod> -c <container> -- sh
+```
+
+#### `HostPath` Volume
+
+- Directly attaching a host's directory to your pod.
+
+#### `NFS` Volume
+
+- Network File Systems which are shared in the available network.
 
 ### Useful Tricks
 
