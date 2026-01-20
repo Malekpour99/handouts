@@ -40,6 +40,8 @@
       - [`EmptyDir` Volume](#emptydir-volume)
       - [`HostPath` Volume](#hostpath-volume)
       - [`NFS` Volume](#nfs-volume)
+      - [Dynamic Provisioning](#dynamic-provisioning)
+        - [`LongHorn`](#longhorn)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1371,10 +1373,42 @@ kubectl exec -it -n <namespace> <pod> -c <container> -- sh
 #### `HostPath` Volume
 
 - Directly attaching a host's directory to your pod.
+- This type of volume is **not recommended** due to security considerations (Pods should be isolated and do not have any access to their host!).
+- Unlike `EmptyDir` volumes, `HostPath` volume is persistent.
 
 #### `NFS` Volume
 
-- Network File Systems which are shared in the available network.
+- Network File Systems are shared in the available network.
+
+#### Dynamic Provisioning
+
+- Dynamic Provisioners are used for **persisting data**, **creating back-ups** and **replicating data**.
+- Dynamic Provisioners interact with **`Storage` classes** for managing `Persistent Volume - PV` and `Persistent Volume Claim - PVC` through `Container Storage Interface - CSI Driver`.
+- A Dynamic Provisioner interacts with `storage class` in order to create its required `Persistent Volume`; then `Persistent Volume` is created by `CSI Driver` and any pod can request for a specific claim based on its required storage space (e.g. `1GB`) which is defined as a `Persistent Volume Claim` and gets attached to the pod. This storage is provided from the available `Persistent Volume`.
+- `PV`s can be access from different name-spaces but `PVC`s are bound to the namespace where they are defined.
+- `ACCESS MODES` -> Different type of **access-modes** are available for accessing `PVC`s:
+  - `ReadWriteOnce`: only one node can read and write on the volume
+  - `ReadWriteMany`: many nodes can read and write on the volume
+  - `ReadOnlyMany`: many nodes can only read from the volume
+- Depending on your storage provisioner supported access-modes you can manage node's access to volumes.
+- `RECLAIM POLICY` determines what happens to `Persistent Volume` when its corresponding `PVC` gets deleted, different policies are:
+  - `DELETE`: `PV` gets deleted when its corresponding `PVC` is deleted.
+  - `RECYCLE`: only `PV` data gets deleted when its corresponding `PVC` is deleted, `PV` will be still available to be used. (deprecated!)
+  - `RETAIN`: `PV` data is preserved when its corresponding `PVC` is deleted; an admin intervention is required for handling retained data. (best practice for sensitive data)
+- As a best practice it's recommended to use dynamic provisioners; `LongHorn` for small to almost big sized projects, `Ceph` for enterprise level projects.
+
+##### `LongHorn`
+
+- `LongHorn` is a robust cloud-native storage provisioning tool. <!-- todo: attach its official installation link using kubectl -->
+- You can read its documentation and fine its best practices for managing your desired volumes.
+
+```sh
+# list persistent volumes
+kubectl get pv
+
+# list persistent volume claims
+kubectl get pvc
+```
 
 ### Useful Tricks
 
