@@ -44,6 +44,7 @@
         - [`LongHorn`](#longhorn)
     - [Environment Variables](#environment-variables)
     - [Command](#command)
+    - [ConfigMap](#configmap)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1479,6 +1480,72 @@ spec:
             image: nginx
             command: ["echo"] # Entrypoint (command) of pod
             args: ["hello"] # Arguments which are passed to the Entrypoint (like CMD in Docker)
+            ports:
+              - containerPort: 80
+                name: http
+```
+
+### ConfigMap
+
+- `ConfigMap` is like a storage which is used for management of pod's configuration
+
+```sh
+# Creating config-map
+# Directly defining key-value pairs using 'literal'; you can also pass multiple literals
+kubectl create configmap <config-name> --from-literal=port=8888
+# Defining key-value pairs using 'file'
+kubectl create configmap <config-name> --from-file=nginx.conf
+kubectl create configmap <config-name> --from-file=./ # using all files from current directory
+# You can also combine 'literal' and 'file' commands.
+# By using namespace flag (-n), configmaps can be defined in your desired namespace.
+
+# List config-maps
+kubectl get cm
+
+# Check config-map details (YAML format)
+kubectl get cm <config-name> -o yaml
+
+# Check config-map details
+kubectl describe cm <config-name>
+
+# Delete config-map
+kubectl delete cm <config-name>
+```
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            # Defining pod's environment variables based on config-map values
+            env:
+              - name: port
+                valueFrom:
+                  configMapKeyRef:
+                    name: nginx-conf
+                    key: port
+            # Defining pod's environment variables from config-map
+            envFrom:
+              - prefix: CONFIG_ # Prefix which will be added before any variable's name
+                configMapRef:
+                  name: nginx-conf
             ports:
               - containerPort: 80
                 name: http
