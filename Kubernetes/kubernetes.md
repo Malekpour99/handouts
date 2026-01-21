@@ -45,6 +45,7 @@
     - [Environment Variables](#environment-variables)
     - [Command](#command)
     - [ConfigMap](#configmap)
+      - [Sample](#sample)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1487,7 +1488,9 @@ spec:
 
 ### ConfigMap
 
-- `ConfigMap` is like a storage which is used for management of pod's configuration
+- `ConfigMap` is like a volume storage which is used for management of pod's configuration
+- Unlike `Volume`, one of the benefits of using a `ConfigMap` is **applying live updates** without restarting your containers.
+- In order to make your app fully cloud-native, consider enabling a **config reloading** mechanism to apply configuration updates!
 
 ```sh
 # Creating config-map
@@ -1549,6 +1552,74 @@ spec:
             ports:
               - containerPort: 80
                 name: http
+```
+
+#### Sample
+
+- Creating a config-map from an nginx configuration file and attaching it as volume to pod:
+
+```conf
+server {
+  listen           8888;
+  server_name      www.example.com;
+  gzip on;
+  gzip_types text/plain application/xml;
+  location / {
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+  }
+}
+```
+
+```sh
+# Creating a config-map from nginx configuration
+kubectl create configmap nginx-config -n <namespace> --from-file=nginx-config.conf
+```
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            volumeMounts: # CAUTION: Mounting volume to a path will make previous contents hidden and inaccessible!
+              - name: config
+                mountPath: /etc/nginx/conf.d
+                readOnly: true
+            volumeMounts: # Prevent making other files inaccessible when mounting to a path
+              - name: config
+                mountPath: /etc/nginx/conf.d/nginx-config.conf
+                subPath: nginx-config.conf
+                readOnly: true
+                defaultMode: "6600" # configuring file permissions
+            ports:
+              - containerPort: 80
+                name: http
+        volumes:
+          - name: config
+            configMap:
+              name: nginx-config
+```
+
+```sh
+# Live reloading config-map updates (in case of changes)
+kubectl exec -it -n <namespace> <pod> -- nginx -s reload
 ```
 
 ### Useful Tricks
