@@ -42,6 +42,7 @@
       - [`NFS` Volume](#nfs-volume)
       - [Dynamic Provisioning](#dynamic-provisioning)
         - [`LongHorn`](#longhorn)
+    - [Environment Variables](#environment-variables)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1408,6 +1409,45 @@ kubectl get pv
 
 # list persistent volume claims
 kubectl get pvc
+```
+
+### Environment Variables
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            env: # Defining pod's environment variables
+              - name: test
+                value: "hi"
+              - name: test2
+                value: "$(test), bye"
+            ports:
+              - containerPort: 80
+                name: http
+```
+
+```sh
+# Checking pod's environment variables
+kubectl exec -it -n <namespace> <pod> -- env
 ```
 
 ### Useful Tricks
