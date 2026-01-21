@@ -43,6 +43,7 @@
       - [Dynamic Provisioning](#dynamic-provisioning)
         - [`LongHorn`](#longhorn)
     - [Environment Variables](#environment-variables)
+    - [Command](#command)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1448,6 +1449,39 @@ spec:
 ```sh
 # Checking pod's environment variables
 kubectl exec -it -n <namespace> <pod> -- env
+```
+
+### Command
+
+- Used for defining/overwriting pod's Entrypoint executable command/path and its corresponding arguments (Immutable).
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            command: ["echo"] # Entrypoint (command) of pod
+            args: ["hello"] # Arguments which are passed to the Entrypoint (like CMD in Docker)
+            ports:
+              - containerPort: 80
+                name: http
 ```
 
 ### Useful Tricks
