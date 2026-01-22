@@ -45,7 +45,9 @@
     - [Environment Variables](#environment-variables)
     - [Command](#command)
     - [ConfigMap](#configmap)
-      - [Sample](#sample)
+      - [ConfigMap Sample](#configmap-sample)
+    - [Secret](#secret)
+      - [Secret Sample](#secret-sample)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1554,7 +1556,7 @@ spec:
                 name: http
 ```
 
-#### Sample
+#### ConfigMap Sample
 
 - Creating a config-map from an nginx configuration file and attaching it as volume to pod:
 
@@ -1620,6 +1622,149 @@ spec:
 ```sh
 # Live reloading config-map updates (in case of changes)
 kubectl exec -it -n <namespace> <pod> -- nginx -s reload
+```
+
+### Secret
+
+- `Secret` is a **base-64** encoded config-map which stores values in binary format (for more security).
+
+```sh
+# Generating SSL certificate
+openssl genrsa -out https.key 2048
+# Generating SSL key
+openssl req -new -x509 -key https.key -out https.cert -days 3650 -subj /CN=www.example.com
+
+# Creating secret from SSL certificate and key
+kubectl create secret generic <secret-name> --from-file=https.key --from-file=https.cert -n <namespace>
+# generic: secret type used for general purposes
+
+# List secrets
+kubectl get secrets -n <namespace>
+# List secrets (YAML format)
+kubectl get secrets -n <namespace> <secret-name> -o yaml
+# Secret variables' value are encoded in base64
+
+# Check secret details
+kubectl describe secret <secret-name> -n <namespace>
+```
+
+#### Secret Sample
+
+- Now let's use secrets in the config-map sample:
+
+```conf
+server {
+  listen               80;
+  listen               443;
+  server_name          www.example.com;
+  ssl_certificate      certs/https.cert;
+  ssl_certificate_key  certs/https.key;
+  ssl_protocols        TLSv1 TLSv1.1 TLSv1.2;
+  ssl_ciphers          HIGH:!aNULL:!MD5;
+  location / {
+    root   /usr/share/nginx/html;
+    index  index.html index.htm;
+  }
+}
+```
+
+```sh
+# Creating a config-map from nginx configuration
+kubectl create configmap nginx-config -n <namespace> --from-file=nginx-config.conf
+```
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            volumeMounts:
+              - name: config
+                mountPath: /etc/nginx/conf.d
+                readOnly: true
+              - name: certs # mounting certificate secrets
+                mountPath: /etc/nginx/certs/
+                readOnly: true
+            ports:
+              - containerPort: 80
+                name: http
+        volumes:
+          - name: config
+            configMap:
+              name: nginx-config
+          - name: certs # Secret volumes are mounted as 'tmpfs' which are stored in pod's memory; to prevent attackers to access secret files from disk
+            secret:
+              secretName: nginx-https
+```
+
+- There is also another useful type of secrets which are docker-registry image pull secrets:
+
+```sh
+# Creating a docker registry secret
+kubectl create secret docker-registry <secret-name> --docker-username=username --docker-password=password --docker-email=user@mail.com
+# docker-registry: secret type used for pushing/pulling images
+```
+
+- Now you need to include this secret for pulling your images from your registry
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        imagePullSecrets: # This secret is used for pulling images from your secured registry
+          - name: dockerhub-secret
+        containers:
+          - name: nginx
+            image: nginx
+            volumeMounts:
+              - name: config
+                mountPath: /etc/nginx/conf.d
+                readOnly: true
+              - name: certs
+                mountPath: /etc/nginx/certs/
+                readOnly: true
+            ports:
+              - containerPort: 80
+                name: http
+        volumes:
+          - name: config
+            configMap:
+              name: nginx-config
+          - name: certs
+            secret:
+              secretName: nginx-https
 ```
 
 ### Useful Tricks
