@@ -49,6 +49,7 @@
     - [Secret](#secret)
       - [Secret Sample](#secret-sample)
     - [MetaData](#metadata)
+      - [Kubernetes REST-API](#kubernetes-rest-api)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1836,6 +1837,55 @@ spec:
             ports:
               - containerPort: 80
                 name: http
+```
+
+#### Kubernetes REST-API
+
+- You can access kubernetes meta-data and many more information through its REST API service.
+
+```sh
+# General cluster info
+kubectl cluster-info
+# by adding 'dump' parameter more detailed information will be provided
+
+# curling kubernetes control plane
+curl <control-plane-IP> -k
+# you should receive forbidden response (403), but there is a way to access control plane by using proxy service
+
+# Exposing control-plane on localhost by proxy service
+kubectl proxy
+# Now your control plane will be exposed on one of your local host ports
+
+# Curl exposed kubernetes control plane
+curl localhost:<exposed-port>
+
+# Check cluster jobs
+curl localhost:<exposed-port>/apis/batch/v1/jobs
+
+# Check cluster replica-sets
+curl localhost:<exposed-port>/apis/batch/v1/replicasets
+
+# Calling kubernetes control-plane from another pod
+env
+# look for KUBERNETES_SERVICE_HOST IP address or you can see its name through 'kubectl get svc' command
+
+# Curl control plane
+curl https://kubernetes.default
+curl https://<control-plane-IP>:443
+# curl will fail since you need SSL certificate in order to call control plane!
+# you can access this certificate here: /var/run/secrets/kubernetes.io/serviceaccount/ca.cert
+curl --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.cert https://kubernetes.default
+# Now you will get forbidden response (403)
+# you can authenticate yourself using this token: /var/run/secrets/kubernetes.io/serviceaccount/token
+TOKEN=$(cat /var/run/secrets/kubernetes.io/serviceaccount/token)
+curl -H "Authorization: Bearer $TOKEN" --cacert /var/run/secrets/kubernetes.io/serviceaccount/ca.cert https://kubernetes.default
+# Now again you will get forbidden response (403) due to lack of RBAC for anonymous user!
+# You can dedicate admin access to anonymous user (VERY BAD PRACTICE! do not use this.)
+kubectl create clusterrolebinding cluster-system-anonymous --clusterrole=cluster-admin --user=system-anonymous
+# finally you can access your control plane.
+
+# There is another way for interacting with kubernetes REST API by using 'ambassador' containers (which is still not recommended due to security matters!)
+# There is also a more clean way for interacting with control plane in case you need it. by using a library based on your programming language you can create a client for interacting with kubernetes REST API service.
 ```
 
 ### Useful Tricks
