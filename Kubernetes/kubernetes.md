@@ -48,6 +48,7 @@
       - [ConfigMap Sample](#configmap-sample)
     - [Secret](#secret)
       - [Secret Sample](#secret-sample)
+    - [MetaData](#metadata)
     - [Useful Tricks](#useful-tricks)
 
 ## Introduction
@@ -1765,6 +1766,76 @@ spec:
           - name: certs
             secret:
               secretName: nginx-https
+```
+
+### MetaData
+
+- There are various ways for accessing Pod's meta-data (e.g. pod's name, resource limitations and etc.) one of them is using kubernetes `downward API`
+- This data is just supplementary, most of the time you don't need them and your services should not depend on them as well since cloud-native applications should not depend on their host or environment meta-data.
+
+```yaml
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:
+  name: nginx-rs
+  namespace: nginx-ns
+spec:
+  replicas: 2
+  selector:
+  matchExpressions:
+    - key: app
+      operator: In
+      values:
+        - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx
+            resources: # Managing pod's resource
+              requests: # base required resources
+                cpu: 1500m
+                memory: 1000ki
+              limits: # maximum accessible resources
+                cpu: 2000m
+                memory: 400Mi
+            env: # dedicating pod's meta-data to environment variables
+              - name: POD_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.name
+              - name: POD_NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: POD_IP
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.podIp
+              - name: NODE_NAME
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.nodeName
+              - name: SERVICE_ACCOUNT
+                valueFrom:
+                  fieldRef:
+                    fieldPath: spec.serviceAccountName
+              - name: CONTAINER_CPU_REQUEST_MILLICORES
+                valueFrom:
+                  resourceFieldRef:
+                    resource: requests.cpu
+                    divisor: 1m
+              - name: CONTAINER_MEMORY_LIMIT_KIBIBYTES
+                valueFrom:
+                  resourceFieldRef:
+                    resource: limits.memory
+                    divisor: 1Ki
+            ports:
+              - containerPort: 80
+                name: http
 ```
 
 ### Useful Tricks
