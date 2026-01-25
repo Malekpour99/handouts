@@ -51,6 +51,7 @@
     - [MetaData](#metadata)
       - [Kubernetes REST-API](#kubernetes-rest-api)
     - [Useful Tricks](#useful-tricks)
+    - [Deployment](#deployment)
 
 ## Introduction
 
@@ -1912,4 +1913,66 @@ systemctl restart containerd.service
 systemctl restart kubelet.service
 
 # Make sure to enable and activate your containerd and kubelet services to always keep them running!
+```
+
+### Deployment
+
+- Basically `deployment` is established based on `replica-set`; furthermore, `deployment` provides more options like `rolling updates`.
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-dp
+  namespace: nginx-ns
+spec:
+  strategy: # Managing rolling update strategy for better deployment
+    rollingUpdate:
+      maxSurge: 3 # Number of replicated pods which will replace old revisions in the rolling update process
+      maxUnavailable: 2 # Max number of unavailable pods during rolling update (recommendation: 25% of replicas + 1)
+    type: RollingUpdate
+  minReadySeconds: 20 # Minimum required seconds of readiness for a pod in order to replace old ones in rolling update process
+  replicas: 10
+  selector:
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        containers:
+          - name: nginx
+            image: nginx:1.27.3 # versions are critical for deployment rolling updates!
+            ports:
+              - containerPort: 80
+                name: http
+```
+
+```sh
+# Creating deployment
+kubectl apply -f nginx-dp.yaml
+# --record flag can be added for tracking version history (Now this flag is deprecated since this action is done by kubernetes!)
+
+# List deployments
+kubectl get deployments.apps -n <namespace>
+
+# Now you can also see the replica-set which has been created by deployment
+kubectl get rs -n <namespace>
+
+# Check rollout status of deployment
+kubectl rollout status deployment -n <namespace> <deployment>
+
+# Check rollout history of deployment
+kubectl rollout history -n <namespace> <deployment>
+
+# Restart deployment rollout
+kubectl rollout restart -n <namespace> <deployment>
+
+# Rollback deployment
+kubectl rollout undo -n <namespace> <deployment>
+# --to-revision=n by adding this flag and 'n' revision recorded number, you can rollback to the desired specific revision
 ```
