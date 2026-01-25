@@ -1336,11 +1336,11 @@ metadata:
 spec:
   replicas: 2
   selector:
-  matchExpressions:
-    - key: app
-      operator: In
-      values:
-        - item
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
   template:
     metadata:
       labels:
@@ -1429,11 +1429,11 @@ metadata:
 spec:
   replicas: 2
   selector:
-  matchExpressions:
-    - key: app
-      operator: In
-      values:
-        - item
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
   template:
     metadata:
       labels:
@@ -1470,11 +1470,11 @@ metadata:
 spec:
   replicas: 2
   selector:
-  matchExpressions:
-    - key: app
-      operator: In
-      values:
-        - item
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
   template:
     metadata:
       labels:
@@ -1528,11 +1528,11 @@ metadata:
 spec:
   replicas: 2
   selector:
-  matchExpressions:
-    - key: app
-      operator: In
-      values:
-        - item
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
   template:
     metadata:
       labels:
@@ -1589,11 +1589,11 @@ metadata:
 spec:
   replicas: 2
   selector:
-  matchExpressions:
-    - key: app
-      operator: In
-      values:
-        - item
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
   template:
     metadata:
       labels:
@@ -1684,11 +1684,11 @@ metadata:
 spec:
   replicas: 2
   selector:
-  matchExpressions:
-    - key: app
-      operator: In
-      values:
-        - item
+    matchExpressions:
+      - key: app
+        operator: In
+        values:
+          - item
   template:
     metadata:
       labels:
