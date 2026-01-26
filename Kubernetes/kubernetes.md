@@ -52,6 +52,7 @@
       - [Kubernetes REST-API](#kubernetes-rest-api)
     - [Useful Tricks](#useful-tricks)
     - [Deployment](#deployment)
+    - [StatefulSet](#statefulset)
 
 ## Introduction
 
@@ -1975,4 +1976,75 @@ kubectl rollout restart -n <namespace> <deployment>
 # Rollback deployment
 kubectl rollout undo -n <namespace> <deployment>
 # --to-revision=n by adding this flag and 'n' revision recorded number, you can rollback to the desired specific revision
+```
+
+### StatefulSet
+
+- `StatefulSet` keeps the state of pods for deployments:
+  - A separate specific storage is dedicated to each pod, which is preserved
+  - Pod's `hostname` is preserved in deployments
+  - In `StatefulSet` deployments, `Headless` services are used since pods' identities are important
+
+```yaml
+apiVersion: apps/v1
+kind: Service
+metadata:
+  name: nginx
+  namespace: nginx-ns
+  labels:
+    app: nginx
+spec:
+  ports:
+    - port: 80
+      name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+  namespace: nginx-ns
+spec:
+  selector:
+    matchLabels:
+      app: nginx # has to match .spec.template.metadata.labels
+  serviceName: "nginx"
+  minReadySeconds: 10 # default is 0
+  replicas: 3 # default is 1
+  template:
+    metadata:
+      labels:
+        app: nginx # has to match .spec.selector.matchLabels
+      spec:
+        terminationGracePeriodSeconds: 10 # how long to wait for graceful shutdown of a pod, then force its deletion
+        containers:
+          - name: nginx
+            image: nginx:1.27.2
+            ports:
+              - containerPort: 80
+                name: web
+            volumeMounts:
+              - name: www
+                mountPath: /usr/share/nginx/html
+  volumeClaimTemplates: # for dedicating a separate volume to each replica
+    - metadata:
+        name: www
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: "longhorn" # You can either create your PVCs before deploying StatefulSets or use a storage class provisioner (e.g. longhorn)
+        resources:
+          requests:
+            storage: 4Gi
+```
+
+```sh
+# Creating stateful-set
+kubectl apply -f nginx-st.yaml
+
+# Editing stateful-set
+kubectl edit statefulsets.apps -n <namespace> <stateful-set>
+# By changing replicas, their PVC is preserved and gets dedicated to the same replica every time!
+# You can use a dnsutils service for calling pods and check their hostname: 'dig SRV nginx.nginx-ns.svc.cluster.local'
 ```
