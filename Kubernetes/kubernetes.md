@@ -71,14 +71,12 @@
 ### Control Plane (Master)
 
 - **API Server**
-
   - The **entry point**.
   - Everything — `kubectl`, `controllers`, `nodes` — talks to the API server. (`kubectl` converts your commands to REST HTTP requests for interacting with API Server!)
   - You don’t talk to anything else.
   - If this is down, you won’t “feel” the cluster immediately die, but you cannot manage it.
 
 - **etcd**
-
   - A distributed key-value store.
   - Kubernetes **stores EVERYTHING here**:
     - Pod definitions
@@ -88,14 +86,12 @@
   - If etcd is corrupted, the cluster is dead. This is **the most critical component**.
 
 - **Controller Manager**
-
   - This is where Kubernetes **enforces the desired state**.
   - Example:
     - You want 3 replicas of a pod. 1 crashes -> Controller notices -> Controller creates a new one
   - It constantly reconciles **“what should be” vs “what is”**.
 
 - **Scheduler**
-
   - Decides **where a pod should run**.
   - Example questions it answers:
     - Is there enough CPU?
@@ -105,7 +101,6 @@
   - If the scheduler stops working, existing pods continue running, but no new pods get scheduled.
 
 - **Cloud Controller Manager** (optional)
-
   - Integrates with cloud providers (`AWS`, `GCP`, etc.).
   - Manages:
     - Load balancers
@@ -116,7 +111,6 @@
 ### Data Plane (Worker)
 
 - **Kubelet**
-
   - The **agent running on every node**.
   - It **receives instructions from the API server**:
     - “Run this pod. Here is the definition.”
@@ -124,7 +118,6 @@
   - If kubelet dies → the node becomes “NotReady”.
 
 - **Container Runtime**
-
   - `Docker`, `containerd`, `CRI-O` — doesn’t matter.
   - Its job is simple:
     - Pull the image
@@ -133,7 +126,6 @@
   - **Kubernetes does NOT run containers itself**.
 
 - **Kube-Proxy**
-
   - **Manages networking rules** - received from the API server.
   - It ensures:
     - Services get virtual IPs
@@ -494,7 +486,6 @@ kubectl get nodes
 - Now you need to manage kubernetes internal network by using a `CNI - Container Network Interface`
 - `CNI` is a tool for container network and security management
 - You can use different tools for fulfilling this purpose like:
-
   - [`Calico`](https://www.tigera.io/project-calico/)
   - `Flannel`
   - `Canal`
@@ -774,7 +765,6 @@ kubectl logs <pod> --previous
 
 - `Replica Controller`: Manages pod replication for high-availability by making sure there always a specified number of replicas are running simultaneously in cluster
 - A `Replica Controller` consists of:
-
   - `Pod Selector`: criteria for selecting certain pods to be managed by this replica-controller
   - `Replicas`: Holds the number of replicas
   - `Pod Template`: A sample template for replication of pods, holding pod's specifications
@@ -1914,6 +1904,10 @@ systemctl restart containerd.service
 systemctl restart kubelet.service
 
 # Make sure to enable and activate your containerd and kubelet services to always keep them running!
+
+# Check kubernetes components' status
+kubectl get componentstatuses  # Deprecated!
+kubectl get --raw='/readyz?verbose' # Provides more detailed status
 ```
 
 ### Deployment
