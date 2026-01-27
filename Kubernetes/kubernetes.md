@@ -1310,7 +1310,7 @@ kubectl get cm -n kube-system coredns -o yaml
 
 ### Volume
 
-- `Volumes` are used for persisting pod's data <!-- todo: add official link to kubernetes volumes documentation -->
+- [`Volumes`](https://kubernetes.io/docs/concepts/storage/volumes/) are used for persisting pod's data
 - Different types of volumes are available, which one to chose is dependent on your requirements
 - Volumes can be shared between pods.
 - Similar to ingress controllers you can also use external tools like `CEPH` which acts as a storage provisioning tool and manages your volumes. (Recommended for large scale companies)
@@ -1399,8 +1399,8 @@ kubectl exec -it -n <namespace> <pod> -c <container> -- sh
 
 ##### `LongHorn`
 
-- `LongHorn` is a robust cloud-native storage provisioning tool. <!-- todo: attach its official installation link using kubectl -->
-- You can read its documentation and fine its best practices for managing your desired volumes.
+- [`LongHorn`](https://longhorn.io/docs/) is a robust cloud-native storage provisioning tool. ([Installation With Kubectl](https://longhorn.io/docs/latest/deploy/install/install-with-kubectl/))
+- You can read its documentation and fine its best practices for managing your desired volumes. ([Create Longhorn Volumes](https://longhorn.io/docs/latest/nodes-and-volumes/volumes/create-volumes/))
 
 ```sh
 # list persistent volumes
