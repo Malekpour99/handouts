@@ -83,7 +83,11 @@
     - Secrets
     - ConfigMaps
     - Cluster state
+  - Only `API Server` directly interacts with `etcd`.
   - If etcd is corrupted, the cluster is dead. This is **the most critical component**.
+  - `etcd` can be distributed by using:
+    - `optimistic concurrency control`, which means in order to prevent blocking requests for updating records, `etcd` use a `version` resource when performing updates on its records.
+    - `RAFT` consensus algorithm for reaching a quorum between multi-instances when electing a leader (That's why an **odd** number of replicated instances is required!)
 
 - **Controller Manager**
   - This is where Kubernetes **enforces the desired state**.
@@ -1908,7 +1912,14 @@ systemctl restart kubelet.service
 # Check kubernetes components' status
 kubectl get componentstatuses  # Deprecated!
 kubectl get --raw='/readyz?verbose' # Provides more detailed status
+
+# Customizing pod list columns and ordering
+kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-by spec.nodeName -n kube-system
 ```
+
+- Since `etcd` keeps the state of everything in your kubernetes cluster, it's very important to create back-ups from it.
+  - you can use `etcd.ctl` and a recurring job to create a back-up from `etcd` data and store it in a safe place.
+  - It's recommended to have at least **3** instances of `etcd` although **5** is better if you have enough resources but do not increase number of instances to higher than 5 in the same cluster, since syncing those instances becomes an overhead and slows down your services.
 
 ### Deployment
 
