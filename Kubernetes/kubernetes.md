@@ -108,6 +108,13 @@
     - Enough memory?
     - Correct node selector?
     - Tolerations/Taints OK?
+  - How scheduler works:
+    - Scheduler gets notified by **`API server`** for creating/updating/deleting resources; `API server` uses a **watcher/observer pattern** over `etcd` storage for notifying scheduler.
+    - Then `scheduler` updates resource manifests to specify where they should run.
+      - In this process, scheduler first identifies available nodes (based on accessibility and free resources)
+      - Second, scheduler considers different constraints/filters for choosing nodes
+      - Then based on some algorithms like round-robin, scheduler prioritizes deployment on an available pod over others
+    - Now `kubelet` is informed by using a similar **watcher/observer pattern** in order to apply updated manifests in the specified host.
   - If the scheduler stops working, existing pods continue running, but no new pods get scheduled.
 
 - **Cloud Controller Manager** (optional)
