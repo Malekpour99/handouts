@@ -75,6 +75,12 @@
   - Everything — `kubectl`, `controllers`, `nodes` — talks to the API server. (`kubectl` converts your commands to REST HTTP requests for interacting with API Server!)
   - You don’t talk to anything else.
   - If this is down, you won’t “feel” the cluster immediately die, but you cannot manage it.
+  - cycle of handling a request by API server:
+    - client (`kubectl`) sends a REST HTTP request
+    - Request is processed by one or more **Authentication** plugins
+    - Then it's processed by **Authorization** plugins
+    - Now request reaches **Admission** plugins (here your _request_ gets validated and other required/unnecessary data is added to/removed from it)
+    - Final step is the resource validation (After this step, valid resources are stored in the `etcd` storage)
 
 - **etcd**
   - A distributed key-value store.
