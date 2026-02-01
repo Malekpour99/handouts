@@ -131,9 +131,10 @@
 
 - **Kubelet**
   - The **agent running on every node**.
-  - It **receives instructions from the API server**:
+  - It **receives instructions from the `API server`**:
     - “Run this pod. Here is the definition.”
-  - The kubelet talks to the container runtime to launch containers.
+  - The kubelet talks to the container runtime (CRI) to launch containers.
+  - kubelet also manages pods logs (e.g. rotating log files)
   - If kubelet dies → the node becomes “NotReady”.
 
 - **Container Runtime**
@@ -145,12 +146,18 @@
   - **Kubernetes does NOT run containers itself**.
 
 - **Kube-Proxy**
-  - **Manages networking rules** - received from the API server.
+  - **Manages networking rules** - received from the `API server`.
   - It ensures:
     - Services get virtual IPs
     - Load balancing to pods works
     - Cluster networking rules are correct
+  - `Kube proxy` directly interacts with host `iptables` for network configurations
   - If this breaks → traffic routing breaks internally.
+  - responsibilities:
+    - connecting pods to services
+    - connecting pods to `API server`
+    - connecting pods to each other
+    - integration and interaction with CNI (e.g. `calico`)
 
 ### Kubernetes Terms
 
