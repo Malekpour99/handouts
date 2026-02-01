@@ -100,6 +100,8 @@
   - Example:
     - You want 3 replicas of a pod. 1 crashes -> Controller notices -> Controller creates a new one
   - It constantly reconciles **“what should be” vs “what is”**.
+  - A specific controller is dedicated to each one of the resources in kubernetes cluster.
+  - Controller informs `kubelet` through `API server` about resources' status and updates.
 
 - **Scheduler**
   - Decides **where a pod should run**.
@@ -114,7 +116,7 @@
       - In this process, scheduler first identifies available nodes (based on accessibility and free resources)
       - Second, scheduler considers different constraints/filters for choosing nodes
       - Then based on some algorithms like round-robin, scheduler prioritizes deployment on an available pod over others
-    - Now `kubelet` is informed by using a similar **watcher/observer pattern** in order to apply updated manifests in the specified host.
+    - Now `kubelet` is informed by `API server` using a similar **watcher/observer pattern** in order to apply updated manifests in the specified host.
   - If the scheduler stops working, existing pods continue running, but no new pods get scheduled.
 
 - **Cloud Controller Manager** (optional)
