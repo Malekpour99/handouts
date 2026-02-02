@@ -10,6 +10,7 @@
     - [Data Plane (Worker)](#data-plane-worker)
     - [Kubernetes Terms](#kubernetes-terms)
     - [Chain of Events](#chain-of-events)
+    - [Networking](#networking)
   - [Learning Environments](#learning-environments)
   - [Configurations](#configurations)
     - [Context Management](#context-management)
@@ -196,6 +197,13 @@
 # following kubernetes chain of events
 kubectl get events --watch
 ```
+
+### Networking
+
+- ![Pod to Pod Networking](./images/pod_to_pod.webp)
+- ![Pod to Service Networking](./images/pod_to_service.webp)
+- ![Internet to Service Networking](./images/internet_to_service.webp)
+<!-- - https://medium.com/techbeatly/kubernetes-networking-fundamentals-d30baf8a28c8 -->
 
 ## Learning Environments
 
