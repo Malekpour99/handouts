@@ -9,6 +9,7 @@
     - [Control Plane (Master)](#control-plane-master)
     - [Data Plane (Worker)](#data-plane-worker)
     - [Kubernetes Terms](#kubernetes-terms)
+    - [Chain of Events](#chain-of-events)
   - [Learning Environments](#learning-environments)
   - [Configurations](#configurations)
     - [Context Management](#context-management)
@@ -179,6 +180,22 @@
 - **Ingress**: Routing from outside → inside cluster (HTTP/HTTPS).
 - **ConfigMap / Secret**: Configuration and sensitive data.
 - **PersistentVolume / PersistentVolumeClaim**: Storage.
+
+### Chain of Events
+
+- ![Kubernetes Chain of Events](./images/kubernetes_chain_of_events.webp)
+- `Kubectl` send a REST request to `API server` for creating a resource (e.g. `Deployment`)
+- `API server` receives the request, after processing request by different plugins and its successful validation, a resource gets created in `etcd` (watcher gets activated after deployment creation)
+- Now since `Deployment` resource requires a `ReplicaSet`, its `controller` informs `API server` to create a new `ReplicaSet` resource for deployment (watcher gets activated after replica-set creation)
+- `ReplicaSet` controller requests `API server` to create its corresponding Pods (watcher gets activate after pod creation)
+- Now `scheduler` gets notified to update each pod's manifest and assign them to worker/master nodes (watcher gets activated for calling `kubelet`)
+- `kubelet` gets notified by `API server`, then uses CRI (Container Runtime Interface) for running pod's container
+- For following kubernetes events, you can run:
+
+```sh
+# following kubernetes chain of events
+kubectl get events --watch
+```
 
 ## Learning Environments
 
