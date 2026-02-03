@@ -55,6 +55,8 @@
     - [Useful Tricks](#useful-tricks)
     - [Deployment](#deployment)
     - [StatefulSet](#statefulset)
+  - [Security](#security)
+    - [Group](#group)
 
 ## Introduction
 
@@ -2100,3 +2102,18 @@ kubectl edit statefulsets.apps -n <namespace> <stateful-set>
 # By changing replicas, their PVC is preserved and gets dedicated to the same replica every time!
 # You can use a dnsutils service for calling pods and check their hostname: 'dig SRV nginx.nginx-ns.svc.cluster.local'
 ```
+
+## Security
+
+- Security is important in two main domains
+  - User's access to kubernetes cluster (External Security)
+  - Pod's access to other pods (Internal Security)
+
+### Group
+
+- Default Groups in kubernetes
+  - `System Unauthenticated`: for unauthenticated users
+  - `System Authenticated`: for authenticated users
+  - `System Service Account`: for system service accounts
+  - `System Service Account:<namespace>`: for namespace system service accounts
+
