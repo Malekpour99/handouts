@@ -52,9 +52,9 @@
       - [Secret Sample](#secret-sample)
     - [MetaData](#metadata)
       - [Kubernetes REST-API](#kubernetes-rest-api)
-    - [Useful Tricks](#useful-tricks)
     - [Deployment](#deployment)
     - [StatefulSet](#statefulset)
+  - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
       - [Service Account](#service-account)
@@ -1934,43 +1934,6 @@ kubectl create clusterrolebinding cluster-system-anonymous --clusterrole=cluster
 # There is also a more clean way for interacting with control plane in case you need it. by using a library based on your programming language you can create a client for interacting with kubernetes REST API service.
 ```
 
-### Useful Tricks
-
-- For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
-
-```sh
-alias k='kubectl'
-
-source <(kubectl completion bash)
-complete -F __start_kubectl k
-```
-
-- When debugging your `NOT READY` nodes:
-- First check for `kubelet` and `containerd` status:
-
-```sh
-# Check status
-systemctl status containerd.service
-systemctl status kubelet.service
-
-# If services were in inactive(dead)/FAILURE status, restart them
-systemctl restart containerd.service
-systemctl restart kubelet.service
-
-# Make sure to enable and activate your containerd and kubelet services to always keep them running!
-
-# Check kubernetes components' status
-kubectl get componentstatuses  # Deprecated!
-kubectl get --raw='/readyz?verbose' # Provides more detailed status
-
-# Customizing pod list columns and ordering
-kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-by spec.nodeName -n kube-system
-```
-
-- Since `etcd` keeps the state of everything in your kubernetes cluster, it's very important to create back-ups from it.
-  - you can use `etcd.ctl` and a recurring job to create a back-up from `etcd` data and store it in a safe place.
-  - It's recommended to have at least **3** instances of `etcd` although **5** is better if you have enough resources but do not increase number of instances to higher than 5 in the same cluster, since syncing those instances becomes an overhead and slows down your services.
-
 ### Deployment
 
 - Basically `deployment` is established based on `replica-set`; furthermore, `deployment` provides more options like `rolling updates`.
@@ -2103,6 +2066,48 @@ kubectl edit statefulsets.apps -n <namespace> <stateful-set>
 # By changing replicas, their PVC is preserved and gets dedicated to the same replica every time!
 # You can use a dnsutils service for calling pods and check their hostname: 'dig SRV nginx.nginx-ns.svc.cluster.local'
 ```
+
+## Useful Tricks
+
+- For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
+
+```sh
+alias k='kubectl'
+
+source <(kubectl completion bash)
+complete -F __start_kubectl k
+```
+
+- When debugging your `NOT READY` nodes:
+- First check for `kubelet` and `containerd` status:
+
+```sh
+# Check status
+systemctl status containerd.service
+systemctl status kubelet.service
+
+# If services were in inactive(dead)/FAILURE status, restart them
+systemctl restart containerd.service
+systemctl restart kubelet.service
+
+# Make sure to enable and activate your containerd and kubelet services to always keep them running!
+
+# Check kubernetes components' status
+kubectl get componentstatuses  # Deprecated!
+kubectl get --raw='/readyz?verbose' # Provides more detailed status
+
+# Customizing pod list columns and ordering
+kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-by spec.nodeName -n kube-system
+
+# Using Linux 'jq' for better JSON presentation of manifest configuration
+kubectl get po -n <namespace> <pod> -o json | jq
+kubectl get po -n <namespace> <pod> -o json | jq .spec.serviceAccount # Only showing desired section in json
+kubectl get po -n <namespace> <pod> -o json | jq .spec.containers[0].image # Only showing desired section in json
+```
+
+- Since `etcd` keeps the state of everything in your kubernetes cluster, it's very important to create back-ups from it.
+  - you can use `etcd.ctl` and a recurring job to create a back-up from `etcd` data and store it in a safe place.
+  - It's recommended to have at least **3** instances of `etcd` although **5** is better if you have enough resources but do not increase number of instances to higher than 5 in the same cluster, since syncing those instances becomes an overhead and slows down your services.
 
 ## Security
 
