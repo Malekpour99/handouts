@@ -57,6 +57,7 @@
     - [StatefulSet](#statefulset)
   - [Security](#security)
     - [Group](#group)
+      - [Service Account](#service-account)
 
 ## Introduction
 
@@ -2117,3 +2118,45 @@ kubectl edit statefulsets.apps -n <namespace> <stateful-set>
   - `System Service Account`: for system service accounts
   - `System Service Account:<namespace>`: for namespace system service accounts
 
+#### Service Account
+
+- `Service Account` is a kubernetes resource which enables pods to access different resources in cluster by authenticating and authorizing pods
+
+```sh
+# List service accounts
+kubectl get sa
+# Every namespace has its own 'default' service account, these 'default' service accounts are not the same!
+
+# Check default service account manifest/details in desired namespace
+kubectl get sa -n <namespace> default -o yaml
+kubectl describe sa -n <namespace> default
+
+# Each pod can only be mapped to one service account resource, but each service account can be dedicated to many pods (M-1 relation)
+# By default, namespace 'default' service account is dedicated to each new pod.
+
+# Creating service account
+kubectl create sa -n <namespace> <service-account-name>
+
+# Deleting service account
+kubectl delete sa -n <namespace> <service-account-name>
+```
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+  namespace: custom
+spec:
+  serviceAccountName: custom-sa # dedicating a custom service account to pod (desired service account must exist in the .metadata.namespace)
+  containers:
+    - name: test
+      image: curlimages/curl
+      command: ["/bin/sh", "-ec", "while :; do echo '.'; sleep 5 ; done"]
+```
+
+```sh
+# Checking custom service account token
+kubectl exec -n custom -it test -- cat /var/run/secrets/kubernetes.io/serviceaccount/token
+# This token is used for this pod's authentication and authorization!
+```
