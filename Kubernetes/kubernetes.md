@@ -58,6 +58,7 @@
   - [Security](#security)
     - [Group](#group)
       - [Service Account](#service-account)
+      - [Checking Pod's Access](#checking-pods-access)
 
 ## Introduction
 
@@ -2161,7 +2162,30 @@ spec:
 ```
 
 ```sh
-# Checking custom service account token
+# Checking service account token
 kubectl exec -n custom -it test -- cat /var/run/secrets/kubernetes.io/serviceaccount/token
 # This token is used for this pod's authentication and authorization!
+```
+
+#### Checking Pod's Access
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+  namespace: custom
+spec:
+  serviceAccountName: custom-sa
+  containers:
+    - name: test
+      image: curlimages/curl
+      command: ["/bin/sh", "-ec", "while :; do echo '.'; sleep 5 ; done"]
+    - name: proxy # Adding a proxy container for checking this pod's access
+      image: seeq13/datalab-kubectl-proxy # For production environments create your own proxy images for security cautions!
+```
+
+```sh
+# Now after exposing API service by proxy, check pod's access
+kubectl exec -it -n <namespace> <pod> -- curl localhost:<exposed-port>
 ```
