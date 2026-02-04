@@ -59,6 +59,7 @@
     - [Group](#group)
       - [Service Account](#service-account)
       - [Checking Pod's Access](#checking-pods-access)
+    - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
 
 ## Introduction
 
@@ -2189,3 +2190,13 @@ spec:
 # Now after exposing API service by proxy, check pod's access
 kubectl exec -it -n <namespace> <pod> -- curl localhost:<exposed-port>
 ```
+
+### Role Based Access Control (RBAC)
+
+- kubernetes `RBAC` consists of:
+  - Namespace based resources: This resources' scope are limited to their namespace and control access to that namespace resources (e.g. `secrets`, `services`)
+    - `Role`
+    - `Role-Binding`
+  - Cluster based resources: This resources' scope cover the whole cluster and access to the cluster resources (e.g. `namespaces`, `nodes`)
+    - `Cluster Role`
+    - `Cluster Role-Binding`
