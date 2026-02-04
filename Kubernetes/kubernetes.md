@@ -60,6 +60,7 @@
       - [Service Account](#service-account)
       - [Checking Pod's Access](#checking-pods-access)
     - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
+      - [Production RBAC Configuration](#production-rbac-configuration)
 
 ## Introduction
 
@@ -2200,3 +2201,19 @@ kubectl exec -it -n <namespace> <pod> -- curl localhost:<exposed-port>
   - Cluster based resources: This resources' scope cover the whole cluster and access to the cluster resources (e.g. `namespaces`, `nodes`)
     - `Cluster Role`
     - `Cluster Role-Binding`
+
+#### Production RBAC Configuration
+
+- Before executing the following commands (which removes all the default available accesses) make sure to create and test your role-binding in developments environment and then apply them in the production as well!
+
+```sh
+# List cluster role bindings
+kubectl get clusterrolebindings.rbac.authorization.k8s.io
+
+# permissive-binding - save its configuration for recovery in case it was needed
+kubectl get clusterrolebindings.rbac.authorization.k8s.io permissive-binding -o yaml
+# Then delete permissive-biding
+kubectl delete clusterrolebindings.rbac.authorization.k8s.io permissive-binding
+# Now your service accounts do not have permissive-binding access to access every cluster/namespace resource!
+# You must specifically define any required role-access and bind it to your desired service account for accessing different resources.
+```
