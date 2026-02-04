@@ -61,6 +61,7 @@
       - [Checking Pod's Access](#checking-pods-access)
     - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
       - [Production RBAC Configuration](#production-rbac-configuration)
+      - [Role \& RoleBinding](#role--rolebinding)
 
 ## Introduction
 
@@ -2216,4 +2217,41 @@ kubectl get clusterrolebindings.rbac.authorization.k8s.io permissive-binding -o 
 kubectl delete clusterrolebindings.rbac.authorization.k8s.io permissive-binding
 # Now your service accounts do not have permissive-binding access to access every cluster/namespace resource!
 # You must specifically define any required role-access and bind it to your desired service account for accessing different resources.
+```
+
+#### Role & RoleBinding
+
+```yaml
+# role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: custom
+  name: service-reader
+rules: # defining a rule which enables seeing list of services (list) or a specific service (get) in the defined namespace
+  - apiGroups: [""]
+    verbs: ["get", "list"]
+    resources: ["services"] # you can use resource abbreviations (e.g. sv) here!
+```
+
+```sh
+# Creating role (from its manifest)
+kubectl apply -f role.yaml
+# Creating a new role (without manifest)
+kubectl create role service-reader -n custom --verb=get --verb=list --resource=services
+
+# Creating a role-binding for a role
+kubectl create rolebinding srb --role=service-reader -n custom --serviceacccount=custom:default
+# Now desired role is bound to the namespace's default service account; default service account now has access to namespace  services
+
+# Check role-binding details
+kubectl get rolebindings.rbac.authorization.k8s.io -n <namespace> <role-binding-name> -o yaml
+# by adding other namespace service accounts under the 'subjects' section, you can bind this role binding to your desired accounts:
+kubectl edit rolebindings.rbac.authorization.k8s.io -n <namespace> <role-binding-name>
+
+# List roles
+kubectl get role -n <namespace>
+
+# Checking namespace role details
+kubectl describe role -n <namespace>
 ```
