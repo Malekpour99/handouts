@@ -62,6 +62,7 @@
     - [Role Based Access Control (RBAC)](#role-based-access-control-rbac)
       - [Production RBAC Configuration](#production-rbac-configuration)
       - [Role \& RoleBinding](#role--rolebinding)
+      - [ClusterRole \& ClusterRoleBinding](#clusterrole--clusterrolebinding)
 
 ## Introduction
 
@@ -2199,7 +2200,7 @@ kubectl exec -it -n <namespace> <pod> -- curl localhost:<exposed-port>
   - Namespace based resources: This resources' scope are limited to their namespace and control access to that namespace resources (e.g. `secrets`, `services`)
     - `Role`
     - `Role-Binding`
-  - Cluster based resources: This resources' scope cover the whole cluster and access to the cluster resources (e.g. `namespaces`, `nodes`)
+  - Cluster based resources: This resources' scope cover the whole cluster and access to the cluster resources (e.g. `namespaces`, `nodes`, `PVs`)
     - `Cluster Role`
     - `Cluster Role-Binding`
 
@@ -2255,3 +2256,46 @@ kubectl get role -n <namespace>
 # Checking namespace role details
 kubectl describe role -n <namespace>
 ```
+
+#### ClusterRole & ClusterRoleBinding
+
+```sh
+# Creating a new cluster-role (without manifest)
+kubectl create clusterrole pv-reader --verb=get,list --resource=persistentvolumes
+
+# Check cluster-role details
+kubectl get clusterrole <cluster-role> -o yaml
+
+# Binding cluster-role to a service account using simple role-binding (cluster-role-resource must be namespace-based!)
+kubectl edit rolebindings.rbac.authorization.k8s.io -n <namespace> <role-binding-name>
+# By adding cluster-role under the 'roleRef` section
+
+# Creating a cluster-role-binding for a cluster-role
+kubectl create clusterrolebinding <cluster-role-binding-name> --clusterrole=<cluster-role-name> --serviceaccount=<namespace>:<service-account-name>
+
+# List cluster-roles
+kubectl get clusterrole
+# There are many pre-defined cluster-roles as well, which can be used!
+
+# List cluster-role-bindings
+kubectl get clusterrolebindings.rbac.authorization.k8s.io
+```
+
+```yaml
+# For cluster resources, simple role-binding won't work since cluster resources (like PV) are not namespace-based; you must use cluster-role-binding!!
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: pvrb
+  namespace: custom
+roleRef: # Binding a cluster-role to a service account (target resource must be namespace-based!)
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: pv-reader # must match the cluster-role name
+subjects:
+  - kind: ServiceAccount
+    name: default
+    namespace: custom
+```
+
+- After creating your cluster-role-binding, you can follow [Kubernetes REST API](#kubernetes-rest-api) commands without using the bad practice to test your service account access.
