@@ -63,6 +63,7 @@
       - [Production RBAC Configuration](#production-rbac-configuration)
       - [Role \& RoleBinding](#role--rolebinding)
       - [ClusterRole \& ClusterRoleBinding](#clusterrole--clusterrolebinding)
+  - [Network](#network)
 
 ## Introduction
 
@@ -2299,3 +2300,24 @@ subjects:
 ```
 
 - After creating your cluster-role-binding, you can follow [Kubernetes REST API](#kubernetes-rest-api) commands without using the bad practice to test your service account access.
+
+## Network
+
+- As it was demonstrated in the introduction, each pod will have a virtual Network Interface Card (`NIC`) and connects to a virtual bridge network for cluster internal communications; but you can configure a pod to use host's actual `NIC` and network instead of a virtual `NIC` (Not Recommended, this is a bad-practice and might cause security issues!)
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine
+  namespace: custom
+spec:
+  # These host configurations are NOT RECOMMENDED and considered BAD PRACTICE!
+  hostNetwork: true # The Pod uses the host's IP address, network interfaces, and routing directly—no separate container network stack.
+  hostPID: true # Processes inside the container can see and interact with all processes running on the host, including their PIDs, hierarchies, and signals. It enables the container to send signals to host processes or inspect host process details.
+  hostIPC: true # Processes inside the container can communicate directly with processes running on the host via IPC mechanisms like shared memory, message queues, semaphores, and Unix domain sockets. It's essentially bypassing container isolation for IPC, giving the Pod access to host-level IPC resources.
+  containers:
+    - name: main
+      images: alpine
+      command: ["/bin/sleep", "999999"] # Keeps container running
+```
