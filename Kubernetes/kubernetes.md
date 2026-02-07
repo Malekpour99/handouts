@@ -66,6 +66,7 @@
     - [Network](#network)
     - [Container Security Context](#container-security-context)
       - [Privileged Mode](#privileged-mode)
+      - [Capability Configuration](#capability-configuration)
 
 ## Introduction
 
@@ -2368,4 +2369,27 @@ spec:
       command: ["/bin/sleep", "999999"] # Keeps container running
       securityContext:
         privileged: true # Run container in privileged mode with full access
+```
+
+#### Capability Configuration
+
+- Instead of giving root access to your pod or running it in privileged mode, you can define capabilities for a pod which provides/limits pod's access to the mentioned parts.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine
+  namespace: custom
+spec:
+  containers:
+    - name: main
+      images: alpine
+      command: ["/bin/sleep", "999999"] # Keeps container running
+      securityContext:
+        capabilities:
+          add: # Providing Access
+            - SYS_TIME # Access for modifying system's time
+          drop: # Removing Access
+            - CHOWN # Prevent changing ownership
 ```
