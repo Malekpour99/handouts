@@ -65,6 +65,7 @@
       - [ClusterRole \& ClusterRoleBinding](#clusterrole--clusterrolebinding)
     - [Network](#network)
     - [Container Security Context](#container-security-context)
+      - [Privileged Mode](#privileged-mode)
 
 ## Introduction
 
@@ -2348,4 +2349,23 @@ spec:
 # Check pod's user-id
 kubectl exec -it -n <namespace> <pod> -- id
 # 'uid=0' is the root user and your pods mustn't have root user access for security reasons!
+```
+
+#### Privileged Mode
+
+- You can run a container in privileged mode which gives your pod full access to host; this is a really **bad practice**! NEVER run your pods in privileged mode.
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine
+  namespace: custom
+spec:
+  containers:
+    - name: main
+      images: alpine
+      command: ["/bin/sleep", "999999"] # Keeps container running
+      securityContext:
+        privileged: true # Run container in privileged mode with full access
 ```
