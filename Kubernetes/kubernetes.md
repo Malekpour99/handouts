@@ -65,6 +65,7 @@
       - [ClusterRole \& ClusterRoleBinding](#clusterrole--clusterrolebinding)
     - [Network](#network)
     - [Container Security Context](#container-security-context)
+      - [User Configuration](#user-configuration)
       - [Privileged Mode](#privileged-mode)
       - [Capability Configuration](#capability-configuration)
 
@@ -2326,6 +2327,8 @@ spec:
 ```
 
 ### Container Security Context
+
+#### User Configuration
 
 - It's a best practice to run your containers with non-root user.
 - It's even better to define your images required non-root user when creating your desired images!
