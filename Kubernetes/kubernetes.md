@@ -2352,6 +2352,23 @@ kubectl exec -it -n <namespace> <pod> -- id
 # 'uid=0' is the root user and your pods mustn't have root user access for security reasons!
 ```
 
+- You can also limit container's user to its owned files and folders for applying modifications:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine
+  namespace: custom
+spec:
+  containers:
+    - name: main
+      images: alpine
+      command: ["/bin/sleep", "999999"]
+      securityContext:
+        readOnlyRootFileSystem: true # All of root files are now accessible only in read-only mode, only owned files by user are modifiable!
+```
+
 #### Privileged Mode
 
 - You can run a container in privileged mode which gives your pod full access to host; this is a really **bad practice**! NEVER run your pods in privileged mode.
