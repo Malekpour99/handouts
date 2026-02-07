@@ -63,7 +63,8 @@
       - [Production RBAC Configuration](#production-rbac-configuration)
       - [Role \& RoleBinding](#role--rolebinding)
       - [ClusterRole \& ClusterRoleBinding](#clusterrole--clusterrolebinding)
-  - [Network](#network)
+    - [Network](#network)
+    - [Container Security Context](#container-security-context)
 
 ## Introduction
 
@@ -2301,7 +2302,7 @@ subjects:
 
 - After creating your cluster-role-binding, you can follow [Kubernetes REST API](#kubernetes-rest-api) commands without using the bad practice to test your service account access.
 
-## Network
+### Network
 
 - As it was demonstrated in the introduction, each pod will have a virtual Network Interface Card (`NIC`) and connects to a virtual bridge network for cluster internal communications; but you can configure a pod to use host's actual `NIC` and network instead of a virtual `NIC` (Not Recommended, this is a bad-practice and might cause security issues!)
 
@@ -2320,4 +2321,31 @@ spec:
     - name: main
       images: alpine
       command: ["/bin/sleep", "999999"] # Keeps container running
+```
+
+### Container Security Context
+
+- It's a best practice to run your containers with non-root user.
+- It's even better to define your images required non-root user when creating your desired images!
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: alpine
+  namespace: custom
+spec:
+  containers:
+    - name: main
+      images: alpine
+      command: ["/bin/sleep", "999999"] # Keeps container running
+      securityContext:
+        runAsUser: 405 # Guest User-ID (UID)
+        runAsNonRoot: true # Run container as non-root user (Works only when either a 'runAsUser' or an 'image non-root user' is defined)
+```
+
+```sh
+# Check pod's user-id
+kubectl exec -it -n <namespace> <pod> -- id
+# 'uid=0' is the root user and your pods mustn't have root user access for security reasons!
 ```
