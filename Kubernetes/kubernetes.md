@@ -70,6 +70,7 @@
       - [Capability Configuration](#capability-configuration)
     - [Pod Security Context](#pod-security-context)
     - [Pod Security Policy](#pod-security-policy)
+    - [Pod Security Admission](#pod-security-admission)
 
 ## Introduction
 
@@ -2486,3 +2487,11 @@ spec:
   volumes:
     - "*"
 ```
+
+### Pod Security Admission
+
+- Instead of deprecated `Pod Security Policy` you can use [`Pod Security Admission`](https://kubernetes.io/docs/concepts/security/pod-security-admission/) or third-party plugins (e.g. `Kubewarden`).
+- `Pod Security Admission` relies on [`Pod Security Standards`](https://kubernetes.io/docs/concepts/security/pod-security-standards/) which has 3 profiles for managing pod's access:
+  - Privileged
+  - Baseline
+  - Restricted
