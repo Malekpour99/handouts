@@ -69,6 +69,7 @@
       - [Privileged Mode](#privileged-mode)
       - [Capability Configuration](#capability-configuration)
     - [Pod Security Context](#pod-security-context)
+    - [Pod Security Policy](#pod-security-policy)
 
 ## Introduction
 
@@ -2452,4 +2453,36 @@ spec:
   volumes:
     - name: shared-volume
       emptyDir:
+```
+
+### Pod Security Policy
+
+- control what a Pod is allowed to do from a security standpoint. (cluster-level resource) - **DEPRECATED & REMOVED**!
+
+```yaml
+apiVersion: v1
+kind: PodSecurityPolicy
+metadata:
+  name: default
+spec:
+  hostIPC: false
+  hostPID: false
+  hostNetwork: false
+  hostPorts:
+    - min: 10000
+      max: 11000
+    - min: 13000
+      max: 14000
+  privileged: false
+  readOnlyRootFilesystem: true
+  runAsUser:
+    rule: RunAsAny
+  fsGroup:
+    rule: RunAsAny
+  supplementalGroups:
+    rule: RunAsAny
+  seLinux:
+    rule: RunAsAny
+  volumes:
+    - "*"
 ```
