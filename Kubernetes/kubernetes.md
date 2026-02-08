@@ -68,6 +68,7 @@
       - [User Configuration](#user-configuration)
       - [Privileged Mode](#privileged-mode)
       - [Capability Configuration](#capability-configuration)
+    - [Pod Security Context](#pod-security-context)
 
 ## Introduction
 
@@ -2412,4 +2413,43 @@ spec:
             - SYS_TIME # Access for modifying system's time
           drop: # Removing Access
             - CHOWN # Prevent changing ownership
+```
+
+### Pod Security Context
+
+- `fsGroup`: Changes group ownership of mounted volumes
+- `supplementalGroups`: Adds extra group memberships to container processes
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-with-shared-volume-fsgroup
+  namespace: custom
+spec:
+  securityContext:
+    fsGroup: 555 # A single group ID that Kubernetes will apply to mounted volumes so that the container can read/write them. (overrides default root group)
+    supplementalGroups: [666, 777] # allows access to files owned by mentioned groups
+  containers:
+    - name: first
+      images: alpine
+      command: ["/bin/sleep", "999999"]
+      securityContext:
+        runAsUser: 1111
+      volumeMounts:
+        - name: shared-volume
+          mountPath: /volume
+          readOnly: false
+    - name: second
+      images: alpine
+      command: ["/bin/sleep", "999999"]
+      securityContext:
+        runAsUser: 2222
+      volumeMounts:
+        - name: shared-volume
+          mountPath: /volume
+          readOnly: false
+  volumes:
+    - name: shared-volume
+      emptyDir:
 ```
