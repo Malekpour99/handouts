@@ -63,7 +63,7 @@
       - [Production RBAC Configuration](#production-rbac-configuration)
       - [Role \& RoleBinding](#role--rolebinding)
       - [ClusterRole \& ClusterRoleBinding](#clusterrole--clusterrolebinding)
-    - [Network](#network)
+    - [Host Network \& Process](#host-network--process)
     - [Container Security Context](#container-security-context)
       - [User Configuration](#user-configuration)
       - [Privileged Mode](#privileged-mode)
@@ -71,6 +71,7 @@
     - [Pod Security Context](#pod-security-context)
     - [Pod Security Policy](#pod-security-policy)
     - [Pod Security Admission](#pod-security-admission)
+    - [Network Policy](#network-policy)
 
 ## Introduction
 
@@ -2308,7 +2309,7 @@ subjects:
 
 - After creating your cluster-role-binding, you can follow [Kubernetes REST API](#kubernetes-rest-api) commands without using the bad practice to test your service account access.
 
-### Network
+### Host Network & Process
 
 - As it was demonstrated in the introduction, each pod will have a virtual Network Interface Card (`NIC`) and connects to a virtual bridge network for cluster internal communications; but you can configure a pod to use host's actual `NIC` and network instead of a virtual `NIC` (Not Recommended, this is a bad-practice and might cause security issues!)
 
@@ -2495,3 +2496,9 @@ spec:
   - Privileged
   - Baseline
   - Restricted
+
+### Network Policy
+
+- [Kubernetes Network Policies Configuration](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
+- A `NetworkPolicy` in Kubernetes is used to **control traffic** between pods (and sometimes between pods and external endpoints).
+  It acts like a firewall for pods, defining which connections are allowed.
