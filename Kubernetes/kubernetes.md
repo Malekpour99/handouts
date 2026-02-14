@@ -54,6 +54,7 @@
       - [Kubernetes REST-API](#kubernetes-rest-api)
     - [Deployment](#deployment)
     - [StatefulSet](#statefulset)
+    - [Resources](#resources)
   - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
@@ -2079,6 +2080,35 @@ kubectl apply -f nginx-st.yaml
 kubectl edit statefulsets.apps -n <namespace> <stateful-set>
 # By changing replicas, their PVC is preserved and gets dedicated to the same replica every time!
 # You can use a dnsutils service for calling pods and check their hostname: 'dig SRV nginx.nginx-ns.svc.cluster.local'
+```
+
+### Resources
+
+- `requests` are the minimum required resources for deployment of a pod; actual resource usage is not limited to the requested resources but minimum required resources are guaranteed to be provided even if not used at the moment.
+- If requested resources can not be provided and guaranteed, pods won't be scheduled to be deployed on a node; `scheduler` only considers the **requested resources** not the resource usage `limit` for scheduling deployments.
+- For distributing remaining resources between deployed pods, corelation of requested resources are considered if no `limit` is explicitly defined (e.g. Pod1 requests 200m core and Pod2 requests 1000m core, remaining resources, in case they were needed will be distributed with a 1 to 5 relation between these pods)
+- `limit` explicitly defines the maximum available resources that can be used by a deployed pod.
+- If no `requests` is defined and only `limit` is provided then `requests` = `limit`!
+- deployed pods can see the total available resources but their usage is limited to the defined `limit`; but Java-based applications (`JVM`) if deployed **without** `xmx` flag (for limiting memory `heap` usage) can exceed memory usage further than the defined limit.
+<!-- - add info about most-requested node and least-requested node for deployment schedule -->
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: requests-pod
+  namespace: custom
+spec:
+  containers:
+    image: busybox
+    command: ["dd", "if=/dev/zero", "of=/dev/null"] # dd command uses as much CPU as possible
+    resources:
+      requests:
+        cpu: 200m # Every 1000m = 1 CPU core
+        memory: 10Mi
+      limit:
+        cpu: 1
+        memory: 20Mi
 ```
 
 ## Useful Tricks
