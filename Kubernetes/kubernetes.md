@@ -2107,7 +2107,7 @@ spec:
       requests:
         cpu: 200m # Every 1000m = 1 CPU core
         memory: 10Mi
-      limit:
+      limits:
         cpu: 1
         memory: 20Mi
 ```
@@ -2117,8 +2117,8 @@ spec:
 - a mechanism used by the `scheduler` and the `kubelet` to decide **which pods should be killed first when the node runs out of resources** (usually memory).
 - `QOS` classes are:
   - `BestEffort` (default): Pod has **no requests and no limits** at all. (first to be evicted)
-  - `Burstable`: A pod becomes Burstable when It has at least one request or limit set, but It does not meet the Guaranteed conditions (**request != limit**). (evicted after `BestEffort`, but before `Guaranteed`)
-  - `Guaranteed`: highest and safest class, where every pod has CPU and memory requests and limits (**request = limit**). (last to be evicted)
+  - `Burstable`: A pod becomes Burstable when It has at least one request or limit set, but It does not meet the Guaranteed conditions (**requests != limits**). (evicted after `BestEffort`, but before `Guaranteed`)
+  - `Guaranteed`: highest and safest class, where every pod has CPU and memory requests and limits (**requests = limits**). (last to be evicted)
 - When two or more pods are in the same `QOS` class and the node is under memory pressure, Kubernetes needs another way to decide which container to kill first. This is where the `OOM - Out Of Memory` score comes in; The higher the score, the more likely the process will be killed.
 
 ## Useful Tricks
