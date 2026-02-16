@@ -56,6 +56,7 @@
     - [StatefulSet](#statefulset)
     - [Resources](#resources)
       - [QOS - Quality Of Service](#qos---quality-of-service)
+      - [LimitRange](#limitrange)
   - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
@@ -2120,6 +2121,47 @@ spec:
   - `Burstable`: A pod becomes Burstable when It has at least one request or limit set, but It does not meet the Guaranteed conditions (**requests != limits**). (evicted after `BestEffort`, but before `Guaranteed`)
   - `Guaranteed`: highest and safest class, where every pod has CPU and memory requests and limits (**requests = limits**). (last to be evicted)
 - When two or more pods are in the same `QOS` class and the node is under memory pressure, Kubernetes needs another way to decide which container to kill first. This is where the `OOM - Out Of Memory` score comes in; The higher the score, the more likely the process will be killed.
+
+#### LimitRange
+
+- `LimitRange` is a Kubernetes resource that enforces **resource constraints** on pods and containers **within a namespace**. It sets default limits and requests for CPU and memory and sometimes storage, preventing resource overuse or under-allocation.
+
+```yaml
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: example
+spec:
+  limits:
+  - type: Pod
+    min:
+      cpu: 50m
+      memory: 5Mi
+    max:
+      cpu: 1
+      memory: 1Gi
+  - type: Container
+    defaultRequest: # Default resource request (when requests is not defined)
+      cpu: 100m
+      memory: 10Mi
+    default: # Default resource limits (when limits is not defined)
+      cpu: 200m
+      memory: 100Mi
+    min:
+      cpu: 50m
+      memory: 5Mi
+    max:
+      cpu: 1
+      memory: 1Gi
+    maxLimitRequestRatio:
+      cpu: 4
+      memory: 10
+  - type: PersistentVolumeClaim
+    min:
+      storage: 1Gi
+    max:
+      storage: 10Gi
+```
 
 ## Useful Tricks
 
