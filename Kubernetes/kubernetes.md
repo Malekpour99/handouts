@@ -57,6 +57,7 @@
     - [Resources](#resources)
       - [QOS - Quality Of Service](#qos---quality-of-service)
       - [LimitRange](#limitrange)
+      - [ResourceQuota](#resourcequota)
   - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
@@ -2161,6 +2162,42 @@ spec:
       storage: 1Gi
     max:
       storage: 10Gi
+```
+
+#### ResourceQuota
+
+- `ResourceQuota` is a Kubernetes resource that enforces **aggregated resource constraints within a namespace**.
+- `ResourceQuota` is only effective from apply time forward and previously deployed pods won't be affected by its deployment; furthermore every pod now must have `requests` and `limits` in order to be deployed. (Best Practice: define a `LimitRange` with default request and limits!)
+
+```yaml
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: res-limit
+  namespace: custom
+spec:
+  hard:
+    requests.cpu: 400m
+    requests.memory: 200Mi
+    limits.cpu: 600m
+    limits.memory: 500Mi
+    requests.storage: 500Gi
+    ssd.storageClass.storage.k8s.io/requests.storage: 300Gi
+    standard.storageClass.storage.k8s.io/requests.storage: 1Ti
+    pods: 10
+    replicationcontrollers: 5
+    secrets: 10
+    configmaps: 10
+    persistentvolumeclaims: 4
+    services: 5
+    services.nodeports: 2
+    services.loadbalancers: 1
+    ssd.storageclass.storage.k8s.io/persistentvolumeclaims: 2
+```
+
+```sh
+# Checking resource usage and limits
+kubectl describe <resource-quota-name> -n <namespace>
 ```
 
 ## Useful Tricks
