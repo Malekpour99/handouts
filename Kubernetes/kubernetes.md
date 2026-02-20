@@ -2134,34 +2134,34 @@ metadata:
   name: example
 spec:
   limits:
-  - type: Pod
-    min:
-      cpu: 50m
-      memory: 5Mi
-    max:
-      cpu: 1
-      memory: 1Gi
-  - type: Container
-    defaultRequest: # Default resource request (when requests is not defined)
-      cpu: 100m
-      memory: 10Mi
-    default: # Default resource limits (when limits is not defined)
-      cpu: 200m
-      memory: 100Mi
-    min:
-      cpu: 50m
-      memory: 5Mi
-    max:
-      cpu: 1
-      memory: 1Gi
-    maxLimitRequestRatio:
-      cpu: 4
-      memory: 10
-  - type: PersistentVolumeClaim
-    min:
-      storage: 1Gi
-    max:
-      storage: 10Gi
+    - type: Pod
+      min:
+        cpu: 50m
+        memory: 5Mi
+      max:
+        cpu: 1
+        memory: 1Gi
+    - type: Container
+      defaultRequest: # Default resource request (when requests is not defined)
+        cpu: 100m
+        memory: 10Mi
+      default: # Default resource limits (when limits is not defined)
+        cpu: 200m
+        memory: 100Mi
+      min:
+        cpu: 50m
+        memory: 5Mi
+      max:
+        cpu: 1
+        memory: 1Gi
+      maxLimitRequestRatio:
+        cpu: 4
+        memory: 10
+    - type: PersistentVolumeClaim
+      min:
+        storage: 1Gi
+      max:
+        storage: 10Gi
 ```
 
 #### ResourceQuota
