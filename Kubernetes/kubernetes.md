@@ -59,6 +59,7 @@
       - [LimitRange](#limitrange)
       - [ResourceQuota](#resourcequota)
     - [Advanced Scheduling](#advanced-scheduling)
+      - [Taint \& Toleration](#taint--toleration)
   - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
@@ -2209,6 +2210,64 @@ kubectl describe <resource-quota-name> -n <namespace>
   - `Kube API Server`
   - `Kube Controller Manager`
   - `Kube Scheduler`
+
+#### Taint & Toleration
+
+- `Taint` and `Toleration` are Kubernetes’ way of controlling which pods are allowed to run on which nodes. A pod must tolerate node's taint in order to be deployed there.
+- A `Taint` is a property on a node that **repels** pods. (`key=value:effect`)
+  - `NoSchedule`: Pod will not be scheduled onto the node; Existing pods are not affected
+  - `PreferNoSchedule`: Scheduler will avoid placing pods there; But it’s not mandatory.
+  - `NoExecute`: Pod will not be scheduled; AND existing pods without toleration will be evicted.
+- A `Toleration` allows a pod to be **scheduled onto a tainted node**.
+
+```sh
+# Check nodes' labels
+kubectl get nodes --show-labels
+
+# Check node taints
+kubectl describe <node>
+
+# Check pod tolerations
+kubectl describe -n <namespace> <pod>
+
+# Create custom taint
+kubectl taint node <node-name> node-type=production:NoSchedule
+```
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-dp
+  namespace: nginx-ns
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        tolerations:
+          # tolerating custom taint for deployment
+          - key: node-type
+            Operator: "Equal"
+            value: production
+            effect: NoSchedule
+          # configuring how long the pod is allowed to stay bound to a node that has become unreachable before it gets evicted. (Good Practice)
+          - key: node.kubernetes.io/unreachable
+            Operator: "Exists"
+            effect: NoExecute
+            tolerationSeconds: 300
+        containers:
+          - name: nginx
+            image: nginx:1.27.3
+            ports:
+              - containerPort: 80
+                name: http
+```
 
 ## Useful Tricks
 
