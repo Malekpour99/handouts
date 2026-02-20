@@ -58,6 +58,7 @@
       - [QOS - Quality Of Service](#qos---quality-of-service)
       - [LimitRange](#limitrange)
       - [ResourceQuota](#resourcequota)
+    - [Advanced Scheduling](#advanced-scheduling)
   - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
@@ -2199,6 +2200,15 @@ spec:
 # Checking resource usage and limits
 kubectl describe <resource-quota-name> -n <namespace>
 ```
+
+### Advanced Scheduling
+
+- **Exception**: `kube-proxy` is a daemon-set which must be deployed on every node free from any `Taint`, `Toleration`, `Affinity` or `AntiAffinity`!
+- **`Static Pods`**: Pods that exist in `/etc/kubernetes/manifests` which can run on mater nodes.
+  - `ETCD`
+  - `Kube API Server`
+  - `Kube Controller Manager`
+  - `Kube Scheduler`
 
 ## Useful Tricks
 
