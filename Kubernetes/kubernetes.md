@@ -60,6 +60,7 @@
       - [ResourceQuota](#resourcequota)
     - [Advanced Scheduling](#advanced-scheduling)
       - [Taint \& Toleration](#taint--toleration)
+      - [Affinity \& AntiAffinity](#affinity--antiaffinity)
   - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
@@ -2205,7 +2206,7 @@ kubectl describe <resource-quota-name> -n <namespace>
 ### Advanced Scheduling
 
 - **Exception**: `kube-proxy` is a daemon-set which must be deployed on every node free from any `Taint`, `Toleration`, `Affinity` or `AntiAffinity`!
-- **`Static Pods`**: Pods that exist in `/etc/kubernetes/manifests` which can run on mater nodes.
+- **`Static Pods`**: Pods that exist in `/etc/kubernetes/manifests` which can run on master nodes.
   - `ETCD`
   - `Kube API Server`
   - `Kube Controller Manager`
@@ -2261,6 +2262,61 @@ spec:
             Operator: "Exists"
             effect: NoExecute
             tolerationSeconds: 300
+        containers:
+          - name: nginx
+            image: nginx:1.27.3
+            ports:
+              - containerPort: 80
+                name: http
+```
+
+#### Affinity & AntiAffinity
+
+- `Affinity` and `anti-affinity` are about **where pods get scheduled**, but in a much more expressive way than `nodeSelector`. affinity is “pod prefers or requires certain placement conditions.”
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-dp
+  namespace: nginx-ns
+spec:
+  replicas: 5
+  selector:
+    matchLabels:
+      app: item
+  template:
+    metadata:
+      labels:
+        app: item
+      spec:
+        affinity:
+          # controls which nodes a pod can run on
+          nodeAffinity:
+            # rule is required when scheduling for deployment, but ignores currently deployed pods (hard rule)
+            requiredDuringSchedulingIgnoreDuringExecution:
+              nodeSelectorTerms:
+                - matchExpressions:
+                    - key: gpu
+                      operator: In
+                      values:
+                        - "true"
+            # rule is preferred when scheduling for deployment, but ignores currently deployed pods (soft rule)
+            preferredDuringSchedulingIgnoreDuringExecution:
+              - weight: 80
+                preference:
+                  - matchExpressions:
+                      - key: availability-zone
+                        operator: In
+                        values:
+                          - tehran
+              - weight: 20
+                preference:
+                  - matchExpressions:
+                      - key: availability-zone
+                        operator: In
+                        values:
+                          - shiraz
         containers:
           - name: nginx
             image: nginx:1.27.3
