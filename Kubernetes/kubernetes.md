@@ -2317,6 +2317,20 @@ spec:
                         operator: In
                         values:
                           - shiraz
+          # controls where a pod runs based on other Pods
+          podAffinity:
+            requiredDuringSchedulingIgnoreDuringExecution:
+              - topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: item2
+          # controls where a pod not runs based on other Pods
+          podAntiAffinity:
+            requiredDuringSchedulingIgnoreDuringExecution:
+              - topologyKey: kubernetes.io/hostname
+                labelSelector:
+                  matchLabels:
+                    app: frontend
         containers:
           - name: nginx
             image: nginx:1.27.3
