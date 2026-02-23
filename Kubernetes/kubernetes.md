@@ -1199,7 +1199,7 @@ metadata:
   name: external-service
   namespace: external
 subsets:
-  - addressees:
+  - addresses:
       - ip: 192.168.230.129
       - ip: 192.168.230.132
     ports:
@@ -2542,7 +2542,7 @@ spec:
   hostIPC: true # Processes inside the container can communicate directly with processes running on the host via IPC mechanisms like shared memory, message queues, semaphores, and Unix domain sockets. It's essentially bypassing container isolation for IPC, giving the Pod access to host-level IPC resources.
   containers:
     - name: main
-      images: alpine
+      image: alpine
       command: ["/bin/sleep", "999999"] # Keeps container running
 ```
 
@@ -2562,7 +2562,7 @@ metadata:
 spec:
   containers:
     - name: main
-      images: alpine
+      image: alpine
       command: ["/bin/sleep", "999999"] # Keeps container running
       securityContext:
         runAsUser: 405 # Guest User-ID (UID)
@@ -2586,7 +2586,7 @@ metadata:
 spec:
   containers:
     - name: main
-      images: alpine
+      image: alpine
       command: ["/bin/sleep", "999999"]
       securityContext:
         readOnlyRootFileSystem: true # All of root files are now accessible only in read-only mode, only owned files by user are modifiable!
@@ -2605,7 +2605,7 @@ metadata:
 spec:
   containers:
     - name: main
-      images: alpine
+      image: alpine
       command: ["/bin/sleep", "999999"] # Keeps container running
       securityContext:
         privileged: true # Run container in privileged mode with full access
@@ -2624,7 +2624,7 @@ metadata:
 spec:
   containers:
     - name: main
-      images: alpine
+      image: alpine
       command: ["/bin/sleep", "999999"] # Keeps container running
       securityContext:
         capabilities:
@@ -2651,7 +2651,7 @@ spec:
     supplementalGroups: [666, 777] # allows access to files owned by mentioned groups
   containers:
     - name: first
-      images: alpine
+      image: alpine
       command: ["/bin/sleep", "999999"]
       securityContext:
         runAsUser: 1111
@@ -2660,7 +2660,7 @@ spec:
           mountPath: /volume
           readOnly: false
     - name: second
-      images: alpine
+      image: alpine
       command: ["/bin/sleep", "999999"]
       securityContext:
         runAsUser: 2222
