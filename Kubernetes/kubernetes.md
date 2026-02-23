@@ -61,7 +61,6 @@
     - [Advanced Scheduling](#advanced-scheduling)
       - [Taint \& Toleration](#taint--toleration)
       - [Affinity \& AntiAffinity](#affinity--antiaffinity)
-  - [Useful Tricks](#useful-tricks)
   - [Security](#security)
     - [Group](#group)
       - [Service Account](#service-account)
@@ -79,6 +78,7 @@
     - [Pod Security Policy](#pod-security-policy)
     - [Pod Security Admission](#pod-security-admission)
     - [Network Policy](#network-policy)
+  - [Useful Tricks](#useful-tricks)
 
 ## Introduction
 
@@ -2339,48 +2339,6 @@ spec:
                 name: http
 ```
 
-## Useful Tricks
-
-- For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
-
-```sh
-alias k='kubectl'
-
-source <(kubectl completion bash)
-complete -F __start_kubectl k
-```
-
-- When debugging your `NOT READY` nodes:
-- First check for `kubelet` and `containerd` status:
-
-```sh
-# Check status
-systemctl status containerd.service
-systemctl status kubelet.service
-
-# If services were in inactive(dead)/FAILURE status, restart them
-systemctl restart containerd.service
-systemctl restart kubelet.service
-
-# Make sure to enable and activate your containerd and kubelet services to always keep them running!
-
-# Check kubernetes components' status
-kubectl get componentstatuses  # Deprecated!
-kubectl get --raw='/readyz?verbose' # Provides more detailed status
-
-# Customizing pod list columns and ordering
-kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-by spec.nodeName -n kube-system
-
-# Using Linux 'jq' for better JSON presentation of manifest configuration
-kubectl get po -n <namespace> <pod> -o json | jq
-kubectl get po -n <namespace> <pod> -o json | jq .spec.serviceAccount # Only showing desired section in json
-kubectl get po -n <namespace> <pod> -o json | jq .spec.containers[0].image # Only showing desired section in json
-```
-
-- Since `etcd` keeps the state of everything in your kubernetes cluster, it's very important to create back-ups from it.
-  - you can use `etcd.ctl` and a recurring job to create a back-up from `etcd` data and store it in a safe place.
-  - It's recommended to have at least **3** instances of `etcd` although **5** is better if you have enough resources but do not increase number of instances to higher than 5 in the same cluster, since syncing those instances becomes an overhead and slows down your services.
-
 ## Security
 
 - Security is important in two main domains
@@ -2760,3 +2718,45 @@ spec:
 - [Kubernetes Network Policies Configuration](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 - A `NetworkPolicy` in Kubernetes is used to **control traffic** between pods (and sometimes between pods and external endpoints).
   It acts like a firewall for pods, defining which connections are allowed.
+
+## Useful Tricks
+
+- For ease of use you can utilize aliases and auto-completion for `kubectl` commands, by adding below configuration to your `~/.bashrc` file:
+
+```sh
+alias k='kubectl'
+
+source <(kubectl completion bash)
+complete -F __start_kubectl k
+```
+
+- When debugging your `NOT READY` nodes:
+- First check for `kubelet` and `containerd` status:
+
+```sh
+# Check status
+systemctl status containerd.service
+systemctl status kubelet.service
+
+# If services were in inactive(dead)/FAILURE status, restart them
+systemctl restart containerd.service
+systemctl restart kubelet.service
+
+# Make sure to enable and activate your containerd and kubelet services to always keep them running!
+
+# Check kubernetes components' status
+kubectl get componentstatuses  # Deprecated!
+kubectl get --raw='/readyz?verbose' # Provides more detailed status
+
+# Customizing pod list columns and ordering
+kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-by spec.nodeName -n kube-system
+
+# Using Linux 'jq' for better JSON presentation of manifest configuration
+kubectl get po -n <namespace> <pod> -o json | jq
+kubectl get po -n <namespace> <pod> -o json | jq .spec.serviceAccount # Only showing desired section in json
+kubectl get po -n <namespace> <pod> -o json | jq .spec.containers[0].image # Only showing desired section in json
+```
+
+- Since `etcd` keeps the state of everything in your kubernetes cluster, it's very important to create back-ups from it.
+  - you can use `etcd.ctl` and a recurring job to create a back-up from `etcd` data and store it in a safe place.
+  - It's recommended to have at least **3** instances of `etcd` although **5** is better if you have enough resources but do not increase number of instances to higher than 5 in the same cluster, since syncing those instances becomes an overhead and slows down your services.
