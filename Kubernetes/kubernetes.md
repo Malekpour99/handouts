@@ -4,6 +4,14 @@
 
 - [Kubernetes](#kubernetes)
   - [Table of Contents](#table-of-contents)
+  - [Quick Reference](#quick-reference)
+    - [Resource Management](#resource-management)
+    - [Pod Operations](#pod-operations)
+    - [Deployments \& Scaling](#deployments--scaling)
+    - [Nodes](#nodes)
+    - [Namespaces \& Context](#namespaces--context)
+    - [Debugging](#debugging)
+    - [Common `resource` Values](#common-resource-values)
   - [Introduction](#introduction)
   - [Components](#components)
     - [Control Plane (Master)](#control-plane-master)
@@ -79,6 +87,138 @@
     - [Pod Security Admission](#pod-security-admission)
     - [Network Policy](#network-policy)
   - [Useful Tricks](#useful-tricks)
+
+## Quick Reference
+
+### Resource Management
+
+```sh
+# Get resources
+kubectl get <resource>                            # List resources in default namespace
+kubectl get <resource> -n <namespace>             # List resources in a specific namespace
+kubectl get <resource> -A                         # List resources across all namespaces
+kubectl get <resource> -o wide                    # List with extra info (Node IP, etc.)
+kubectl get <resource> -o yaml                    # Show full manifest in YAML
+kubectl get <resource> -o json | jq               # Show full manifest in JSON
+kubectl get <resource> --watch                    # Watch for live changes
+
+# Describe resources (events + detailed status)
+kubectl describe <resource> <name> -n <namespace>
+
+# Apply / delete manifests
+kubectl apply -f <file.yaml>                      # Create or update resource
+kubectl delete -f <file.yaml>                     # Delete resource from file
+kubectl delete <resource> <name> -n <namespace>   # Delete resource by name
+kubectl diff -f <file.yaml>                       # Preview changes before applying
+```
+
+### Pod Operations
+
+```sh
+# Logs
+kubectl logs <pod> -n <namespace>                 # Fetch pod logs
+kubectl logs <pod> -n <namespace> -f              # Stream (follow) pod logs
+kubectl logs <pod> -n <namespace> -c <container>  # Logs of a specific container
+kubectl logs <pod> -n <namespace> --previous      # Logs of previous (crashed) container
+
+# Execute commands inside a pod
+kubectl exec -it <pod> -n <namespace> -- bash
+kubectl exec -it <pod> -n <namespace> -c <container> -- sh
+
+# Copy files to/from a pod
+kubectl cp <pod>:<path> <local-dest> -n <namespace>
+kubectl cp <local-file> <pod>:<path> -n <namespace>
+
+# Port forwarding
+kubectl port-forward <pod> <local-port>:<pod-port> -n <namespace>
+kubectl port-forward svc/<service> <local-port>:<svc-port> -n <namespace>
+```
+
+### Deployments & Scaling
+
+```sh
+# Scale a deployment
+kubectl scale deployment <name> --replicas=<n> -n <namespace>
+
+# Rollout management
+kubectl rollout status deployment/<name> -n <namespace>
+kubectl rollout history deployment/<name> -n <namespace>
+kubectl rollout undo deployment/<name> -n <namespace>           # Roll back one revision
+kubectl rollout undo deployment/<name> --to-revision=<n> -n <namespace>
+
+# Update a container image
+kubectl set image deployment/<name> <container>=<image>:<tag> -n <namespace>
+```
+
+### Nodes
+
+```sh
+# List nodes
+kubectl get nodes
+kubectl get nodes -o wide
+
+# Cordon / Drain / Uncordon
+kubectl cordon <node>    # Mark node as unschedulable
+kubectl drain <node> --ignore-daemonsets --delete-emptydir-data  # Evict all pods
+kubectl uncordon <node>  # Mark node as schedulable again
+
+# Node details
+kubectl describe node <node>
+kubectl top node          # Node CPU/Memory usage (requires metrics-server)
+kubectl top pod -n <namespace>
+```
+
+### Namespaces & Context
+
+```sh
+# Namespaces
+kubectl get namespaces
+kubectl create namespace <name>
+kubectl delete namespace <name>
+
+# Context management
+kubectl config get-contexts            # List all contexts
+kubectl config current-context        # Show active context
+kubectl config use-context <name>     # Switch context
+kubectl config set-context --current --namespace=<ns>  # Change default namespace
+```
+
+### Debugging
+
+```sh
+# Run a temporary debug pod
+kubectl run debug --image=busybox -it --rm --restart=Never -- sh
+
+# Check cluster component health
+kubectl get --raw='/readyz?verbose'
+
+# Watch all events in a namespace
+kubectl get events -n <namespace> --watch
+
+# Custom column output
+kubectl get po -o custom-columns=POD:metadata.name,NODE:spec.nodeName --sort-by spec.nodeName -n <namespace>
+```
+
+### Common `resource` Values
+
+| Short    | Full Name                |
+| -------- | ------------------------ |
+| `po`     | `pods`                   |
+| `svc`    | `services`               |
+| `deploy` | `deployments`            |
+| `rs`     | `replicasets`            |
+| `ds`     | `daemonsets`             |
+| `sts`    | `statefulsets`           |
+| `cm`     | `configmaps`             |
+| `secret` | `secrets`                |
+| `ns`     | `namespaces`             |
+| `pv`     | `persistentvolumes`      |
+| `pvc`    | `persistentvolumeclaims` |
+| `sa`     | `serviceaccounts`        |
+| `ing`    | `ingresses`              |
+| `no`     | `nodes`                  |
+| `job`    | `jobs`                   |
+| `cj`     | `cronjobs`               |
 
 ## Introduction
 
