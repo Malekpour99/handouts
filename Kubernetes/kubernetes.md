@@ -86,6 +86,7 @@
     - [Pod Security Policy](#pod-security-policy)
     - [Pod Security Admission](#pod-security-admission)
     - [Network Policy](#network-policy)
+  - [CRDs (Custom Resource Definitions)](#crds-custom-resource-definitions)
   - [Useful Tricks](#useful-tricks)
 
 ## Quick Reference
@@ -2858,6 +2859,88 @@ spec:
 - [Kubernetes Network Policies Configuration](https://kubernetes.io/docs/concepts/services-networking/network-policies/)
 - A `NetworkPolicy` in Kubernetes is used to **control traffic** between pods (and sometimes between pods and external endpoints).
   It acts like a firewall for pods, defining which connections are allowed.
+
+## CRDs (Custom Resource Definitions)
+
+- A `CRD - Custom Resource Definition` extends the Kubernetes API by letting you define your own resource types, just like built-in resources (`Pod`, `Deployment`, etc.).
+- Once a CRD is registered, you can create, list, get, update, and delete instances of it using `kubectl` — they are treated as first-class Kubernetes objects stored in `etcd`.
+- CRDs are the foundation of the **Operator pattern**: a controller watches custom resources and reconciles the actual state with the desired state.
+- Common tools that ship their own CRDs: `cert-manager`, `Prometheus Operator`, `Argo CD`, `Istio`, `LongHorn`, `Calico`, `Crossplane`.
+
+```sh
+# List all installed CRDs in the cluster
+kubectl get crds
+
+# Describe a specific CRD (shows schema, versions, scope)
+kubectl describe crd <crd-name>
+
+# Get all instances of a custom resource
+kubectl get <custom-resource-name> -A
+
+# Delete a CRD (also deletes ALL instances of that resource!)
+kubectl delete crd <crd-name>
+```
+
+- Example CRD manifest:
+
+```yaml
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: backups.myapp.example.com # <plural>.<group>
+spec:
+  group: myapp.example.com
+  scope: Namespaced # or Cluster
+  names:
+    plural: backups
+    singular: backup
+    kind: Backup
+    shortNames:
+      - bkp
+  versions:
+    - name: v1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                target:
+                  type: string
+                retentionDays:
+                  type: integer
+```
+
+- Once the CRD above is applied, you can create instances of it:
+
+```yaml
+apiVersion: myapp.example.com/v1
+kind: Backup
+metadata:
+  name: daily-backup
+  namespace: default
+spec:
+  target: s3://my-bucket/backups
+  retentionDays: 30
+```
+
+```sh
+# Apply the CRD definition
+kubectl apply -f backup-crd.yaml
+
+# Apply a custom resource instance
+kubectl apply -f daily-backup.yaml
+
+# List all backup instances
+kubectl get backups -A
+kubectl get bkp -n <namespace>
+```
+
+- **Operators** extend CRDs with a controller loop that continuously watches custom resource events and reconciles cluster state. Frameworks like [`controller-runtime`](https://github.com/kubernetes-sigs/controller-runtime) (Go) or [`kopf`](https://kopf.readthedocs.io/) (Python) simplify building operators.
+- You can discover and install community operators through [OperatorHub.io](https://operatorhub.io/).
 
 ## Useful Tricks
 
