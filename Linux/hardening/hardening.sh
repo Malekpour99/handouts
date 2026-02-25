@@ -1,18 +1,18 @@
 #!/bin/bash
 # Time Variable Section --------------------------------------
-HOUR=`date +%H`
-WEEK=`date +%A`
-MONTH=`date +%Y-%d`
-DAY=`date +%Y-%m-%d`
+HOUR=$(date +%H)
+WEEK=$(date +%A)
+MONTH=$(date +%Y-%d)
+DAY=$(date +%Y-%m-%d)
 NOW="$(date +"%Y-%m-%d_%H-%M-%S")"
 # Variable Section -------------------------------------------
-DOMAIN_NAME=<your desired hostname>
+DOMAIN_NAME="<your desired hostname>"
 HostName=$DOMAIN_NAME
 SSH_PORT=1242
 BAC_DIR=/opt/backup/files_$NOW
 # docker config destination
 DOCKER_DEST=/etc/systemd/system/docker.service.d/
-MIRROR_REGISTRY=<your docker registry mirror>
+MIRROR_REGISTRY="<your docker registry mirror>"
 # Timezone Configuration
 TIMEZONE="Asia/Tehran"
 # LYNIS Configurations
@@ -112,7 +112,7 @@ echo "root hard nofile 65535" >> /etc/security/limits.conf
 echo "root soft nproc 65535" >> /etc/security/limits.conf
 echo "root hard nproc 65535" >> /etc/security/limits.conf
 
-echo "* soft nofile 2048" >  /etc/security/limits.conf
+echo "* soft nofile 2048" >> /etc/security/limits.conf
 echo "* hard nofile 2048" >> /etc/security/limits.conf
 echo "* soft nproc  2048" >> /etc/security/limits.conf
 echo "* hard nproc  2048" >> /etc/security/limits.conf
@@ -251,14 +251,11 @@ cat <<EOT > /etc/iptables/rules.v4
 :FORWARD ACCEPT [0:0]
 :OUTPUT ACCEPT [0:0]
 :POSTROUTING ACCEPT [0:0]
--A PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
--A PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags SYN,RST SYN,RST -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN FIN,SYN -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags FIN,RST FIN,RST -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags ACK,URG URG -j DROP
--A PREROUTING -p tcp -m tcp --tcp-flags FIN,ACK FIN -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags PSH,ACK PSH -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG FIN,SYN,RST,PSH,ACK,URG -j DROP
 -A PREROUTING -p tcp -m tcp --tcp-flags FIN,SYN,RST,PSH,ACK,URG NONE -j DROP
