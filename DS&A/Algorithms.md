@@ -12,6 +12,7 @@
     - [Merge Sort](#merge-sort)
     - [Quick Sort](#quick-sort)
     - [Heap Sort](#heap-sort)
+  - [Dijkstra Algorithm](#dijkstra-algorithm)
 
 ## Asymptotic Notations
 
@@ -329,4 +330,97 @@ func heapify(arr []int, n, i int) {
 		heapify(arr, n, largest)
 	}
 }
+```
+
+## Dijkstra Algorithm
+
+- Dijkstra's algorithm is a popular **greedy algorithm** used to **find the shortest path between nodes in a graph**.
+- It solves the Single-Source Shortest Path (SSSP) problem, meaning it finds the shortest path from a specific starting node to all other nodes in the graph.
+- Key Requirements:
+  - Weighted Graph: The edges connecting nodes must have values (weights/costs).
+  - Non-Negative Weights: Dijkstra's algorithm **does not work with negative edge weights**. (If you have negative weights, use the Bellman-Ford algorithm).
+
+- How It Works (Step-by-Step):
+  1. Initialization:
+     - Set the distance to the start node as 0.
+     - Set the distance to all other nodes as infinity (∞).
+     - Add all nodes to a priority queue (or unvisited set), prioritized by their current known distance.
+  2. Selection:
+     - Select the unvisited node with the smallest known distance from the start node. (Initially, this is the start node itself).
+  3. Relaxation (Updating Neighbors):
+     - For the current node, look at all its unvisited neighbors.
+     - Calculate the distance from the start node to the neighbor through the current node (current_distance + edge_weight).
+     - If this calculated distance is less than the neighbor's currently recorded distance, update the neighbor's distance.
+  4. Mark as Visited:
+     - Once all neighbors are checked, mark the current node as visited. A visited node will not be checked again.
+  5. Repeat:
+     - Repeat steps 2–4 until the priority queue is empty or the target node is visited.
+
+```python
+import heapq
+from collections import defaultdict
+
+def dijkstra(graph, start_node):
+    """
+    Finds the shortest path from start_node to all other nodes in the graph.
+
+    Args:
+        graph: A dictionary representing an adjacency list.
+               Format: {node: [(neighbor, weight), ...]}
+        start_node: The starting vertex.
+
+    Returns:
+        distances: A dictionary mapping each node to its shortest distance from start_node.
+    """
+
+    # 1. Initialize distances to infinity for all nodes
+    # We use a defaultdict so accessing a missing key returns infinity
+    distances = defaultdict(lambda: float('inf'))
+    distances[start_node] = 0
+
+    # 2. Priority queue to store (distance, node) tuples
+    # We start with the start_node having distance 0
+    priority_queue = [(0, start_node)]
+
+    # Set to keep track of visited nodes (optional optimization with heap)
+    visited = set()
+
+    while priority_queue:
+        # 3. Pop the node with the smallest distance
+        current_distance, current_node = heapq.heappop(priority_queue)
+
+        # If we have already processed this node with a shorter distance, skip it
+        if current_node in visited:
+            continue
+
+        visited.add(current_node)
+
+        # 4. Iterate over neighbors
+        for neighbor, weight in graph[current_node]:
+            distance = current_distance + weight
+
+            # 5. Relaxation step: If a shorter path is found, update distance
+            if distance < distances[neighbor]:
+                distances[neighbor] = distance
+                heapq.heappush(priority_queue, (distance, neighbor))
+
+    return distances
+
+# --- Example Usage ---
+
+# Define a graph as an adjacency list
+# Format: Node -> List of (Neighbor, Weight)
+graph = {
+    'A': [('B', 1), ('C', 4)],
+    'B': [('A', 1), ('C', 2), ('D', 5)],
+    'C': [('A', 4), ('B', 2), ('D', 1)],
+    'D': [('B', 5), ('C', 1)]
+}
+
+start = 'A'
+shortest_distances = dijkstra(graph, start)
+
+print(f"Shortest distances from node {start}:")
+for node, distance in shortest_distances.items():
+    print(f"Node {node}: {distance}")
 ```
