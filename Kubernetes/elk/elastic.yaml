@@ -1,0 +1,191 @@
+apiVersion: elasticsearch.k8s.elastic.co/v1
+kind: Elasticsearch
+metadata:
+  name: elasticsearch
+  namespace: logging
+spec:
+  version: 8.12.0
+  image: elastic/elasticsearch:8.12.0
+  volumeClaimDeletePolicy: DeleteOnScaledownAndClusterDeletion
+  nodeSets:
+  - name: masters
+    count: 3
+    podTemplate:
+      spec:
+        # containers:
+        # - name: elasticsearch
+        #   resources:
+        #     requests:
+        #       memory: 4Gi
+        #       cpu: 8
+        #     limits:
+        #       memory: 4Gi
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: cephfs-hdd
+    config:
+      node.roles: ["master"]
+      xpack.ml.enabled: true
+  - name: data
+    count: 3
+    podTemplate:
+      spec:
+        # containers:
+        # - name: elasticsearch
+        #   resources:
+        #     requests:
+        #       memory: 4Gi
+        #       cpu: 8
+        #     limits:
+        #       memory: 4Gi
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 2Gi
+        storageClassName: cephfs-hdd
+    config:
+      node.roles: ["data", "ingest", "ml", "transform"]
+  - name: hot
+    count: 3
+    podTemplate:
+      spec:
+        # containers:
+        # - name: elasticsearch
+        #   resources:
+        #     requests:
+        #       memory: 4Gi
+        #       cpu: 8
+        #     limits:
+        #       memory: 4Gi
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: cephfs-hdd
+    config:
+      node.roles: ["data_hot", "data_content", "ingest"]
+  - name: warm
+    count: 3
+    podTemplate:
+      spec:
+        # containers:
+        # - name: elasticsearch
+        #   resources:
+        #     requests:
+        #       memory: 4Gi
+        #       cpu: 8
+        #     limits:
+        #       memory: 4Gi
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: cephfs-hdd
+    config:
+      node.roles: ["data_warm"]
+  - name: cold
+    count: 3
+    podTemplate:
+      spec:
+        # containers:
+        # - name: elasticsearch
+        #   resources:
+        #     requests:
+        #       memory: 4Gi
+        #       cpu: 8
+        #     limits:
+        #       memory: 4Gi
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: cephfs-hdd
+    config:
+      node.roles: ["data_cold"]
+  - name: ml
+    count: 1
+    podTemplate:
+      spec:
+        # containers:
+        # - name: elasticsearch
+        #   resources:
+        #     requests:
+        #       memory: 4Gi
+        #       cpu: 8
+        #     limits:
+        #       memory: 4Gi
+        initContainers:
+        - name: sysctl
+          securityContext:
+            privileged: true
+            runAsUser: 0
+          command: ['sh', '-c', 'sysctl -w vm.max_map_count=262144']
+    volumeClaimTemplates:
+    - metadata:
+        name: elasticsearch-data # Do not change this name unless you set up a volume mount for the data path.
+      spec:
+        accessModes:
+        - ReadWriteOnce
+        resources:
+          requests:
+            storage: 5Gi
+        storageClassName: cephfs-hdd
+    config:
+      node.roles: ["ml"]
