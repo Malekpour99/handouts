@@ -1,0 +1,34 @@
+apiVersion: kibana.k8s.elastic.co/v1
+kind: Kibana
+metadata:
+  name: kibana
+  namespace: logging
+spec:
+  version: 8.12.0
+  image: elastic/kibana:8.12.0
+  count: 1
+  podTemplate:
+    spec:
+      containers:
+      - name: kibana
+        env:
+        - name: NODE_OPTIONS
+          value: "--max-old-space-size=2048"
+        resources:
+          requests:
+            memory: 1Gi
+            cpu: 0.5
+          limits:
+            memory: 2.5Gi
+            cpu: 2
+      # nodeSelector:
+  #   type: frontend
+  config:
+    elasticsearch.hosts:
+    - https://elasticsearch-es-http:9200
+  elasticsearchRef:
+    name: elasticsearch
+  http:
+    service:
+      spec:
+        type: NodePort
