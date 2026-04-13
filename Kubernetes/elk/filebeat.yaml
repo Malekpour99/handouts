@@ -23,6 +23,19 @@ spec:
         providers:
         - type: kubernetes
           node: ${NODE_NAME}
+          # configuration for aggregating logs from a custom namespace containers matching specified pattern filters
+          # templates:
+          # - condition:
+          #     equals:
+          #       kubernetes.namespace: custom
+          #     config:
+          #       - type: container
+          #         paths:
+          #           - /var/log/containers/*-${data.kubernetes.container.id}.log
+          #         multiline.pattern: '^[0-9]{4}-[0-9]{2}-[0-9]{2}'
+          #         multiline.negate: true
+          #         multiline.match: after
+          #         exclude_lines: ["^\\s+[\\-`('.|_)`]"] # drop ascii art lines
           hints:
             enabled: true
             default_config:
