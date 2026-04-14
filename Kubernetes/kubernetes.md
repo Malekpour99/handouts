@@ -38,6 +38,7 @@
       - [DaemonSet](#daemonset)
       - [Job](#job)
       - [CronJob](#cronjob)
+    - [HPA - Horizontal Pod Auto-scaler](#hpa---horizontal-pod-auto-scaler)
     - [Services](#services)
       - [Attaching Services \& Endpoints](#attaching-services--endpoints)
       - [Exposing Services](#exposing-services)
@@ -1195,6 +1196,38 @@ kubectl get cronjobs.batch
 # Checking cron-job's pod status
 kubectl get po
 # Successful jobs have 'Completed' status!
+```
+
+### HPA - Horizontal Pod Auto-scaler
+
+- Instead of hardcoding your pod's scale, auto-scaler will replicated your pod based on your desired metric
+- Best practice: `desired-replicas = ceil[current-replicas * (current-metric-value / desired-metric-value)]`
+
+```yaml
+apiVersion: autoscaling/v1
+kind: HorizontalPodAutoscaler
+metadata:
+  annotations:
+    name: node-example
+    namespace: custom
+spec:
+  maxReplicas: 4
+  minReplicas: 1
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: node-example
+  targetCPUUtilizationPercentage: 1 # if CPU usage of desired pods exceed 1%, a new pod gets created
+```
+
+- In order to acquire desired metrics, you must install `metrics-server` from kubernetes official website!
+
+```sh
+# List every pod's resource usage
+kubectl top po -A
+
+# List each node's resource usage
+kubectl top nodes
 ```
 
 ### Services
