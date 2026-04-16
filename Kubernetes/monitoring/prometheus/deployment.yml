@@ -1,0 +1,26 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: node-example
+  namespace: mehrabi
+spec:
+  replicas: 1
+  selector:
+      matchLabels:
+        app: node-example
+  template:
+    metadata:
+      labels:
+        app: node-example
+    spec:
+      containers:
+      - name: node-example
+        image: vamin2/node-example
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 3000
+        resources:
+            limits:
+              cpu: "0.5"
+            requests:
+              cpu: "0.25"
