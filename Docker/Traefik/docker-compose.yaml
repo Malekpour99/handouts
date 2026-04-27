@@ -74,12 +74,8 @@ services:
   nexus:
     image: sonatype/nexus3
     restart: always
-    environment:
-      - NEXUS_SECURITY_RANDOMPASSWORD=false
-      - NEXUS_SECURITY_INITIAL_ADMIN_USERNAME=${NEXUS_USERNAME}
-      - NEXUS_SECURITY_INITIAL_ADMIN_PASSWORD=${NEXUS_PASSWORD}
     volumes:
-      - "nexus-data:/sonatype-work"
+      - "nexus-data:/nexus-data"
     networks:
       - default
     labels:
