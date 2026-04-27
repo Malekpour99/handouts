@@ -1,0 +1,65 @@
+apiVersion: logstash.k8s.elastic.co/v1alpha1
+kind: Logstash
+metadata:
+  name: logstash
+  namespace: logging
+spec:
+  count: 1
+  image: elastic/logstash:8.12.0
+  elasticsearchRefs:
+  - name: elasticsearch
+    clusterName: qs
+  config:
+    pipeline.workers: 4
+    log.level: debug
+  version: 8.12.0
+  volumeClaimTemplates:
+  - metadata:
+      name: logstash-data # Do not change this name unless you set up a volume mount for the data path.
+    spec:
+      accessModes:
+      - ReadWriteMany
+      resources:
+        requests:
+          storage: 2Gi
+      storageClassName: cephfs-hdd
+  # podTemplate:
+  #   spec:
+  #     containers:
+  #     - name: logtash
+  #       env:
+  #       - name: LS_JAVA_OPTS
+  #         value: "-Xmx2g -Xms2g"
+  #       resources:
+  #         requests:
+  #           memory: 1Gi
+  #           cpu: 0.5
+  #         limits:
+  #           memory: 4Gi
+  #           cpu: 2
+  pipelines:
+  - pipeline.id: main
+    config.string: |
+      input {
+        beats {
+          port => 5044
+        }
+      }
+      output {
+        elasticsearch {
+          hosts => [ "${QS_ES_HOSTS}" ]
+          user => "${QS_ES_USER}"
+          password => "${QS_ES_PASSWORD}"
+          ssl_certificate_authorities => "${QS_ES_SSL_CERTIFICATE_AUTHORITY}"
+        }
+      }
+  services:
+  - name: beats
+    service:
+      spec:
+        type: NodePort
+        ports:
+        - port: 5044
+          name: "filebeat"
+          protocol: TCP
+          targetPort: 5044

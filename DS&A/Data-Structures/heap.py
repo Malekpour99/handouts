@@ -9,7 +9,7 @@
 # node's parent: floor((i-1)/2)
 
 
-def heapify(array, index):
+def heapify(array: list[int], index: int):
     """
     Converts your heap to a MaxHeap using its array, based on the given node index
     Compares nodes with their parents and swap them if needed
@@ -21,7 +21,7 @@ def heapify(array, index):
             heapify(array, p)
 
 
-def insert_node(array, data):
+def insert_node(array: list[int], data: int):
     """
     Inserting a node into a max-heap and then heapify
     Node is inserted at the end of our array
@@ -31,21 +31,23 @@ def insert_node(array, data):
     heapify(array, n)
 
 
-def max_heapify(arr, n, i):
+def max_heapify(arr: list, node_index: int, current_node_index: int):
     "Converts your heap to a MaxHeap using its array"
-    largest = i
-    l = 2 * i + 1
-    r = 2 * i + 2
-    if l < n and arr[i] < arr[l]:
-        largest = l
-    if r < n and arr[largest] < arr[r]:
-        largest = r
-    if largest != i:
-        arr[i], arr[largest] = arr[largest], arr[i]
-        max_heapify(arr, n, largest)
+    largest = current_node_index
+    left_node_index = 2 * current_node_index + 1
+    right_node_index = 2 * current_node_index + 2
+    if left_node_index < node_index and arr[current_node_index] < arr[left_node_index]:
+        largest = left_node_index
+
+    if right_node_index < node_index and arr[largest] < arr[right_node_index]:
+        largest = right_node_index
+
+    if largest != current_node_index:
+        arr[current_node_index], arr[largest] = arr[largest], arr[current_node_index]
+        max_heapify(arr, node_index, largest)
 
 
-def heap_sort(arr):
+def heap_sort(arr: list[int]):
     "Sorts your MaxHeap array"
     n = len(arr)
     # Creating MaxHeap
@@ -58,22 +60,24 @@ def heap_sort(arr):
         max_heapify(arr, i, 0)
 
 
-def min_heapify(array, index):
+def min_heapify(array: list[int], index: int):
     "Converts your heap to a MinHeap using its array based on node index"
-    l = 2 * index + 1
-    r = 2 * index + 2
-    if l < len(array) and array[l] < array[index]:
-        smallest = l
+    left_node_index = 2 * index + 1
+    right_node_index = 2 * index + 2
+    if left_node_index < len(array) and array[left_node_index] < array[index]:
+        smallest = left_node_index
     else:
         smallest = index
-    if r < len(array) and array[r] < array[smallest]:
-        smallest = r
+
+    if right_node_index < len(array) and array[right_node_index] < array[smallest]:
+        smallest = right_node_index
+
     if smallest != index:
         array[index], array[smallest] = array[smallest], array[index]
         min_heapify(array, smallest)
 
 
-def build_min_heap(array):
+def build_min_heap(array: list[int]):
     "Creates a MinHeap from an array"
     n = int((len(array) // 2) - 1)
     for i in range(n, -1, -1):

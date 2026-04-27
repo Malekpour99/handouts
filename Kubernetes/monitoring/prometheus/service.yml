@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: node-example
+  namespace: mehrabi
+  labels:
+    app: node-example
+spec:
+  selector:
+    app: node-example
+  ports:
+  - port: 3000
+    protocol: TCP
+    nodePort: 30001
+  type: NodePort
