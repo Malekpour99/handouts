@@ -225,12 +225,13 @@ tls:
 ```
 
 - Defines a middleware named `web-auth` that enables **HTTP Basic Authentication**.
-  - `user` is the username.
+  - `user` is the username. (You can replace it with your desired username)
   - The long hash (`$$apr1$$...`) is an **Apache MD5-hashed** password.
   - The double `$` (`$$`) is necessary in Docker Compose to escape `$` from YAML interpolation.
   - You can generate your password, using:
 
 ```sh
+# Generating authentication credentials with hashed password for traefik
 echo $(htpasswd -nb user password) | sed -e s/\\$/\\$\\$/g
 ```
 

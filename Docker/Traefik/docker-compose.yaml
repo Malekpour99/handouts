@@ -60,7 +60,7 @@ services:
       - "traefik.http.middlewares.https-redirect.redirectscheme.scheme=https"
 
       # Basic Auth
-      - "traefik.http.middlewares.web-auth.basicauth.users=${TRAEFIK_AUTH_USER}:${TRAEFIK_AUTH_HASH}"
+      - "traefik.http.middlewares.web-auth.basicauth.users=${TRAEFIK_AUTH_CREDENTIALS}"
 
       # HTTPS router
       - "traefik.http.routers.traefik-secure.middlewares=web-auth"
