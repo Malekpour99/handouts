@@ -252,6 +252,14 @@ OVER (
 -- offset → how many rows away (default = 1)
 -- default_value → returned if row doesn't exist (default = NULL)
 
+-- first value function:
+-- It returns the first value in a window frame according to the ordering you define. (you can also apply partitioning)
+FIRST_VALUE(<column>)
+OVER (
+    PARTITION BY ...
+    ORDER BY ...
+)
+
 -- Arithmetic functions
 CEIL() -- Returns the ceiling of a decimal number by rounding up the number
 FLOOR() -- Returns the floor of a decimal number by rounding down the number
