@@ -220,18 +220,18 @@ OVER(PARTITION BY booking_date ORDER BY amount_tipped DESC)
 FROM bookings; -- Groups the result of total amount of tips based on the date but shows that date's sum of tips along with other rows
 
 -- Difference between ranking functions:
--- ROW_NUMBER()
+ROW_NUMBER()
     -- Assigns a unique sequential number to each row
     -- Even if values are equal, rows get different numbers
     -- No duplicates, no gaps
     -- Often used for pagination or selecting top N per group
 
--- RANK() 
+RANK() 
     -- Assigns the same rank to tied values
     -- Creates gaps in the ranking sequence after ties
     -- If two rows tie for rank 1, next row gets rank 3 (gap at 2)
 
--- DENSE_RANK()
+DENSE_RANK()
     -- Similar to RANK but no gaps after ties
     -- If two rows tie for rank 1, next row gets rank 2
 
