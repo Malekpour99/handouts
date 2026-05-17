@@ -235,6 +235,23 @@ DENSE_RANK()
     -- Similar to RANK but no gaps after ties
     -- If two rows tie for rank 1, next row gets rank 2
 
+-- Lead & Lag functions:
+-- LEAD: look forward
+LEAD(<column>, offset, default_value)
+OVER (
+    PARTITION BY ...
+    ORDER BY ...
+)
+-- LAG: look backward
+LAG(<column>, offset, default_value)
+OVER (
+    PARTITION BY ...
+    ORDER BY ...
+)
+-- column → value you want from another row
+-- offset → how many rows away (default = 1)
+-- default_value → returned if row doesn't exist (default = NULL)
+
 -- Arithmetic functions
 CEIL() -- Returns the ceiling of a decimal number by rounding up the number
 FLOOR() -- Returns the floor of a decimal number by rounding down the number
